@@ -308,17 +308,17 @@
 
         .popular-badge {
             position: absolute;
-            top: 10px;
-            left: 10px;
+            top: 8px;
+            left: 8px;
             background: var(--primary);
             color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.75em;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.65em;
             font-weight: 700;
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 2px;
             box-shadow: 0 2px 8px rgba(255, 45, 85, 0.4);
         }
 
@@ -1667,12 +1667,20 @@
 
                 console.log('All items loaded:', allItems.length);
                 console.log('Sample items with emojis:', allItems.slice(0, 3).map(i => ({name: i.name, imageURL: i.imageURL, emoji: i.emoji})));
+                console.log('Raw categories from API:', allItems.map(i => i.category).slice(0, 10));
                 console.log('Category breakdown:', {
                     'filipino sunrice': allItems.filter(i => i.category === 'FILIPINO SUNRICE').length,
                     'dish of the day': allItems.filter(i => i.category === 'DISH OF THE DAY').length,
                     'vegetable meal': allItems.filter(i => i.category === 'VEGETABLE MEAL').length,
                     'seafood': allItems.filter(i => i.category === 'SEAFOOD').length,
                     'snacks': allItems.filter(i => i.category === 'SNACKS').length
+                });
+                console.log('Categorized breakdown:', {
+                    'filipino sunrice': allItems.filter(i => categorizeItem(i) === 'filipino sunrice').length,
+                    'dish of the day': allItems.filter(i => categorizeItem(i) === 'dish of the day').length,
+                    'vegetable meal': allItems.filter(i => categorizeItem(i) === 'vegetable meal').length,
+                    'seafood': allItems.filter(i => categorizeItem(i) === 'seafood').length,
+                    'snacks': allItems.filter(i => categorizeItem(i) === 'snacks').length
                 });
                 renderMenu();
                 updateCategoryCounts(); // Call updateCategoryCounts after menu is loaded
@@ -1705,7 +1713,14 @@
         function categorizeItem(item) {
             // Return the category directly from the spreadsheet in lowercase
             if (item.category) {
-                return item.category.toLowerCase().trim();
+                const cat = item.category.toLowerCase().trim();
+                // Map the exact categories from your spreadsheet
+                if (cat === 'filipino sunrice') return 'filipino sunrice';
+                if (cat === 'dish of the day') return 'dish of the day';
+                if (cat === 'vegetable meal') return 'vegetable meal';
+                if (cat === 'seafood') return 'seafood';
+                if (cat === 'snacks') return 'snacks';
+                return cat;
             }
             
             // Fallback to 'all' if no category
@@ -1713,13 +1728,22 @@
         }
 
         function filterItems() {
-            return allItems.filter(item => {
-                const matchesCategory = currentCategory === 'all' || categorizeItem(item) === currentCategory;
+            console.log('Filtering items - currentCategory:', currentCategory, 'searchQuery:', searchQuery);
+            const filtered = allItems.filter(item => {
+                const itemCategory = categorizeItem(item);
+                const matchesCategory = currentCategory === 'all' || itemCategory === currentCategory;
                 const matchesSearch = !searchQuery || 
                     item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                     (item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase()));
+                
+                if (!matchesCategory) {
+                    console.log(`Item "${item.name}" filtered out - category: ${itemCategory}, current: ${currentCategory}`);
+                }
+                
                 return matchesCategory && matchesSearch;
             });
+            console.log(`Filtered ${allItems.length} items down to ${filtered.length}`);
+            return filtered;
         }
 
         function renderMenu() {
