@@ -1457,7 +1457,7 @@
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbzDm7A05AtpzzUAxf3XPD9Jg-4GVB87hjQAcJbkfDYkcK3npcPs7VMK-afBeZNe542s/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbyRKC7cmdyp-4flz_Etnv4a0m045W8ecCOmwgaxIPLW2SA3evkavxNXKwZtbVIrnQCx/exec";
 
         const tg = window.Telegram.WebApp;
         tg.ready();
@@ -1633,7 +1633,7 @@
         async function fetchMenu() {
             try {
                 console.log('Fetching menu from:', API_URL);
-                const response = await fetch(API_URL + "?action=getMenu&_=" + Date.now());
+                const response = await fetch(API_URL + "?action=getMenu&_=" + Date.now() + "&v=" + Math.random());
                 console.log('Response status:', response.status);
                 
                 const text = await response.text();
@@ -1662,11 +1662,18 @@
                 allItems = items.map(item => ({
                     ...item,
                     // Use imageURL from spreadsheet if it's a URL, otherwise use the emoji
-                    emoji: (item.imageURL && item.imageURL.startsWith('http')) ? item.imageURL : (item.imageURL || '🍽️')
+                    emoji: (item.imageURL && item.imageURL.startsWith('http')) ? item.imageURL : '🍽️'
                 }));
 
                 console.log('All items loaded:', allItems.length);
                 console.log('Sample items with emojis:', allItems.slice(0, 3).map(i => ({name: i.name, imageURL: i.imageURL, emoji: i.emoji})));
+                console.log('Category breakdown:', {
+                    'filipino sunrice': allItems.filter(i => i.category === 'FILIPINO SUNRICE').length,
+                    'dish of the day': allItems.filter(i => i.category === 'DISH OF THE DAY').length,
+                    'vegetable meal': allItems.filter(i => i.category === 'VEGETABLE MEAL').length,
+                    'seafood': allItems.filter(i => i.category === 'SEAFOOD').length,
+                    'snacks': allItems.filter(i => i.category === 'SNACKS').length
+                });
                 renderMenu();
                 updateCategoryCounts(); // Call updateCategoryCounts after menu is loaded
             } catch (error) {
