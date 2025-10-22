@@ -943,50 +943,81 @@
         // Initialize Map
         function initMap() {
             try {
-                // Default location (center of city or restaurant location)
-                const defaultLat = 40.7128;
-                const defaultLng = -74.0060;
+                // Default location (fallback if geolocation fails)
+                let defaultLat = 40.7128;
+                let defaultLng = -74.0060;
+                let useDefaultLocation = true;
 
-                // Create map
-                map = L.map('map').setView([defaultLat, defaultLng], 13);
+                // Try to get user's current location
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            // Success: Use user's actual location
+                            defaultLat = position.coords.latitude;
+                            defaultLng = position.coords.longitude;
+                            useDefaultLocation = false;
+                            initializeMapView(defaultLat, defaultLng);
+                        },
+                        function(error) {
+                            // Error: Use default location
+                            console.warn('Geolocation error:', error.message);
+                            initializeMapView(defaultLat, defaultLng);
+                        },
+                        {
+                            enableHighAccuracy: false,
+                            timeout: 10000,
+                            maximumAge: 300000
+                        }
+                    );
+                } else {
+                    // Geolocation not supported: Use default
+                    console.warn('Geolocation is not supported by this browser');
+                    initializeMapView(defaultLat, defaultLng);
+                }
 
-                // Add OpenStreetMap tiles
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors',
-                    maxZoom: 19
-                }).addTo(map);
+                function initializeMapView(lat, lng) {
+                    // Create map
+                    map = L.map('map').setView([lat, lng], 15);
 
-                // Add draggable marker
-                marker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(map);
-                marker.bindPopup('Your delivery location');
+                    // Add OpenStreetMap tiles
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors',
+                        maxZoom: 19
+                    }).addTo(map);
 
-                // Set initial location
-                deliveryLocation = { lat: defaultLat, lng: defaultLng };
+                    // Add draggable marker
+                    marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+                    marker.bindPopup(`📍 Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`);
 
-                // Update location when marker is dragged
-                marker.on('dragend', function() {
-                    const latLng = marker.getLatLng();
-                    deliveryLocation = {
-                        lat: latLng.lat,
-                        lng: latLng.lng
-                    };
-                    marker.setPopupContent(`📍 Lat: ${latLng.lat.toFixed(4)}, Lng: ${latLng.lng.toFixed(4)}`);
-                    console.log('Location updated:', deliveryLocation);
-                });
+                    // Set initial location
+                    deliveryLocation = { lat: lat, lng: lng };
 
-                // Allow clicking map to place marker
-                map.on('click', function(e) {
-                    marker.setLatLng(e.latlng);
-                    deliveryLocation = {
-                        lat: e.latlng.lat,
-                        lng: e.latlng.lng
-                    };
-                    marker.setPopupContent(`📍 Lat: ${e.latlng.lat.toFixed(4)}, Lng: ${e.latlng.lng.toFixed(4)}`);
-                    marker.openPopup();
-                    console.log('Location updated:', deliveryLocation);
-                });
+                    // Update location when marker is dragged
+                    marker.on('dragend', function() {
+                        const latLng = marker.getLatLng();
+                        deliveryLocation = {
+                            lat: latLng.lat,
+                            lng: latLng.lng
+                        };
+                        marker.setPopupContent(`📍 Lat: ${latLng.lat.toFixed(4)}, Lng: ${latLng.lng.toFixed(4)}`);
+                        marker.openPopup();
+                        console.log('Location updated:', deliveryLocation);
+                    });
 
-                console.log('Map initialized successfully');
+                    // Allow clicking map to place marker
+                    map.on('click', function(e) {
+                        marker.setLatLng(e.latlng);
+                        deliveryLocation = {
+                            lat: e.latlng.lat,
+                            lng: e.latlng.lng
+                        };
+                        marker.setPopupContent(`📍 Lat: ${e.latlng.lat.toFixed(4)}, Lng: ${e.latlng.lng.toFixed(4)}`);
+                        marker.openPopup();
+                        console.log('Location updated:', deliveryLocation);
+                    });
+
+                    console.log('Map initialized at:', { lat, lng });
+                }
             } catch (error) {
                 console.error('Error initializing map:', error);
             }
