@@ -1723,29 +1723,74 @@
 
         // Test function to check API directly
         async function testAPI() {
-            console.log('Testing API directly...');
+            console.log('=== TESTING API DIRECTLY ===');
+            console.log('API URL:', API_URL);
+            console.log('Full URL:', API_URL + "?action=getMenu&_=" + Date.now());
+            
             try {
-                const response = await fetch(API_URL + "?action=getMenu&_=" + Date.now());
-                console.log('Test response status:', response.status);
-                const text = await response.text();
-                console.log('Test response text:', text);
+                const testUrl = API_URL + "?action=getMenu&_=" + Date.now();
+                console.log('Making request to:', testUrl);
                 
-                if (response.status === 200) {
+                const response = await fetch(testUrl, {
+                    method: 'GET',
+                    mode: 'cors',
+                    cache: 'no-cache'
+                });
+                
+                console.log('Response received!');
+                console.log('Status:', response.status);
+                console.log('Status Text:', response.statusText);
+                console.log('Headers:', [...response.headers.entries()]);
+                console.log('OK:', response.ok);
+                console.log('Type:', response.type);
+                
+                const text = await response.text();
+                console.log('Raw response text length:', text.length);
+                console.log('Raw response text:', text);
+                
+                if (response.ok) {
                     try {
                         const data = JSON.parse(text);
-                        console.log('Test parsed data:', data);
-                        console.log('Test data length:', data.length);
+                        console.log('✅ Successfully parsed JSON!');
+                        console.log('Data type:', typeof data);
+                        console.log('Is array:', Array.isArray(data));
+                        console.log('Data length:', data ? data.length : 'null/undefined');
+                        console.log('First item:', data && data[0]);
+                        console.log('Full data:', data);
                     } catch (e) {
-                        console.error('Test JSON parse error:', e);
+                        console.error('❌ JSON parse error:', e);
+                        console.log('Text that failed to parse:', text);
                     }
+                } else {
+                    console.error('❌ Response not OK:', response.status, response.statusText);
                 }
             } catch (error) {
-                console.error('Test API error:', error);
+                console.error('❌ Network error:', error);
+                console.error('Error name:', error.name);
+                console.error('Error message:', error.message);
+                console.error('Error stack:', error.stack);
             }
+            
+            console.log('=== END API TEST ===');
         }
 
-        // Make testAPI available globally
+        // Simple connectivity test
+        async function testConnectivity() {
+            console.log('=== TESTING BASIC CONNECTIVITY ===');
+            try {
+                const response = await fetch(API_URL, { method: 'GET', mode: 'no-cors' });
+                console.log('Basic connectivity test - response received');
+                console.log('Response type:', response.type);
+                console.log('Response status:', response.status);
+            } catch (error) {
+                console.error('Basic connectivity failed:', error);
+            }
+            console.log('=== END CONNECTIVITY TEST ===');
+        }
+
+        // Make functions available globally
         window.testAPI = testAPI;
+        window.testConnectivity = testConnectivity;
 
         // Fetch Menu
         async function fetchMenu() {
@@ -2307,6 +2352,7 @@
                         <li>Spreadsheet data is missing</li>
                         <li>Network connection issue</li>
                     </ul>
+                    <button onclick="testConnectivity()" style="margin: 10px 5px; padding: 8px 16px; background: var(--warning); color: white; border: none; border-radius: 8px;">Test Connection</button>
                     <button onclick="testAPI()" style="margin: 10px 5px; padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: 8px;">Test API</button>
                     <button onclick="refreshMenu()" style="margin: 10px 5px; padding: 8px 16px; background: var(--secondary); color: white; border: none; border-radius: 8px;">Retry</button>
                 </div>
