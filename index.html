@@ -1661,11 +1661,12 @@
 
                 allItems = items.map(item => ({
                     ...item,
-                    // Use imageURL from spreadsheet if available, otherwise generate emoji from name
-                    emoji: (!item.imageURL || item.imageURL === '🍽️') ? getItemEmoji(item.name) : item.imageURL
+                    // Use imageURL from spreadsheet if it's a URL, otherwise use the emoji
+                    emoji: (item.imageURL && item.imageURL.startsWith('http')) ? item.imageURL : (item.imageURL || '🍽️')
                 }));
 
                 console.log('All items loaded:', allItems.length);
+                console.log('Sample items with emojis:', allItems.slice(0, 3).map(i => ({name: i.name, imageURL: i.imageURL, emoji: i.emoji})));
                 renderMenu();
                 updateCategoryCounts(); // Call updateCategoryCounts after menu is loaded
             } catch (error) {
