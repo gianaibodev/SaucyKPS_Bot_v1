@@ -6,7 +6,6 @@
     <title>Saucy KPS Restaurant</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* Modern Color Palette */
         :root {
             --primary: #FF6B35;
             --primary-dark: #E55A2B;
@@ -19,13 +18,6 @@
             --text-secondary: #7F8C8D;
             --border: #E0E0E0;
             --shadow: rgba(0, 0, 0, 0.08);
-            
-            /* Telegram theme fallbacks */
-            --tg-bg: var(--tg-theme-bg-color, var(--background));
-            --tg-text: var(--tg-theme-text-color, var(--text-primary));
-            --tg-hint: var(--tg-theme-hint-color, var(--text-secondary));
-            --tg-button: var(--tg-theme-button-color, var(--primary));
-            --tg-button-text: var(--tg-theme-button-text-color, #ffffff);
         }
 
         * {
@@ -35,15 +27,13 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             color: var(--text-primary);
-            padding: 0;
             padding-bottom: 100px;
             line-height: 1.6;
         }
 
-        /* Header Section */
         .header {
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             color: white;
@@ -59,16 +49,13 @@
             font-size: 2em;
             font-weight: 700;
             margin-bottom: 8px;
-            letter-spacing: -0.5px;
         }
 
         .header p {
             font-size: 0.95em;
             opacity: 0.95;
-            font-weight: 300;
         }
 
-        /* Address Section */
         .address-section {
             background: var(--surface);
             margin: 20px 15px;
@@ -80,7 +67,6 @@
         .address-section h3 {
             font-size: 1.1em;
             margin-bottom: 12px;
-            color: var(--text-primary);
             display: flex;
             align-items: center;
             gap: 8px;
@@ -111,11 +97,6 @@
             box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
         }
 
-        #delivery-address::placeholder {
-            color: var(--text-secondary);
-        }
-
-        /* Loading Spinner */
         .loader-container {
             display: flex;
             flex-direction: column;
@@ -139,12 +120,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        .loader-text {
-            color: var(--text-secondary);
-            font-size: 0.95em;
-        }
-
-        /* Menu Categories */
         .menu-container {
             padding: 0 15px;
         }
@@ -156,7 +131,6 @@
         .category-title {
             font-size: 1.4em;
             font-weight: 700;
-            color: var(--text-primary);
             margin-bottom: 15px;
             padding-left: 5px;
             display: flex;
@@ -172,7 +146,6 @@
             border-radius: 2px;
         }
 
-        /* Menu Items */
         .menu-grid {
             display: grid;
             gap: 15px;
@@ -185,7 +158,6 @@
             box-shadow: 0 2px 12px var(--shadow);
             transition: all 0.3s ease;
             position: relative;
-            overflow: hidden;
         }
 
         .menu-item:hover {
@@ -209,20 +181,10 @@
             opacity: 1;
         }
 
-        .item-content {
-            display: flex;
-            justify-content: space-between;
-            gap: 15px;
-        }
-
-        .item-details {
-            flex: 1;
-        }
-
         .item-header {
             display: flex;
-            align-items: start;
             justify-content: space-between;
+            align-items: start;
             margin-bottom: 8px;
         }
 
@@ -230,40 +192,27 @@
             font-size: 1.15em;
             font-weight: 600;
             color: var(--text-primary);
-            margin-bottom: 6px;
         }
 
         .item-badge {
-            background: var(--accent);
+            background: var(--primary);
             color: white;
             padding: 3px 10px;
             border-radius: 12px;
             font-size: 0.75em;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .item-badge.popular {
-            background: var(--primary);
-        }
-
-        .item-badge.new {
-            background: var(--success);
         }
 
         .item-description {
             font-size: 0.9em;
             color: var(--text-secondary);
             margin-bottom: 12px;
-            line-height: 1.5;
         }
 
         .item-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 12px;
         }
 
         .item-price {
@@ -272,7 +221,6 @@
             color: var(--primary);
         }
 
-        /* Item Controls */
         .item-controls {
             display: flex;
             align-items: center;
@@ -294,23 +242,17 @@
             justify-content: center;
             transition: all 0.2s ease;
             box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+            flex-shrink: 0;
         }
 
         .item-controls button:active {
             transform: scale(0.95);
         }
 
-        .item-controls button:hover {
-            background: var(--primary-dark);
-        }
-
-        .btn-remove {
+        .item-controls .btn-remove {
             background: var(--text-secondary);
             box-shadow: 0 2px 8px rgba(127, 140, 141, 0.3);
-        }
-
-        .btn-remove:hover {
-            background: #6c7a89;
+            display: none;
         }
 
         .quantity-badge {
@@ -327,7 +269,6 @@
             padding: 0 10px;
         }
 
-        /* Empty State */
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -339,55 +280,6 @@
             margin-bottom: 15px;
         }
 
-        .empty-state h3 {
-            font-size: 1.3em;
-            margin-bottom: 8px;
-            color: var(--text-primary);
-        }
-
-        /* Cart Summary */
-        .cart-summary {
-            background: var(--surface);
-            margin: 20px 15px;
-            padding: 20px;
-            border-radius: 16px;
-            box-shadow: 0 2px 12px var(--shadow);
-            display: none;
-        }
-
-        .cart-summary.active {
-            display: block;
-        }
-
-        .cart-summary h3 {
-            font-size: 1.2em;
-            margin-bottom: 15px;
-            color: var(--text-primary);
-        }
-
-        .cart-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .cart-item:last-child {
-            border-bottom: none;
-        }
-
-        .cart-total {
-            display: flex;
-            justify-content: space-between;
-            font-size: 1.3em;
-            font-weight: 700;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 2px solid var(--border);
-            color: var(--primary);
-        }
-
-        /* Error Message */
         .error-message {
             background: #fee;
             color: #c33;
@@ -395,24 +287,16 @@
             margin: 20px 15px;
             border-radius: 12px;
             text-align: center;
-        }
-
-        /* Responsive Design */
-        @media (min-width: 768px) {
-            .menu-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+            display: none;
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
     <div class="header">
         <h1>🍽️ Saucy KPS Restaurant</h1>
         <p>Fresh & Delicious Meals Delivered to Your Door</p>
     </div>
 
-    <!-- Address Section -->
     <div class="address-section">
         <h3>Delivery Address</h3>
         <textarea 
@@ -422,28 +306,21 @@
         ></textarea>
     </div>
 
-    <!-- Loading State -->
     <div id="loader" class="loader-container">
         <div class="loader"></div>
-        <p class="loader-text">Loading delicious menu...</p>
+        <p>Loading delicious menu...</p>
     </div>
 
-    <!-- Menu Container -->
     <div id="menu-container" class="menu-container" style="display: none;"></div>
-
-    <!-- Error Message -->
-    <div id="error-message" class="error-message" style="display: none;"></div>
+    <div id="error-message" class="error-message"></div>
 
     <script>
-        // Configuration
         const API_URL = "https://script.google.com/macros/s/AKfycbzDm7A05AtpzzUAxf3XPD9Jg-4GVB87hjQAcJbkfDYkcK3npcPs7VMK-afBeZNe542s/exec";
         
-        // Initialize Telegram
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
 
-        // State
         let cart = {};
         let menu = {};
         const loader = document.getElementById('loader');
@@ -451,7 +328,6 @@
         const addressInput = document.getElementById('delivery-address');
         const errorMessage = document.getElementById('error-message');
 
-        // Categorize items for better organization
         const categories = {
             popular: { title: '🔥 Popular Dishes', items: [] },
             mains: { title: '🍖 Main Courses', items: [] },
@@ -460,90 +336,67 @@
             beverages: { title: '🥤 Beverages', items: [] }
         };
 
-        // Fetch menu from API
         async function fetchMenu() {
             try {
-                console.log('Fetching menu from:', API_URL + "?action=getMenu");
+                console.log('[FETCH] Starting menu fetch...');
+                const cacheBuster = '&_=' + new Date().getTime();
+                const url = API_URL + "?action=getMenu" + cacheBuster;
+                console.log('[FETCH] URL:', url);
                 
-                const response = await fetch(API_URL + "?action=getMenu", {
+                const response = await fetch(url, {
                     method: 'GET',
                     redirect: 'follow'
                 });
                 
-                console.log('Response status:', response.status);
+                console.log('[FETCH] Response status:', response.status);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
                 const items = await response.json();
-                console.log('Received items:', items);
+                console.log('[FETCH] Received items:', items);
                 
-                if (!items) {
-                    throw new Error('No data received from server');
-                }
-                
-                if (!Array.isArray(items)) {
-                    console.error('Invalid response format:', items);
-                    throw new Error('Invalid menu data format');
-                }
-                
-                if (items.length === 0) {
+                if (!Array.isArray(items) || items.length === 0) {
                     showEmptyState();
                     return;
                 }
 
-                // Store and categorize items
-                let itemCount = 0;
                 items.forEach(item => {
-                    if (!item.id || !item.name || !item.price) {
-                        console.warn('Skipping invalid item:', item);
-                        return;
-                    }
-                    
                     menu[item.id] = item;
-                    itemCount++;
-                    
-                    // Auto-categorize based on price or add category field to your sheet
                     const category = categorizeItem(item);
                     categories[category].items.push(item);
+                    console.log('[MENU] Added:', item.name, '(ID:', item.id, ')');
                 });
 
-                console.log(`Successfully loaded ${itemCount} menu items`);
-                
-                if (itemCount === 0) {
-                    showEmptyState();
-                    return;
-                }
-
+                console.log('[MENU] Total items loaded:', Object.keys(menu).length);
                 renderMenu();
                 
             } catch (error) {
-                console.error("Fetch Menu Error:", error);
-                showError(`Unable to load menu: ${error.message}. Please check the console for details.`);
+                console.error('[ERROR] Fetch failed:', error);
+                showError(`Unable to load menu: ${error.message}`);
             } finally {
                 loader.style.display = 'none';
             }
         }
 
-        // Simple categorization logic (customize based on your needs)
         function categorizeItem(item) {
-            const name = item.name.toLowerCase();
+            if (item.category) return item.category;
+            const name = (item.name || '').toLowerCase();
             const price = parseFloat(item.price);
             
             if (item.popular || price > 15) return 'popular';
-            if (name.includes('drink') || name.includes('juice') || name.includes('soda')) return 'beverages';
-            if (name.includes('cake') || name.includes('ice cream') || name.includes('dessert')) return 'desserts';
-            if (name.includes('salad') || name.includes('soup') || name.includes('appetizer')) return 'appetizers';
+            if (name.includes('drink') || name.includes('tea') || name.includes('smoothie')) return 'beverages';
+            if (name.includes('cake') || name.includes('dessert')) return 'desserts';
+            if (name.includes('salad') || name.includes('soup') || name.includes('roll')) return 'appetizers';
             return 'mains';
         }
 
-        // Render the menu
         function renderMenu() {
             menuContainer.innerHTML = '';
             menuContainer.style.display = 'block';
+            console.log('[RENDER] Starting menu render...');
 
-            // Render each category
             Object.keys(categories).forEach(key => {
                 const category = categories[key];
                 if (category.items.length === 0) return;
@@ -565,45 +418,47 @@
 
                 section.appendChild(grid);
                 menuContainer.appendChild(section);
+                console.log('[RENDER] Category:', category.title, '- Items:', category.items.length);
             });
+
+            console.log('[RENDER] Menu rendered successfully');
         }
 
-        // Create menu item element
         function createMenuItem(item) {
             const el = document.createElement('div');
             el.className = 'menu-item';
             el.id = `item-${item.id}`;
             
-            let badge = '';
-            if (item.popular) badge = '<span class="item-badge popular">Popular</span>';
-            else if (item.new) badge = '<span class="item-badge new">New</span>';
+            const badge = item.popular ? '<span class="item-badge">Popular</span>' : '';
             
             el.innerHTML = `
-                <div class="item-content">
-                    <div class="item-details">
-                        <div class="item-header">
-                            <h3 class="item-name">${item.name}</h3>
-                            ${badge}
-                        </div>
-                        <p class="item-description">${item.description || 'Delicious and freshly prepared'}</p>
-                        <div class="item-footer">
-                            <div class="item-price">$${parseFloat(item.price).toFixed(2)}</div>
-                            <div class="item-controls">
-                                <button class="btn-remove" data-id="${item.id}" style="display: none;">−</button>
-                                <span class="quantity-display" data-id="${item.id}"></span>
-                                <button class="btn-add" data-id="${item.id}">+</button>
-                            </div>
-                        </div>
+                <div class="item-header">
+                    <h3 class="item-name">${item.name}</h3>
+                    ${badge}
+                </div>
+                <p class="item-description">${item.description || 'Delicious and freshly prepared'}</p>
+                <div class="item-footer">
+                    <div class="item-price">$${parseFloat(item.price).toFixed(2)}</div>
+                    <div class="item-controls">
+                        <button class="btn-remove" data-id="${item.id}">−</button>
+                        <span class="quantity-display" data-id="${item.id}"></span>
+                        <button class="btn-add" data-id="${item.id}">+</button>
                     </div>
                 </div>
             `;
+            
+            console.log('[CREATE] Created item element for:', item.name, 'with ID:', item.id);
             return el;
         }
 
-        // Update cart
         function updateCart(itemId, change) {
+            console.log('[CART] Update cart - ID:', itemId, 'Change:', change);
+            
             const item = menu[itemId];
-            if (!item) return;
+            if (!item) {
+                console.error('[CART] Item not found in menu:', itemId);
+                return;
+            }
             
             if (!cart[itemId]) {
                 cart[itemId] = {
@@ -614,34 +469,41 @@
             }
 
             cart[itemId].quantity += change;
+            console.log('[CART] New quantity for', item.name, ':', cart[itemId].quantity);
 
             if (cart[itemId].quantity <= 0) {
                 delete cart[itemId];
+                console.log('[CART] Removed from cart:', item.name);
             }
 
             updateItemUI(itemId);
             updateMainButton();
         }
 
-        // Update individual item UI
         function updateItemUI(itemId) {
             const quantity = cart[itemId] ? cart[itemId].quantity : 0;
             const itemEl = document.getElementById(`item-${itemId}`);
-            const quantityEl = itemEl?.querySelector(`.quantity-display[data-id="${itemId}"]`);
-            const removeBtn = itemEl?.querySelector(`.btn-remove[data-id="${itemId}"]`);
+            if (!itemEl) {
+                console.error('[UI] Item element not found:', itemId);
+                return;
+            }
+            
+            const quantityEl = itemEl.querySelector(`.quantity-display[data-id="${itemId}"]`);
+            const removeBtn = itemEl.querySelector(`.btn-remove[data-id="${itemId}"]`);
             
             if (quantity > 0) {
-                itemEl?.classList.add('in-cart');
+                itemEl.classList.add('in-cart');
                 if (quantityEl) quantityEl.innerHTML = `<span class="quantity-badge">${quantity}</span>`;
                 if (removeBtn) removeBtn.style.display = 'flex';
+                console.log('[UI] Updated display - Quantity:', quantity);
             } else {
-                itemEl?.classList.remove('in-cart');
+                itemEl.classList.remove('in-cart');
                 if (quantityEl) quantityEl.innerHTML = '';
                 if (removeBtn) removeBtn.style.display = 'none';
+                console.log('[UI] Cleared display');
             }
         }
 
-        // Update Telegram Main Button
         function updateMainButton() {
             let totalQuantity = 0;
             let totalPrice = 0;
@@ -650,6 +512,8 @@
                 totalQuantity += cart[id].quantity;
                 totalPrice += cart[id].price * cart[id].quantity;
             }
+
+            console.log('[BUTTON] Total items:', totalQuantity, 'Total price:', totalPrice);
 
             if (totalQuantity > 0) {
                 tg.MainButton.setText(`🛒 Checkout (${totalQuantity} items • $${totalPrice.toFixed(2)})`);
@@ -660,7 +524,6 @@
             }
         }
 
-        // Handle checkout
         async function handleCheckout() {
             const address = addressInput.value.trim();
             
@@ -681,7 +544,7 @@
             
             const orderData = {
                 action: "newOrder",
-                user: tg.initDataUnsafe.user,
+                user: tg.initDataUnsafe.user || { firstName: "Test", id: "123456" },
                 address: address,
                 cart: {
                     items: cartItems,
@@ -690,10 +553,12 @@
                 timestamp: new Date().toISOString()
             };
 
+            console.log('[ORDER] Submitting:', orderData);
+
             try {
                 tg.MainButton.showProgress();
 
-                const response = await fetch(API_URL, {
+                await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify(orderData),
@@ -702,15 +567,14 @@
 
                 tg.showPopup({
                     title: '✅ Order Confirmed!',
-                    message: `Your order of $${totalPrice.toFixed(2)} has been received!\n\nWe'll send you payment instructions shortly. Thank you for choosing Saucy KPS!`,
+                    message: `Your order of $${totalPrice.toFixed(2)} has been received!\n\nWe'll send you payment instructions shortly. Thank you!`,
                     buttons: [{ id: 'ok', type: 'ok' }]
                 }, () => {
                     tg.close();
                 });
 
             } catch (error) {
-                console.error("Order Error:", error);
-                
+                console.error('[ORDER] Error:', error);
                 tg.showPopup({
                     title: '✅ Order Sent!',
                     message: 'Your order has been received. Check your messages for payment details.',
@@ -718,56 +582,68 @@
                 }, () => {
                     tg.close();
                 });
-                
             } finally {
                 tg.MainButton.hideProgress();
             }
         }
 
-        // Show empty state
         function showEmptyState() {
             menuContainer.innerHTML = `
                 <div class="empty-state">
                     <div class="empty-state-icon">🍽️</div>
                     <h3>No Menu Items Found</h3>
-                    <p>The menu is currently empty. Please add items to your Google Sheet.</p>
-                    <br>
-                    <p style="font-size: 0.85em; color: var(--text-secondary);">
-                        <strong>To add menu items:</strong><br>
-                        1. Open your Google Sheet<br>
-                        2. Add items with columns: id, name, description, price<br>
-                        3. Refresh this page
-                    </p>
+                    <p>The menu is currently empty. Please run setupEverything() in your Google Apps Script.</p>
                 </div>
             `;
             menuContainer.style.display = 'block';
-            console.log('Empty state shown - no menu items in database');
+            console.log('[STATE] Empty state shown');
         }
 
-        // Show error
         function showError(message) {
             errorMessage.textContent = message;
             errorMessage.style.display = 'block';
+            console.log('[ERROR]', message);
         }
 
         // Event Listeners
         menuContainer.addEventListener('click', (e) => {
+            console.log('[CLICK] Element clicked:', e.target.className, 'ID:', e.target.dataset.id);
+            
             if (e.target.classList.contains('btn-add')) {
-                const haptic = tg.HapticFeedback;
-                haptic.impactOccurred('light');
-                updateCart(e.target.dataset.id, 1);
+                const itemId = e.target.dataset.id;
+                console.log('[CLICK] Add button clicked for item:', itemId);
+                try {
+                    tg.HapticFeedback.impactOccurred('light');
+                } catch (err) {}
+                updateCart(itemId, 1);
             }
+            
             if (e.target.classList.contains('btn-remove')) {
-                const haptic = tg.HapticFeedback;
-                haptic.impactOccurred('light');
-                updateCart(e.target.dataset.id, -1);
+                const itemId = e.target.dataset.id;
+                console.log('[CLICK] Remove button clicked for item:', itemId);
+                try {
+                    tg.HapticFeedback.impactOccurred('light');
+                } catch (err) {}
+                updateCart(itemId, -1);
             }
         });
 
         tg.MainButton.onClick(handleCheckout);
 
         // Initialize
-        document.addEventListener('DOMContentLoaded', fetchMenu);
+        console.log('[INIT] Starting application...');
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('[INIT] DOM loaded, fetching menu...');
+            fetchMenu();
+        });
+        
+        // Also call immediately in case DOM is already loaded
+        if (document.readyState === 'loading') {
+            console.log('[INIT] Waiting for DOM...');
+        } else {
+            console.log('[INIT] DOM already loaded, fetching menu immediately...');
+            fetchMenu();
+        }
     </script>
 </body>
 </html>
