@@ -803,9 +803,305 @@
         
         
 
+    
+        /* Onboarding Tutorial Styles */
+        .tutorial-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .tutorial-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .tutorial-modal {
+            background: white;
+            border-radius: 24px;
+            padding: 40px 24px;
+            max-width: 90%;
+            width: 100%;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .tutorial-content {
+            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .tutorial-step {
+            opacity: 0;
+            display: none;
+            animation: fadeIn 0.3s ease forwards;
+            width: 100%;
+        }
+
+        .tutorial-step.active {
+            opacity: 1;
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .tutorial-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            animation: bounce 0.6s ease infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .tutorial-step h2 {
+            font-size: 1.8em;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .tutorial-subtitle {
+            font-size: 1.1em;
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .tutorial-description {
+            background: var(--background);
+            padding: 16px;
+            border-radius: 12px;
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .tutorial-description p {
+            font-size: 0.95em;
+            color: var(--text-primary);
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .tutorial-description p:last-child {
+            margin-bottom: 0;
+        }
+
+        .tutorial-controls {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .tutorial-skip-btn {
+            background: transparent;
+            color: var(--text-secondary);
+            border: none;
+            font-size: 0.9em;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .tutorial-skip-btn:active {
+            background: var(--background);
+            color: var(--text-primary);
+        }
+
+        .tutorial-nav {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .tutorial-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .tutorial-btn-secondary {
+            background: var(--background);
+            color: var(--text-primary);
+            border: 2px solid var(--border);
+        }
+
+        .tutorial-btn-secondary:active {
+            transform: scale(0.98);
+            background: var(--border);
+        }
+
+        .tutorial-btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(255, 45, 85, 0.3);
+        }
+
+        .tutorial-btn-primary:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 6px rgba(255, 45, 85, 0.3);
+        }
+
+        .tutorial-start-btn {
+            font-size: 1.1em;
+            min-width: 100%;
+        }
+
+        .tutorial-progress {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .progress-dot.active {
+            background: var(--primary);
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 600px) {
+            .tutorial-modal {
+                padding: 32px 20px;
+                border-radius: 20px;
+            }
+
+            .tutorial-step h2 {
+                font-size: 1.5em;
+            }
+
+            .tutorial-icon {
+                font-size: 3.5em;
+            }
+
+            .tutorial-btn {
+                flex: 1;
+                min-width: 100px;
+            }
+        }
+
     </style>
 </head>
 <body>
+    <!-- Onboarding Tutorial Modal -->
+    <div id="tutorial-overlay" class="tutorial-overlay active">
+        <div class="tutorial-modal">
+            <!-- Tutorial Content -->
+            <div class="tutorial-content">
+                <!-- Step 1: Welcome -->
+                <div class="tutorial-step active" id="step-1">
+                    <div class="tutorial-icon">🎉</div>
+                    <h2>Welcome to Saucy Kitchen!</h2>
+                    <p class="tutorial-subtitle">Kamusta! Excited kaming ipakita sa'yo kung paano mag-order.</p>
+                    <div class="tutorial-description">
+                        <p>Dito makikita mo lahat ng masarap na pagkain. Tingnan mo lang ang menu at piliin kung ano ang gusto mo.</p>
+                        <p style="font-size: 0.85em; color: var(--text-secondary); margin-top: 10px;">You can scroll through categories like Popular, Mains, Appetizers, and more!</p>
+                    </div>
+                </div>
+
+                <!-- Step 2: Add to Cart -->
+                <div class="tutorial-step" id="step-2">
+                    <div class="tutorial-icon">🛒</div>
+                    <h2>Mag-Add ng Items sa Cart</h2>
+                    <p class="tutorial-subtitle">Piliin ang pagkain na gusto mo.</p>
+                    <div class="tutorial-description">
+                        <p>Makikita mo ang bawat pagkain na may presyo. Click lang ang "Add" button para idagdag sa iyong order.</p>
+                        <p style="font-size: 0.85em; color: var(--text-secondary); margin-top: 10px;">You can add multiple items! The cart badge shows how many items you have.</p>
+                    </div>
+                </div>
+
+                <!-- Step 3: Checkout -->
+                <div class="tutorial-step" id="step-3">
+                    <div class="tutorial-icon">✅</div>
+                    <h2>I-Checkout at Mag-Order</h2>
+                    <p class="tutorial-subtitle">Tayo na sa payment part!</p>
+                    <div class="tutorial-description">
+                        <p>Once na handa ka na, click ang shopping cart icon sa baba. Then fill in your delivery address, add any special requests, at click "Place Order" - tapos na!</p>
+                        <p style="font-size: 0.85em; color: var(--text-secondary); margin-top: 10px;">Your order will be confirmed right away. You'll get notifications every step!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tutorial Controls -->
+            <div class="tutorial-controls">
+                <button id="tutorial-skip" class="tutorial-skip-btn">Skip</button>
+                
+                <div class="tutorial-nav">
+                    <button id="tutorial-back" class="tutorial-btn tutorial-btn-secondary">← Back</button>
+                    <button id="tutorial-next" class="tutorial-btn tutorial-btn-primary">Next →</button>
+                    <button id="tutorial-start" class="tutorial-btn tutorial-btn-primary tutorial-start-btn" style="display: none;">Let's Go! 🚀</button>
+                </div>
+            </div>
+
+            <!-- Progress Indicator -->
+            <div class="tutorial-progress">
+                <div class="progress-dot active" id="dot-1"></div>
+                <div class="progress-dot" id="dot-2"></div>
+                <div class="progress-dot" id="dot-3"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- Hero Section -->
     <div class="hero">
         <div class="hero-content">
@@ -959,6 +1255,115 @@
             userName: document.getElementById('user-name'),
             userTelegram: document.getElementById('user-telegram')
         };
+
+        // ========== ONBOARDING TUTORIAL SYSTEM ==========
+        
+        const TutorialSystem = {
+            currentStep: 1,
+            totalSteps: 3,
+            hasSeenTutorial: localStorage.getItem('saucyKPS_tutorialSeen'),
+
+            init() {
+                if (!this.hasSeenTutorial) {
+                    this.showTutorial();
+                } else {
+                    this.hideTutorial();
+                }
+                this.setupEventListeners();
+            },
+
+            setupEventListeners() {
+                const skipBtn = document.getElementById('tutorial-skip');
+                const backBtn = document.getElementById('tutorial-back');
+                const nextBtn = document.getElementById('tutorial-next');
+                const startBtn = document.getElementById('tutorial-start');
+                const progressDots = document.querySelectorAll('.progress-dot');
+
+                skipBtn.addEventListener('click', () => this.completeTutorial());
+                backBtn.addEventListener('click', () => this.previousStep());
+                nextBtn.addEventListener('click', () => this.nextStep());
+                startBtn.addEventListener('click', () => this.completeTutorial());
+                progressDots.forEach((dot, index) => {
+                    dot.addEventListener('click', () => this.goToStep(index + 1));
+                });
+            },
+
+            showTutorial() {
+                const overlay = document.getElementById('tutorial-overlay');
+                overlay.classList.add('active');
+                this.updateStep();
+            },
+
+            hideTutorial() {
+                const overlay = document.getElementById('tutorial-overlay');
+                overlay.classList.remove('active');
+            },
+
+            updateStep() {
+                // Hide all steps
+                document.querySelectorAll('.tutorial-step').forEach(step => {
+                    step.classList.remove('active');
+                });
+
+                // Show current step
+                const currentStepEl = document.getElementById(`step-${this.currentStep}`);
+                if (currentStepEl) {
+                    currentStepEl.classList.add('active');
+                }
+
+                // Update progress dots
+                document.querySelectorAll('.progress-dot').forEach((dot, index) => {
+                    dot.classList.remove('active');
+                    if (index + 1 === this.currentStep) {
+                        dot.classList.add('active');
+                    }
+                });
+
+                // Update buttons
+                const backBtn = document.getElementById('tutorial-back');
+                const nextBtn = document.getElementById('tutorial-next');
+                const startBtn = document.getElementById('tutorial-start');
+
+                backBtn.style.display = this.currentStep === 1 ? 'none' : 'block';
+                nextBtn.style.display = this.currentStep === this.totalSteps ? 'none' : 'block';
+                startBtn.style.display = this.currentStep === this.totalSteps ? 'block' : 'none';
+
+                // Add haptic feedback
+                try {
+                    tg.HapticFeedback.impactOccurred('light');
+                } catch (e) {}
+            },
+
+            nextStep() {
+                if (this.currentStep < this.totalSteps) {
+                    this.currentStep++;
+                    this.updateStep();
+                }
+            },
+
+            previousStep() {
+                if (this.currentStep > 1) {
+                    this.currentStep--;
+                    this.updateStep();
+                }
+            },
+
+            goToStep(stepNumber) {
+                if (stepNumber >= 1 && stepNumber <= this.totalSteps) {
+                    this.currentStep = stepNumber;
+                    this.updateStep();
+                }
+            },
+
+            completeTutorial() {
+                localStorage.setItem('saucyKPS_tutorialSeen', 'true');
+                this.hideTutorial();
+                console.log('Tutorial completed!');
+            }
+        };
+
+        // ================================================
+
 
         // Initialize User Info
         function initUserInfo() {
