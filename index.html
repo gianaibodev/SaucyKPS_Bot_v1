@@ -463,32 +463,64 @@
         // Fetch menu from API
         async function fetchMenu() {
             try {
-                const response = await fetch(API_URL + "?action=getMenu");
+                console.log('Fetching menu from:', API_URL + "?action=getMenu");
+                
+                const response = await fetch(API_URL + "?action=getMenu", {
+                    method: 'GET',
+                    redirect: 'follow'
+                });
+                
+                console.log('Response status:', response.status);
+                
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
                 const items = await response.json();
+                console.log('Received items:', items);
                 
-                if (!items || items.length === 0) {
+                if (!items) {
+                    throw new Error('No data received from server');
+                }
+                
+                if (!Array.isArray(items)) {
+                    console.error('Invalid response format:', items);
+                    throw new Error('Invalid menu data format');
+                }
+                
+                if (items.length === 0) {
                     showEmptyState();
                     return;
                 }
 
                 // Store and categorize items
+                let itemCount = 0;
                 items.forEach(item => {
+                    if (!item.id || !item.name || !item.price) {
+                        console.warn('Skipping invalid item:', item);
+                        return;
+                    }
+                    
                     menu[item.id] = item;
+                    itemCount++;
                     
                     // Auto-categorize based on price or add category field to your sheet
                     const category = categorizeItem(item);
                     categories[category].items.push(item);
                 });
 
+                console.log(`Successfully loaded ${itemCount} menu items`);
+                
+                if (itemCount === 0) {
+                    showEmptyState();
+                    return;
+                }
+
                 renderMenu();
                 
             } catch (error) {
-                showError(`Unable to load menu: ${error.message}. Please try again.`);
                 console.error("Fetch Menu Error:", error);
+                showError(`Unable to load menu: ${error.message}. Please check the console for details.`);
             } finally {
                 loader.style.display = 'none';
             }
@@ -697,11 +729,19 @@
             menuContainer.innerHTML = `
                 <div class="empty-state">
                     <div class="empty-state-icon">🍽️</div>
-                    <h3>Menu Coming Soon</h3>
-                    <p>We're preparing something delicious for you!</p>
+                    <h3>No Menu Items Found</h3>
+                    <p>The menu is currently empty. Please add items to your Google Sheet.</p>
+                    <br>
+                    <p style="font-size: 0.85em; color: var(--text-secondary);">
+                        <strong>To add menu items:</strong><br>
+                        1. Open your Google Sheet<br>
+                        2. Add items with columns: id, name, description, price<br>
+                        3. Refresh this page
+                    </p>
                 </div>
             `;
             menuContainer.style.display = 'block';
+            console.log('Empty state shown - no menu items in database');
         }
 
         // Show error
