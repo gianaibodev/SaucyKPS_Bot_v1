@@ -1626,9 +1626,31 @@
             console.log('User Info:', userInfo);
         }
 
+        // Cache for menu data
+        let menuCache = null;
+        let cacheTimestamp = 0;
+        const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+        // Function to force refresh menu (bypass cache)
+        function refreshMenu() {
+            menuCache = null;
+            cacheTimestamp = 0;
+            fetchMenu();
+        }
+
         // Fetch Menu
         async function fetchMenu() {
             try {
+                // Check if we have valid cached data
+                const now = Date.now();
+                if (menuCache && (now - cacheTimestamp) < CACHE_DURATION) {
+                    console.log('Using cached menu data');
+                    allItems = menuCache;
+                    renderMenu();
+                    updateCategoryCounts();
+                    return;
+                }
+
                 console.log('Fetching menu from:', API_URL);
                 const response = await fetch(API_URL + "?action=getMenu&_=" + Date.now() + "&v=" + Math.random());
                 console.log('Response status:', response.status);
@@ -1661,6 +1683,10 @@
                     // Use imageURL from spreadsheet if it's a URL, otherwise use the emoji
                     emoji: (item.imageURL && item.imageURL.startsWith('http')) ? item.imageURL : '🍽️'
                 }));
+
+                // Cache the processed data
+                menuCache = allItems;
+                cacheTimestamp = Date.now();
 
                 console.log('All items loaded:', allItems.length);
                 console.log('Sample items with emojis:', allItems.slice(0, 3).map(i => ({name: i.name, imageURL: i.imageURL, emoji: i.emoji})));
@@ -1923,39 +1949,52 @@
         }
 
         async function checkout() {
-            const notes = document.getElementById('order-notes').value.trim();
-
-            if (Object.keys(cart).length === 0) {
-                tg.showAlert("⚠️ Your cart is empty");
-                return;
-            }
-
-            const items = Object.values(cart).map(item => ({
-                id: item.id,
-                name: item.name,
-                price: item.price,
-                quantity: item.quantity
-            }));
-
-            const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
-            // Get user info with username for easy contact
-            const orderUser = userInfo || tg.initDataUnsafe.user || {
-                id: 123456,
-                first_name: "Customer",
-                last_name: "",
-                username: "customer"
-            };
-
-            // Create formatted user object
-            const formattedUser = {
-                id: orderUser.id,
-                firstName: orderUser.first_name || "Customer",
-                lastName: orderUser.last_name || "",
-                username: orderUser.username || `user_${orderUser.id}`
-            };
-
             try {
+                const notes = document.getElementById('order-notes').value.trim();
+
+                if (Object.keys(cart).length === 0) {
+                    tg.showAlert("⚠️ Your cart is empty");
+                    return;
+                }
+
+                const items = Object.values(cart).map(item => ({
+                    id: item.id,
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity
+                }));
+
+                const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+                // Get user info with username for easy contact
+                const orderUser = userInfo || tg.initDataUnsafe.user || {
+                    id: 123456,
+                    first_name: "Customer",
+                    last_name: "",
+                    username: "customer"
+                };
+
+                // Create formatted user object
+                const formattedUser = {
+                    id: orderUser.id,
+                    firstName: orderUser.first_name || "Customer",
+                    lastName: orderUser.last_name || "",
+                    username: orderUser.username || `user_${orderUser.id}`
+                };
+
+                // Validate required data
+                if (!formattedUser.id) {
+                    throw new Error("User ID is missing");
+                }
+
+                if (items.length === 0) {
+                    throw new Error("No items in cart");
+                }
+
+                if (subtotal <= 0) {
+                    throw new Error("Invalid total amount");
+                }
+
                 elements.checkoutButton.textContent = "Placing order...";
                 elements.checkoutButton.disabled = true;
 
@@ -1995,6 +2034,7 @@
                 orderSummary += `Please send a screenshot of the QR code payment to our direct message.\n\n`;
                 orderSummary += `Riders can contact you via: @${formattedUser.username}`;
 
+                // Show success popup regardless of API response (since we can't read response with no-cors)
                 tg.showPopup({
                     title: '✅ Order Confirmed!',
                     message: orderSummary,
@@ -2014,14 +2054,28 @@
                     name: error.name
                 });
                 
-                let errorMessage = '❌ Something went wrong. Please try again.';
-                if (error.message.includes('fetch')) {
-                    errorMessage = '❌ Network error. Please check your connection and try again.';
-                } else if (error.message.includes('JSON')) {
-                    errorMessage = '❌ Server error. Please try again in a moment.';
-                }
-                
-                tg.showAlert(errorMessage);
+                // Even if API fails, show order confirmation as fallback
+                let orderSummary = `Total: $${(subtotal + DELIVERY_FEE).toFixed(2)}\n\n`;
+                orderSummary += `Items in your order:\n`;
+                items.forEach(item => {
+                    orderSummary += `• ${item.name} × ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}\n`;
+                });
+                orderSummary += `\n📱 Payment Instructions:\n`;
+                orderSummary += `Please send a screenshot of the QR code payment to our direct message.\n\n`;
+                orderSummary += `Riders can contact you via: @${formattedUser.username}`;
+                orderSummary += `\n\n⚠️ Note: Order may not be recorded in system. Please contact us directly.`;
+
+                tg.showPopup({
+                    title: '⚠️ Order Submitted (Offline)',
+                    message: orderSummary,
+                    buttons: [{ id: 'ok', type: 'ok' }]
+                }, () => {
+                    cart = {};
+                    updateCartUI();
+                    hideCart();
+                    document.getElementById('order-notes').value = '';
+                    tg.close();
+                });
             } finally {
                 elements.checkoutButton.textContent = "Place Order";
                 elements.checkoutButton.disabled = false;
@@ -2060,6 +2114,33 @@
                 e.target.classList.add('active');
                 currentCategory = e.target.dataset.category;
                 renderMenu();
+            }
+        });
+
+        // Add pull-to-refresh functionality
+        let startY = 0;
+        let currentY = 0;
+        let isRefreshing = false;
+
+        document.addEventListener('touchstart', (e) => {
+            if (window.scrollY === 0) {
+                startY = e.touches[0].clientY;
+            }
+        });
+
+        document.addEventListener('touchmove', (e) => {
+            if (window.scrollY === 0 && startY > 0) {
+                currentY = e.touches[0].clientY;
+                const pullDistance = currentY - startY;
+                
+                if (pullDistance > 50 && !isRefreshing) {
+                    isRefreshing = true;
+                    console.log('Pull to refresh triggered');
+                    refreshMenu();
+                    setTimeout(() => {
+                        isRefreshing = false;
+                    }, 2000);
+                }
             }
         });
 
