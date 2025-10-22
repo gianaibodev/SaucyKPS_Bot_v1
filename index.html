@@ -1949,8 +1949,10 @@
         }
 
         async function checkout() {
+            console.log('Checkout function called!');
             try {
                 const notes = document.getElementById('order-notes').value.trim();
+                console.log('Notes:', notes);
 
                 if (Object.keys(cart).length === 0) {
                     tg.showAlert("⚠️ Your cart is empty");
@@ -2096,7 +2098,35 @@
         // Event Listeners
         elements.floatingCart.addEventListener('click', showCart);
         elements.cartOverlay.addEventListener('click', hideCart);
-        elements.checkoutButton.addEventListener('click', checkout);
+        
+        // Add checkout button event listener with debugging
+        if (elements.checkoutButton) {
+            console.log('Checkout button found, adding event listener');
+            elements.checkoutButton.addEventListener('click', (e) => {
+                console.log('Checkout button clicked!');
+                e.preventDefault();
+                e.stopPropagation();
+                checkout();
+            });
+            
+            // Test if button is clickable
+            elements.checkoutButton.style.cursor = 'pointer';
+            console.log('Checkout button setup complete');
+        } else {
+            console.error('Checkout button not found!');
+            // Try to find it manually
+            const manualButton = document.getElementById('checkout-button');
+            if (manualButton) {
+                console.log('Found checkout button manually, adding listener');
+                manualButton.addEventListener('click', (e) => {
+                    console.log('Manual checkout button clicked!');
+                    e.preventDefault();
+                    checkout();
+                });
+            } else {
+                console.error('Checkout button not found anywhere!');
+            }
+        }
         elements.clearCart.addEventListener('click', () => {
             cart = {};
             updateCartUI();
