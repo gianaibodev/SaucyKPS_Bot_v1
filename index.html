@@ -426,6 +426,7 @@
             max-height: 70vh;
             display: flex;
             flex-direction: column;
+            overflow-y: auto;
         }
 
         .cart-sheet.active {
@@ -861,13 +862,40 @@
         }
 
         #map {
-            height: 160px;
+            height: 120px;
             width: 100%;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             margin-bottom: 8px;
             border: 2px solid var(--border);
         }
+
+        .confirm-location-button {
+            width: 100%;
+            padding: 10px 14px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 8px;
+            box-shadow: 0 2px 6px rgba(255, 45, 85, 0.2);
+        }
+        
+        .confirm-location-button:active {
+            transform: scale(0.98);
+            box-shadow: 0 1px 3px rgba(255, 45, 85, 0.2);
+        }
+        
+        .confirm-location-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
     </style>
 </head>
 <body>
@@ -955,6 +983,9 @@
             <p id="selected-address-text">
                 Drag the pin or search to set your delivery location
             </p>
+            <button id="confirm-location-btn" class="confirm-location-button">
+                ✓ Confirm Location
+            </button>
         </div>
 
         <div class="notes-input-section">
@@ -1556,6 +1587,23 @@
             `;
             elements.menuContainer.style.display = 'block';
         }
+
+
+        // Confirm Location Button
+        const confirmLocationBtn = document.getElementById('confirm-location-btn');
+        confirmLocationBtn.addEventListener('click', () => {
+            if (!deliveryLocation || !deliveryLocation.address) {
+                tg.showAlert('❌ Please select a valid location on the map');
+                return;
+            }
+            document.getElementById('selected-address-text').classList.add('active');
+            confirmLocationBtn.textContent = '✓ Location Confirmed!';
+            confirmLocationBtn.disabled = true;
+            try {
+                tg.HapticFeedback.impactOccurred('medium');
+            } catch (e) {}
+            console.log('Location confirmed:', deliveryLocation);
+        });
 
         // Event Listeners
         elements.floatingCart.addEventListener('click', showCart);
