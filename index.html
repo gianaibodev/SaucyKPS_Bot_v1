@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Saucy KPS Restaurant</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Leaflet.js Map Library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <style>
         :root {
             --primary: #FF2D55;
@@ -96,7 +99,7 @@
         }
 
         .search-input {
-            width: 100%;
+            width: 100%; 
             padding: 14px 45px 14px 45px;
             background: white;
             border: none;
@@ -248,7 +251,15 @@
 
         .menu-grid {
             display: grid;
-            gap: 15px;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        @media (min-width: 600px) {
+            .menu-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 12px;
+            }
         }
 
         .menu-item {
@@ -341,16 +352,26 @@
             color: white;
             border: none;
             border-radius: 12px;
-            padding: 10px 20px;
-            font-size: 0.9em;
+            padding: 10px 16px;
+            font-size: 0.85em;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 4px 12px rgba(255, 45, 85, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
 
         .add-button:active {
             transform: scale(0.95);
+        }
+
+        .cart-icon-svg {
+            width: 18px;
+            height: 18px;
+            display: inline-block;
         }
 
         .quantity-controls {
@@ -664,6 +685,87 @@
         .menu-item:nth-child(3) { animation-delay: 0.3s; }
         .menu-item:nth-child(4) { animation-delay: 0.4s; }
         .menu-item:nth-child(5) { animation-delay: 0.5s; }
+
+        .notes-input-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: var(--background);
+            border-radius: 12px;
+        }
+
+        .notes-label {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .notes-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 0.95em;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 70px;
+            transition: all 0.3s ease;
+        }
+
+        .notes-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+        }
+
+        .notes-hint {
+            font-size: 0.8em;
+            color: var(--text-secondary);
+            margin-top: 6px;
+        }
+
+        /* Map Section Styles */
+        .map-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: var(--background);
+            border-radius: 12px;
+        }
+
+        .map-label {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+        }
+
+        #map {
+            height: 250px;
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 8px;
+            border: 2px solid var(--border);
+        }
+
+        .map-hint {
+            font-size: 0.8em;
+            color: var(--text-secondary);
+            margin-top: 6px;
+        }
+
+        .leaflet-container {
+            border-radius: 8px;
+        }
+
+        .leaflet-marker-icon {
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
     </style>
 </head>
 <body>
@@ -740,12 +842,22 @@
 
         <div class="address-input-section">
             <div class="address-label">📍 Delivery Address</div>
+            <div id="map" class="map-section"></div>
+            <p class="map-hint">Click on the map to select your delivery location.</p>
+        </div>
+
+        <div class="notes-input-section">
+            <div class="notes-label">
+                <svg class="cart-icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+                Order Notes (Optional)
+            </div>
             <textarea 
-                class="address-input" 
-                id="delivery-address"
-                placeholder="Enter your complete delivery address..."
+                class="notes-input" 
+                id="order-notes"
+                placeholder="Add any special instructions for the kitchen..."
                 rows="2"
             ></textarea>
+            <p class="notes-hint">These notes will be sent to the restaurant.</p>
         </div>
 
         <div class="cart-items" id="cart-items-list"></div>
@@ -772,7 +884,7 @@
 
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbzDm7A05AtpzzUAxf3XPD9Jg-4GVB87hjQAcJbkfDYkcK3npcPs7VMK-afBeZNe542s/exec";
-        
+
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
@@ -783,6 +895,9 @@
         let searchQuery = '';
         const DELIVERY_FEE = 2.99;
         let userInfo = null;
+        let deliveryLocation = null;
+        let map = null;
+        let marker = null;
 
         const elements = {
             loader: document.getElementById('loader'),
@@ -823,6 +938,58 @@
             elements.userAvatar.textContent = initial;
 
             console.log('User Info:', userInfo);
+        }
+
+        // Initialize Map
+        function initMap() {
+            try {
+                // Default location (center of city or restaurant location)
+                const defaultLat = 40.7128;
+                const defaultLng = -74.0060;
+
+                // Create map
+                map = L.map('map').setView([defaultLat, defaultLng], 13);
+
+                // Add OpenStreetMap tiles
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors',
+                    maxZoom: 19
+                }).addTo(map);
+
+                // Add draggable marker
+                marker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(map);
+                marker.bindPopup('Your delivery location');
+
+                // Set initial location
+                deliveryLocation = { lat: defaultLat, lng: defaultLng };
+
+                // Update location when marker is dragged
+                marker.on('dragend', function() {
+                    const latLng = marker.getLatLng();
+                    deliveryLocation = {
+                        lat: latLng.lat,
+                        lng: latLng.lng
+                    };
+                    marker.setPopupContent(`📍 Lat: ${latLng.lat.toFixed(4)}, Lng: ${latLng.lng.toFixed(4)}`);
+                    console.log('Location updated:', deliveryLocation);
+                });
+
+                // Allow clicking map to place marker
+                map.on('click', function(e) {
+                    marker.setLatLng(e.latlng);
+                    deliveryLocation = {
+                        lat: e.latlng.lat,
+                        lng: e.latlng.lng
+                    };
+                    marker.setPopupContent(`📍 Lat: ${e.latlng.lat.toFixed(4)}, Lng: ${e.latlng.lng.toFixed(4)}`);
+                    marker.openPopup();
+                    console.log('Location updated:', deliveryLocation);
+                });
+
+                console.log('Map initialized successfully');
+            } catch (error) {
+                console.error('Error initializing map:', error);
+            }
         }
 
         // Fetch Menu
@@ -908,13 +1075,13 @@
             grid.className = 'menu-grid';
 
             filteredItems.forEach(item => {
-                const el = document.createElement('div');
-                el.className = 'menu-item';
+            const el = document.createElement('div');
+            el.className = 'menu-item';
                 
                 const popularBadge = item.popular ? '<div class="popular-badge">🔥 Popular</div>' : '';
                 const quantity = cart[item.id]?.quantity || 0;
                 
-                el.innerHTML = `
+            el.innerHTML = `
                     <div class="item-image-placeholder">
                         <span style="font-size: 3em;">${item.emoji}</span>
                         ${popularBadge}
@@ -931,11 +1098,14 @@
                                     <button class="quantity-btn" onclick="updateCart('${item.id}', 1)">+</button>
                                 </div>
                             ` : `
-                                <button class="add-button" onclick="updateCart('${item.id}', 1)">Add</button>
+                                <button class="add-button" onclick="updateCart('${item.id}', 1)">
+                                    <svg class="cart-icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus-circle"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+                                    Add
+                                </button>
                             `}
-                        </div>
-                    </div>
-                `;
+                </div>
+                </div>
+            `;
                 
                 grid.appendChild(el);
             });
@@ -1020,10 +1190,10 @@
         }
 
         async function checkout() {
-            const address = elements.addressInput.value.trim();
+            const notes = document.getElementById('order-notes').value.trim();
             
-            if (!address || address.length < 10) {
-                tg.showAlert("⚠️ Please enter your complete delivery address");
+            if (!deliveryLocation) {
+                tg.showAlert("⚠️ Please select your delivery location on the map");
                 return;
             }
 
@@ -1067,7 +1237,8 @@
                     body: JSON.stringify({
                         action: "newOrder",
                         user: formattedUser,
-                        address: address,
+                        location: deliveryLocation,
+                        notes: notes || "No special requests",
                         cart: {
                             items: items,
                             totalPrice: subtotal + DELIVERY_FEE
@@ -1087,6 +1258,7 @@
                     cart = {};
                     updateCartUI();
                     hideCart();
+                    document.getElementById('order-notes').value = '';
                     tg.close();
                 });
             } catch (error) {
@@ -1135,6 +1307,7 @@
 
         // Initialize
         initUserInfo();
+        initMap(); // Call initMap here
         fetchMenu();
     </script>
 </body>
