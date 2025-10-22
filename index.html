@@ -3,209 +3,576 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restaurant Menu</title>
-    <!-- This script connects to the Telegram app -->
+    <title>Saucy KPS Restaurant</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* Use Telegram's theme colors */
+        /* Modern Color Palette */
         :root {
-            --tg-bg: var(--tg-theme-bg-color, #ffffff);
-            --tg-text: var(--tg-theme-text-color, #000000);
-            --tg-hint: var(--tg-theme-hint-color, #888888);
-            --tg-button: var(--tg-theme-button-color, #007bff);
+            --primary: #FF6B35;
+            --primary-dark: #E55A2B;
+            --secondary: #004E89;
+            --accent: #F7B801;
+            --success: #2ECC71;
+            --background: #FAFAFA;
+            --surface: #FFFFFF;
+            --text-primary: #2C3E50;
+            --text-secondary: #7F8C8D;
+            --border: #E0E0E0;
+            --shadow: rgba(0, 0, 0, 0.08);
+            
+            /* Telegram theme fallbacks */
+            --tg-bg: var(--tg-theme-bg-color, var(--background));
+            --tg-text: var(--tg-theme-text-color, var(--text-primary));
+            --tg-hint: var(--tg-theme-hint-color, var(--text-secondary));
+            --tg-button: var(--tg-theme-button-color, var(--primary));
             --tg-button-text: var(--tg-theme-button-text-color, #ffffff);
-            --tg-secondary-bg: var(--tg-theme-secondary-bg-color, #f4f4f4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--tg-bg);
-            color: var(--tg-text);
-            margin: 0;
-            padding: 15px;
-            padding-bottom: 80px; /* Space for the Main Button */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--text-primary);
+            padding: 0;
+            padding-bottom: 100px;
+            line-height: 1.6;
         }
 
-        h3 {
-            margin: 0 0 8px 0;
-            font-weight: 600;
+        /* Header Section */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 30px 20px 25px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        /* --- Address Box --- */
-        #address-box {
-            padding-bottom: 15px;
-        }
-        #delivery-address {
-            /* Use 95% width and padding-box to prevent overflow */
-            box-sizing: border-box; 
-            width: 100%; 
-            height: 60px;
-            border-radius: 8px;
-            padding: 10px;
-            border: 1px solid var(--tg-hint);
-            background: var(--tg-secondary-bg);
-            color: var(--tg-text);
-            font-family: inherit;
-            font-size: 1em;
+        .header h1 {
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
         }
 
-        /* --- Loading Spinner --- */
-        #loader {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            border: 5px solid var(--tg-secondary-bg);
-            border-top: 5px solid var(--tg-button);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: translate(-50%, -50%) rotate(0deg); }
-            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        .header p {
+            font-size: 0.95em;
+            opacity: 0.95;
+            font-weight: 300;
         }
 
-        /* --- Menu List --- */
-        #menu-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+        /* Address Section */
+        .address-section {
+            background: var(--surface);
+            margin: 20px 15px;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px var(--shadow);
         }
-        .menu-item {
-            background-color: var(--tg-secondary-bg);
-            border-radius: 10px;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .item-details {
-            /* Prevent text from overflowing */
-            max-width: 65%; 
-            word-wrap: break-word;
-        }
-        .item-details h3 {
-            margin: 0 0 5px 0;
+
+        .address-section h3 {
             font-size: 1.1em;
-        }
-        .item-details p {
-            margin: 0 0 8px 0;
-            font-size: 0.9em;
-            color: var(--tg-hint);
-        }
-        .item-details .price {
-            font-size: 1em;
-            font-weight: 600;
-            color: var(--tg-text);
-        }
-        .item-controls {
+            margin-bottom: 12px;
+            color: var(--text-primary);
             display: flex;
             align-items: center;
             gap: 8px;
         }
+
+        .address-section h3::before {
+            content: "📍";
+            font-size: 1.2em;
+        }
+
+        #delivery-address {
+            width: 100%;
+            min-height: 80px;
+            padding: 15px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 1em;
+            font-family: inherit;
+            color: var(--text-primary);
+            background: var(--background);
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        #delivery-address:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+        }
+
+        #delivery-address::placeholder {
+            color: var(--text-secondary);
+        }
+
+        /* Loading Spinner */
+        .loader-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            gap: 15px;
+        }
+
+        .loader {
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loader-text {
+            color: var(--text-secondary);
+            font-size: 0.95em;
+        }
+
+        /* Menu Categories */
+        .menu-container {
+            padding: 0 15px;
+        }
+
+        .category-section {
+            margin-bottom: 35px;
+        }
+
+        .category-title {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            padding-left: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .category-title::before {
+            content: "";
+            width: 4px;
+            height: 28px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        /* Menu Items */
+        .menu-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .menu-item {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 18px;
+            box-shadow: 0 2px 12px var(--shadow);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .menu-item::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .menu-item.in-cart::before {
+            opacity: 1;
+        }
+
+        .item-content {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        .item-header {
+            display: flex;
+            align-items: start;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .item-name {
+            font-size: 1.15em;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .item-badge {
+            background: var(--accent);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .item-badge.popular {
+            background: var(--primary);
+        }
+
+        .item-badge.new {
+            background: var(--success);
+        }
+
+        .item-description {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .item-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+        }
+
+        .item-price {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* Item Controls */
+        .item-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
         .item-controls button {
-            background-color: var(--tg-button);
-            color: var(--tg-button-text);
+            background: var(--primary);
+            color: white;
             border: none;
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            font-size: 1.2em;
-            font-weight: bold;
-            cursor: pointer;
-            /* Prevent button from shrinking */
-            flex-shrink: 0; 
-        }
-        .item-controls .quantity {
-            font-size: 1.1em;
+            width: 36px;
+            height: 36px;
+            font-size: 1.3em;
             font-weight: 600;
-            min-width: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+        }
+
+        .item-controls button:active {
+            transform: scale(0.95);
+        }
+
+        .item-controls button:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-remove {
+            background: var(--text-secondary);
+            box-shadow: 0 2px 8px rgba(127, 140, 141, 0.3);
+        }
+
+        .btn-remove:hover {
+            background: #6c7a89;
+        }
+
+        .quantity-badge {
+            background: var(--secondary);
+            color: white;
+            font-size: 1em;
+            font-weight: 700;
+            min-width: 32px;
+            height: 32px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 10px;
+        }
+
+        /* Empty State */
+        .empty-state {
             text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+        }
+
+        .empty-state h3 {
+            font-size: 1.3em;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        /* Cart Summary */
+        .cart-summary {
+            background: var(--surface);
+            margin: 20px 15px;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px var(--shadow);
+            display: none;
+        }
+
+        .cart-summary.active {
+            display: block;
+        }
+
+        .cart-summary h3 {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            color: var(--text-primary);
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.3em;
+            font-weight: 700;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid var(--border);
+            color: var(--primary);
+        }
+
+        /* Error Message */
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 20px;
+            margin: 20px 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        /* Responsive Design */
+        @media (min-width: 768px) {
+            .menu-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
     </style>
 </head>
 <body>
-
-    <div id="address-box">
-        <h3>Delivery Address</h3>
-        <textarea id="delivery-address" 
-                  placeholder="Please enter your full address..."></textarea>
+    <!-- Header -->
+    <div class="header">
+        <h1>🍽️ Saucy KPS Restaurant</h1>
+        <p>Fresh & Delicious Meals Delivered to Your Door</p>
     </div>
 
-    <div id="loader"></div>
-    <div id="menu-list"></div>
+    <!-- Address Section -->
+    <div class="address-section">
+        <h3>Delivery Address</h3>
+        <textarea 
+            id="delivery-address" 
+            placeholder="Enter your complete delivery address (Street, Building, Floor, City, Zip Code)..."
+            rows="3"
+        ></textarea>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loader" class="loader-container">
+        <div class="loader"></div>
+        <p class="loader-text">Loading delicious menu...</p>
+    </div>
+
+    <!-- Menu Container -->
+    <div id="menu-container" class="menu-container" style="display: none;"></div>
+
+    <!-- Error Message -->
+    <div id="error-message" class="error-message" style="display: none;"></div>
 
     <script>
-        // --- 1. CONFIGURATION ---
-        // ⬇️ *** PASTE YOUR WEB APP URL FROM PHASE 3 HERE *** ⬇️
+        // Configuration
         const API_URL = "https://script.google.com/macros/s/AKfycbzDm7A05AtpzzUAxf3XPD9Jg-4GVB87hjQAcJbkfDYkcK3npcPs7VMK-afBeZNe542s/exec";
-
-        // --- 2. INITIALIZE TELEGRAM APP ---
+        
+        // Initialize Telegram
         const tg = window.Telegram.WebApp;
-        tg.ready(); // Let Telegram know the app is ready
+        tg.ready();
+        tg.expand();
 
-        // --- 3. STATE MANAGEMENT ---
-        let cart = {}; // { "item-id": { name: "Pizza", price: 10, quantity: 1 }, ... }
-        let menu = {}; // { "item-id": { ...item data... }, ... }
+        // State
+        let cart = {};
+        let menu = {};
         const loader = document.getElementById('loader');
-        const menuList = document.getElementById('menu-list');
+        const menuContainer = document.getElementById('menu-container');
         const addressInput = document.getElementById('delivery-address');
+        const errorMessage = document.getElementById('error-message');
 
-        // --- 4. CORE FUNCTIONS ---
+        // Categorize items for better organization
+        const categories = {
+            popular: { title: '🔥 Popular Dishes', items: [] },
+            mains: { title: '🍖 Main Courses', items: [] },
+            appetizers: { title: '🥗 Appetizers', items: [] },
+            desserts: { title: '🍰 Desserts', items: [] },
+            beverages: { title: '🥤 Beverages', items: [] }
+        };
 
-        // Fetch menu from Google Apps Script
+        // Fetch menu from API
         async function fetchMenu() {
             try {
                 const response = await fetch(API_URL + "?action=getMenu");
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
+                
                 const items = await response.json();
                 
-                menuList.innerHTML = ""; // Clear loader
-                
+                if (!items || items.length === 0) {
+                    showEmptyState();
+                    return;
+                }
+
+                // Store and categorize items
                 items.forEach(item => {
-                    // Store item data for cart logic
                     menu[item.id] = item;
-                    // Render the item
-                    menuList.appendChild(createMenuItemElement(item));
+                    
+                    // Auto-categorize based on price or add category field to your sheet
+                    const category = categorizeItem(item);
+                    categories[category].items.push(item);
                 });
+
+                renderMenu();
+                
             } catch (error) {
-                menuList.innerHTML = `Error loading menu: ${error.message}. Please try again.`;
+                showError(`Unable to load menu: ${error.message}. Please try again.`);
                 console.error("Fetch Menu Error:", error);
             } finally {
-                if (loader) loader.style.display = 'none';
+                loader.style.display = 'none';
             }
         }
 
-        // Create HTML for a single menu item
-        function createMenuItemElement(item) {
+        // Simple categorization logic (customize based on your needs)
+        function categorizeItem(item) {
+            const name = item.name.toLowerCase();
+            const price = parseFloat(item.price);
+            
+            if (item.popular || price > 15) return 'popular';
+            if (name.includes('drink') || name.includes('juice') || name.includes('soda')) return 'beverages';
+            if (name.includes('cake') || name.includes('ice cream') || name.includes('dessert')) return 'desserts';
+            if (name.includes('salad') || name.includes('soup') || name.includes('appetizer')) return 'appetizers';
+            return 'mains';
+        }
+
+        // Render the menu
+        function renderMenu() {
+            menuContainer.innerHTML = '';
+            menuContainer.style.display = 'block';
+
+            // Render each category
+            Object.keys(categories).forEach(key => {
+                const category = categories[key];
+                if (category.items.length === 0) return;
+
+                const section = document.createElement('div');
+                section.className = 'category-section';
+                
+                const title = document.createElement('h2');
+                title.className = 'category-title';
+                title.textContent = category.title;
+                section.appendChild(title);
+
+                const grid = document.createElement('div');
+                grid.className = 'menu-grid';
+                
+                category.items.forEach(item => {
+                    grid.appendChild(createMenuItem(item));
+                });
+
+                section.appendChild(grid);
+                menuContainer.appendChild(section);
+            });
+        }
+
+        // Create menu item element
+        function createMenuItem(item) {
             const el = document.createElement('div');
             el.className = 'menu-item';
             el.id = `item-${item.id}`;
+            
+            let badge = '';
+            if (item.popular) badge = '<span class="item-badge popular">Popular</span>';
+            else if (item.new) badge = '<span class="item-badge new">New</span>';
+            
             el.innerHTML = `
-                <div class="item-details">
-                    <h3>${item.name}</h3>
-                    <p>${item.description}</p>
-                    <div class="price">$${parseFloat(item.price).toFixed(2)}</div>
-                </div>
-                <div class="item-controls">
-                    <button class="btn-remove" data-id="${item.id}" style="display: none;">-</button>
-                    <span class="quantity" data-id="${item.id}"></span>
-                    <button class="btn-add" data-id="${item.id}">+</button>
+                <div class="item-content">
+                    <div class="item-details">
+                        <div class="item-header">
+                            <h3 class="item-name">${item.name}</h3>
+                            ${badge}
+                        </div>
+                        <p class="item-description">${item.description || 'Delicious and freshly prepared'}</p>
+                        <div class="item-footer">
+                            <div class="item-price">$${parseFloat(item.price).toFixed(2)}</div>
+                            <div class="item-controls">
+                                <button class="btn-remove" data-id="${item.id}" style="display: none;">−</button>
+                                <span class="quantity-display" data-id="${item.id}"></span>
+                                <button class="btn-add" data-id="${item.id}">+</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             `;
             return el;
         }
 
-        // Update cart and UI
+        // Update cart
         function updateCart(itemId, change) {
             const item = menu[itemId];
-            if (!item) return; // Safety check
+            if (!item) return;
             
-            // Initialize item in cart
             if (!cart[itemId]) {
                 cart[itemId] = {
                     name: item.name,
@@ -214,35 +581,35 @@
                 };
             }
 
-            // Apply change
             cart[itemId].quantity += change;
 
-            // Remove from cart if quantity is 0
             if (cart[itemId].quantity <= 0) {
                 delete cart[itemId];
             }
 
-            // Update UI
-            updateUI(itemId);
+            updateItemUI(itemId);
             updateMainButton();
         }
 
-        // Update just the controls for a specific item
-        function updateUI(itemId) {
+        // Update individual item UI
+        function updateItemUI(itemId) {
             const quantity = cart[itemId] ? cart[itemId].quantity : 0;
-            const quantityEl = document.querySelector(`.quantity[data-id="${itemId}"]`);
-            const removeBtnEl = document.querySelector(`.btn-remove[data-id="${itemId}"]`);
+            const itemEl = document.getElementById(`item-${itemId}`);
+            const quantityEl = itemEl?.querySelector(`.quantity-display[data-id="${itemId}"]`);
+            const removeBtn = itemEl?.querySelector(`.btn-remove[data-id="${itemId}"]`);
             
-            if (quantity > 0 && quantityEl && removeBtnEl) {
-                quantityEl.textContent = quantity;
-                removeBtnEl.style.display = 'block';
-            } else if (quantityEl && removeBtnEl) {
-                quantityEl.textContent = '';
-                removeBtnEl.style.display = 'none';
+            if (quantity > 0) {
+                itemEl?.classList.add('in-cart');
+                if (quantityEl) quantityEl.innerHTML = `<span class="quantity-badge">${quantity}</span>`;
+                if (removeBtn) removeBtn.style.display = 'flex';
+            } else {
+                itemEl?.classList.remove('in-cart');
+                if (quantityEl) quantityEl.innerHTML = '';
+                if (removeBtn) removeBtn.style.display = 'none';
             }
         }
 
-        // Update the main "Checkout" button
+        // Update Telegram Main Button
         function updateMainButton() {
             let totalQuantity = 0;
             let totalPrice = 0;
@@ -253,25 +620,24 @@
             }
 
             if (totalQuantity > 0) {
-                tg.MainButton.setText(`View Order ($${totalPrice.toFixed(2)})`);
+                tg.MainButton.setText(`🛒 Checkout (${totalQuantity} items • $${totalPrice.toFixed(2)})`);
+                tg.MainButton.color = '#FF6B35';
                 tg.MainButton.show();
             } else {
                 tg.MainButton.hide();
             }
         }
 
-        // Handle order submission
+        // Handle checkout
         async function handleCheckout() {
-            const address = addressInput.value;
+            const address = addressInput.value.trim();
             
-            // Check if address is empty
-            if (!address || address.trim().length < 10) {
-                tg.showAlert("Please enter a valid delivery address.");
+            if (!address || address.length < 10) {
+                tg.showAlert("⚠️ Please enter a complete delivery address (at least 10 characters)");
                 addressInput.focus();
-                return; // Stop the checkout
+                return;
             }
 
-            // Get cart items
             const cartItems = Object.keys(cart).map(id => ({
                 id: id,
                 name: cart[id].name,
@@ -284,75 +650,84 @@
             const orderData = {
                 action: "newOrder",
                 user: tg.initDataUnsafe.user,
-                address: address, // <-- We added this!
+                address: address,
                 cart: {
                     items: cartItems,
                     totalPrice: totalPrice
-                }
+                },
+                timestamp: new Date().toISOString()
             };
 
             try {
-                // Show loading spinner on button
                 tg.MainButton.showProgress();
 
                 const response = await fetch(API_URL, {
                     method: 'POST',
-                    // Use 'text/plain' as Apps Script can be tricky with JSON preflight
-                    headers: { 'Content-Type': 'text/plain' }, 
+                    headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify(orderData),
-                    mode: 'no-cors' // Use no-cors to avoid preflight issues
+                    mode: 'no-cors'
                 });
 
-                // NOTE: With 'no-cors', we can't read the response. 
-                // We'll just assume it worked and let the bot message the user.
-                
-                // Show success and close
                 tg.showPopup({
-                    title: 'Order Placed!',
-                    message: 'We are waiting for your manual payment. You will get a message from our bot shortly.',
+                    title: '✅ Order Confirmed!',
+                    message: `Your order of $${totalPrice.toFixed(2)} has been received!\n\nWe'll send you payment instructions shortly. Thank you for choosing Saucy KPS!`,
                     buttons: [{ id: 'ok', type: 'ok' }]
                 }, () => {
                     tg.close();
                 });
 
             } catch (error) {
-                // 'no-cors' requests will often throw a "network error" even on success
-                // So we'll optimistically close anyway, but log the error
-                console.error("Fetch Order Error (may be 'no-cors' related):", error);
+                console.error("Order Error:", error);
                 
-                // Still show the popup as the request likely went through
                 tg.showPopup({
-                    title: 'Order Placed!',
-                    message: 'We are waiting for your manual payment. You will get a message from our bot shortly.',
+                    title: '✅ Order Sent!',
+                    message: 'Your order has been received. Check your messages for payment details.',
                     buttons: [{ id: 'ok', type: 'ok' }]
                 }, () => {
                     tg.close();
                 });
                 
             } finally {
-                // Hide loading spinner
                 tg.MainButton.hideProgress();
             }
         }
 
-        // --- 5. EVENT LISTENERS ---
+        // Show empty state
+        function showEmptyState() {
+            menuContainer.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">🍽️</div>
+                    <h3>Menu Coming Soon</h3>
+                    <p>We're preparing something delicious for you!</p>
+                </div>
+            `;
+            menuContainer.style.display = 'block';
+        }
 
-        // Listen for clicks on + and - buttons
-        menuList.addEventListener('click', (e) => {
+        // Show error
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+
+        // Event Listeners
+        menuContainer.addEventListener('click', (e) => {
             if (e.target.classList.contains('btn-add')) {
+                const haptic = tg.HapticFeedback;
+                haptic.impactOccurred('light');
                 updateCart(e.target.dataset.id, 1);
             }
             if (e.target.classList.contains('btn-remove')) {
+                const haptic = tg.HapticFeedback;
+                haptic.impactOccurred('light');
                 updateCart(e.target.dataset.id, -1);
             }
         });
 
-        // Listen for the main Telegram button being clicked
         tg.MainButton.onClick(handleCheckout);
 
-        // --- 6. START THE APP ---
+        // Initialize
         document.addEventListener('DOMContentLoaded', fetchMenu);
     </script>
 </body>
 </html>
-
