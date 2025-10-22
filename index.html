@@ -1534,6 +1534,7 @@
 
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbwYIcjTrHUWPNDK0Xjllzjex3N3e8D1R9dcnijln5WttNN_iA7-2e2KQ3qDBaTuOOSG/exec";
+        const CORS_PROXY = "https://api.allorigins.win/raw?url=";  // Free CORS proxy that works better
 
         const tg = window.Telegram.WebApp;
         tg.ready();
@@ -1728,7 +1729,7 @@
             console.log('Full URL:', API_URL + "?action=getMenu&_=" + Date.now());
             
             try {
-                const testUrl = API_URL + "?action=getMenu&_=" + Date.now();
+                const testUrl = CORS_PROXY + encodeURIComponent(API_URL + "?action=getMenu&_=" + Date.now());
                 console.log('Making request to:', testUrl);
                 
                 const response = await fetch(testUrl, {
@@ -1826,7 +1827,10 @@
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
                 
-                loadingPromise = fetch(API_URL + "?action=getMenu&_=" + Date.now() + "&v=" + Math.random(), {
+                const fetchUrl = CORS_PROXY + encodeURIComponent(API_URL + "?action=getMenu&_=" + Date.now() + "&v=" + Math.random());
+                console.log('Fetching from:', fetchUrl);
+                
+                loadingPromise = fetch(fetchUrl, {
                     signal: controller.signal,
                     cache: 'no-cache',
                     headers: {
