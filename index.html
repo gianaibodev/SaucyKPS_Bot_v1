@@ -1248,7 +1248,7 @@
                         </div>
                     </div>
                     <p class="tutorial-subtitle">Lagyan ng address, tapos na! Simple.</p>
-                </div>
+    </div>
 
                 <!-- Step 3: Checkout -->
                 <div class="tutorial-step" id="step-3">
@@ -1726,7 +1726,7 @@
                             `<span style="font-size: 3em;">${item.emoji}</span>`
                         }
                         ${popularBadge}
-                    </div>
+                </div>
                     <div class="item-content">
                         <div class="item-name">${item.name}</div>
                         <div class="item-description">${item.description || 'Delicious and freshly prepared'}</div>
@@ -1894,7 +1894,7 @@
 
                 await fetch(API_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'text/plain' },
+                    headers: { 'Content-Type': 'text/plain' }, 
                     body: JSON.stringify({
                         action: "newOrder",
                         user: formattedUser,
