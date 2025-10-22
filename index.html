@@ -1637,7 +1637,8 @@
                 console.log('Response status:', response.status);
                 
                 const text = await response.text();
-                console.log('Response text:', text);
+                console.log('Response text (first 500 chars):', text.substring(0, 500));
+                console.log('Response text length:', text.length);
                 
                 let items;
                 try {
@@ -1650,6 +1651,7 @@
                 }
                 
                 console.log('Parsed items:', items);
+                console.log('Number of items received from API:', items.length);
                 
                 if (!Array.isArray(items) || items.length === 0) {
                     console.log('No items found or invalid array');
