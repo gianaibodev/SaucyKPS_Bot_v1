@@ -1448,7 +1448,8 @@
     <!-- Loading -->
     <div id="loader" class="loader-container">
         <div class="loader"></div>
-        <p style="color: var(--text-secondary);">Loading menu...</p>
+        <p id="loading-text" style="color: var(--text-secondary);">Loading menu...</p>
+        <div class="loading-progress" id="loading-progress" style="width: 0%; height: 3px; background: var(--primary); margin-top: 10px; border-radius: 2px; transition: width 0.3s ease;"></div>
     </div>
 
     <!-- Menu Container -->
@@ -1707,7 +1708,11 @@
         // Cache for menu data
         let menuCache = null;
         let cacheTimestamp = 0;
-        const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+        const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes (increased cache time)
+        
+        // Loading state management
+        let isLoading = false;
+        let loadingPromise = null;
 
         // Function to force refresh menu (bypass cache)
         function refreshMenu() {
@@ -1716,8 +1721,40 @@
             fetchMenu();
         }
 
+        // Test function to check API directly
+        async function testAPI() {
+            console.log('Testing API directly...');
+            try {
+                const response = await fetch(API_URL + "?action=getMenu&_=" + Date.now());
+                console.log('Test response status:', response.status);
+                const text = await response.text();
+                console.log('Test response text:', text);
+                
+                if (response.status === 200) {
+                    try {
+                        const data = JSON.parse(text);
+                        console.log('Test parsed data:', data);
+                        console.log('Test data length:', data.length);
+                    } catch (e) {
+                        console.error('Test JSON parse error:', e);
+                    }
+                }
+            } catch (error) {
+                console.error('Test API error:', error);
+            }
+        }
+
+        // Make testAPI available globally
+        window.testAPI = testAPI;
+
         // Fetch Menu
         async function fetchMenu() {
+            // Prevent multiple simultaneous requests
+            if (isLoading) {
+                console.log('Menu already loading, waiting for existing request...');
+                return loadingPromise;
+            }
+
             try {
                 // Check if we have valid cached data
                 const now = Date.now();
@@ -1729,21 +1766,64 @@
                     return;
                 }
 
+                isLoading = true;
+                elements.loader.style.display = 'block';
+                
+                // Update loading text and progress
+                const loadingText = document.getElementById('loading-text');
+                const loadingProgress = document.getElementById('loading-progress');
+                loadingText.textContent = 'Connecting to server...';
+                loadingProgress.style.width = '20%';
+                
                 console.log('Fetching menu from:', API_URL);
-                const response = await fetch(API_URL + "?action=getMenu&_=" + Date.now() + "&v=" + Math.random());
+                
+                // Create abort controller for timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+                
+                loadingPromise = fetch(API_URL + "?action=getMenu&_=" + Date.now() + "&v=" + Math.random(), {
+                    signal: controller.signal,
+                    cache: 'no-cache',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Cache-Control': 'no-cache'
+                    }
+                });
+                
+                const response = await loadingPromise;
+                clearTimeout(timeoutId);
+                
+                loadingText.textContent = 'Processing menu data...';
+                loadingProgress.style.width = '60%';
+                
                 console.log('Response status:', response.status);
                 
                 const text = await response.text();
                 console.log('Response text (first 500 chars):', text.substring(0, 500));
                 console.log('Response text length:', text.length);
+                console.log('Full response text:', text);
                 
                 let items;
                 try {
                     items = JSON.parse(text);
+                    console.log('Successfully parsed JSON:', items);
                 } catch (parseError) {
                     console.error('JSON parse error:', parseError);
                     console.log('Received non-JSON response:', text);
-                    showEmptyState();
+                    console.log('Response status was:', response.status);
+                    console.log('Response headers:', response.headers);
+                    
+                    // Show more detailed error message
+                    elements.menuContainer.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">⚠️</div>
+                            <h3>API Error</h3>
+                            <p>Server returned invalid data. Status: ${response.status}</p>
+                            <p>Response: ${text.substring(0, 200)}...</p>
+                            <button onclick="refreshMenu()" style="margin-top: 10px; padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: 8px;">Retry</button>
+                        </div>
+                    `;
+                    elements.menuContainer.style.display = 'block';
                     return;
                 }
                 
@@ -1756,6 +1836,9 @@
                     return;
                 }
 
+                loadingText.textContent = 'Finalizing menu...';
+                loadingProgress.style.width = '80%';
+
                 allItems = items.map(item => ({
                     ...item,
                     // Use imageURL from spreadsheet if it's a URL, otherwise use the emoji
@@ -1765,6 +1848,9 @@
                 // Cache the processed data
                 menuCache = allItems;
                 cacheTimestamp = Date.now();
+                
+                loadingText.textContent = 'Almost ready...';
+                loadingProgress.style.width = '100%';
 
                 console.log('All items loaded:', allItems.length);
                 console.log('Sample items with emojis:', allItems.slice(0, 3).map(i => ({name: i.name, imageURL: i.imageURL, emoji: i.emoji})));
@@ -1787,8 +1873,16 @@
                 updateCategoryCounts(); // Call updateCategoryCounts after menu is loaded
             } catch (error) {
                 console.error('Fetch error:', error);
-                showEmptyState();
+                if (error.name === 'AbortError') {
+                    console.error('Request timed out after 15 seconds');
+                    showEmptyState();
+                } else {
+                    console.error('Network or parsing error:', error);
+                    showEmptyState();
+                }
             } finally {
+                isLoading = false;
+                loadingPromise = null;
                 elements.loader.style.display = 'none';
             }
         }
@@ -2206,8 +2300,15 @@
             elements.menuContainer.innerHTML = `
                 <div class="empty-state">
                     <div class="empty-icon">🍽️</div>
-                    <h3>Menu Coming Soon</h3>
-                    <p>Run setupEverything() in Google Apps Script</p>
+                    <h3>Menu Loading Issue</h3>
+                    <p>Unable to load menu from server. This could be:</p>
+                    <ul style="text-align: left; margin: 10px 0; padding-left: 20px;">
+                        <li>Google Apps Script needs redeployment</li>
+                        <li>Spreadsheet data is missing</li>
+                        <li>Network connection issue</li>
+                    </ul>
+                    <button onclick="testAPI()" style="margin: 10px 5px; padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: 8px;">Test API</button>
+                    <button onclick="refreshMenu()" style="margin: 10px 5px; padding: 8px 16px; background: var(--secondary); color: white; border: none; border-radius: 8px;">Retry</button>
                 </div>
             `;
             elements.menuContainer.style.display = 'block';
@@ -2292,10 +2393,14 @@
             }
         });
 
-        // Initialize
+        // Initialize with optimized loading
         initUserInfo();
         TutorialSystem.init();
-        fetchMenu();
+        
+        // Start loading menu after a small delay to let UI render first
+        setTimeout(() => {
+            fetchMenu();
+        }, 100);
     </script>
 </body>
 </html>
