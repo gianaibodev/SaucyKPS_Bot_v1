@@ -7,9 +7,9 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --primary: #E74C3C;
-            --primary-light: #EC7063;
-            --primary-dark: #C0392B;
+            --primary: #FE6601;
+            --primary-light: #FE8533;
+            --primary-dark: #E55A00;
             --secondary: #5856D6;
             --accent: #FF9500;
             --success: #34C759;
@@ -33,7 +33,7 @@
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
             background: var(--background);
             color: var(--text-primary);
-            padding-bottom: 80px;
+            padding-bottom: 120px;
             overflow-x: hidden;
         }
 
@@ -202,9 +202,14 @@
 
         .category-chip.active {
             background: var(--primary);
-            border-color: var(--primary);
             color: white;
-            box-shadow: 0 4px 12px rgba(255, 45, 85, 0.3);
+            box-shadow: 0 2px 8px rgba(254, 102, 1, 0.3);
+        }
+
+        .category-count {
+            font-size: 0.85em;
+            opacity: 0.8;
+            margin-left: 2px;
         }
 
         /* Loading */
@@ -274,13 +279,20 @@
 
         .item-image-placeholder {
             height: 140px;
-            background: linear-gradient(135deg, #FFE5E5 0%, #FFD1D1 100%);
+            background: linear-gradient(135deg, #FE6601 0%, #FE8533 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 3em;
             position: relative;
             overflow: hidden;
+        }
+
+        .item-image-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
         }
 
         .item-image-placeholder::before {
@@ -291,6 +303,7 @@
             width: 200px;
             height: 200px;
             background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+            pointer-events: none;
         }
 
         .popular-badge {
@@ -1139,6 +1152,50 @@
             }
         }
 
+        /* Order Summary Bar */
+        .order-summary-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid var(--border);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: center;
+            z-index: 100;
+            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .order-summary-content {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .summary-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .summary-label {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .summary-value {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .summary-divider {
+            color: var(--border);
+            font-weight: 300;
+        }
+
     </style>
 </head>
 <body>
@@ -1294,12 +1351,27 @@
     <!-- Categories -->
     <div class="categories">
         <div class="category-chips" id="category-chips">
-            <div class="category-chip active" data-category="all">All</div>
-            <div class="category-chip" data-category="popular">🔥 Popular</div>
-            <div class="category-chip" data-category="mains">🍖 Mains</div>
-            <div class="category-chip" data-category="appetizers">🥗 Appetizers</div>
-            <div class="category-chip" data-category="desserts">🍰 Desserts</div>
-            <div class="category-chip" data-category="beverages">🥤 Drinks</div>
+            <div class="category-chip active" data-category="all">All <span class="category-count">(0)</span></div>
+            <div class="category-chip" data-category="popular">🔥 Popular <span class="category-count">(0)</span></div>
+            <div class="category-chip" data-category="mains">🍖 Mains <span class="category-count">(0)</span></div>
+            <div class="category-chip" data-category="appetizers">🥗 Appetizers <span class="category-count">(0)</span></div>
+            <div class="category-chip" data-category="desserts">🍰 Desserts <span class="category-count">(0)</span></div>
+            <div class="category-chip" data-category="beverages">🥤 Drinks <span class="category-count">(0)</span></div>
+        </div>
+    </div>
+
+    <!-- Order Summary Bar -->
+    <div class="order-summary-bar">
+        <div class="order-summary-content">
+            <div class="summary-item">
+                <span class="summary-label">Items:</span>
+                <span class="summary-value" id="order-item-count">0</span>
+            </div>
+            <div class="summary-divider">•</div>
+            <div class="summary-item">
+                <span class="summary-label">Total:</span>
+                <span class="summary-value" id="order-total">$0.00</span>
+            </div>
         </div>
     </div>
 
@@ -1442,10 +1514,12 @@
                 const startBtn = document.getElementById('tutorial-start');
                 const progressDots = document.querySelectorAll('.progress-dot');
 
-                skipBtn.addEventListener('click', () => this.completeTutorial());
-                backBtn.addEventListener('click', () => this.previousStep());
-                nextBtn.addEventListener('click', () => this.nextStep());
-                startBtn.addEventListener('click', () => this.completeTutorial());
+                // Add null checks to prevent errors
+                if (skipBtn) skipBtn.addEventListener('click', () => this.completeTutorial());
+                if (backBtn) backBtn.addEventListener('click', () => this.previousStep());
+                if (nextBtn) nextBtn.addEventListener('click', () => this.nextStep());
+                if (startBtn) startBtn.addEventListener('click', () => this.completeTutorial());
+                
                 progressDots.forEach((dot, index) => {
                     dot.addEventListener('click', () => this.goToStep(index + 1));
                 });
@@ -1482,19 +1556,19 @@
                     }
                 });
 
-                // Update buttons
+                // Update buttons - with null checks
                 const backBtn = document.getElementById('tutorial-back');
                 const nextBtn = document.getElementById('tutorial-next');
                 const startBtn = document.getElementById('tutorial-start');
 
                 // Back button: show when not on step 1
-                backBtn.style.display = this.currentStep === 1 ? 'none' : 'block';
+                if (backBtn) backBtn.style.display = this.currentStep === 1 ? 'none' : 'block';
                 
                 // Next button: show when not on last step
-                nextBtn.style.display = this.currentStep < this.totalSteps ? 'block' : 'none';
+                if (nextBtn) nextBtn.style.display = this.currentStep < this.totalSteps ? 'block' : 'none';
                 
                 // Start button: show only on last step
-                startBtn.style.display = this.currentStep === this.totalSteps ? 'block' : 'none';
+                if (startBtn) startBtn.style.display = this.currentStep === this.totalSteps ? 'block' : 'none';
 
                 // Add haptic feedback
                 try {
@@ -1571,6 +1645,7 @@
                 }));
 
                 renderMenu();
+                updateCategoryCounts(); // Call updateCategoryCounts after menu is loaded
             } catch (error) {
                 console.error('Error:', error);
                 showEmptyState();
@@ -1581,19 +1656,20 @@
 
         function getItemEmoji(name) {
             const n = name.toLowerCase();
-            if (n.includes('burger') || n.includes('beef')) return '🍔';
-            if (n.includes('chicken')) return '🍗';
-            if (n.includes('pizza')) return '🍕';
-            if (n.includes('salad')) return '🥗';
-            if (n.includes('fries') || n.includes('potato')) return '🍟';
-            if (n.includes('wing')) return '🍗';
-            if (n.includes('cake') || n.includes('dessert')) return '🍰';
-            if (n.includes('tea') || n.includes('coffee')) return '☕';
-            if (n.includes('smoothie') || n.includes('juice')) return '🥤';
-            if (n.includes('pasta')) return '🍝';
-            if (n.includes('soup')) return '🍲';
-            if (n.includes('roll')) return '🥢';
-            return '🍽️';
+            // Return image URLs instead of emojis
+            if (n.includes('burger') || n.includes('beef')) return 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&h=200&fit=crop';
+            if (n.includes('chicken')) return 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=200&h=200&fit=crop';
+            if (n.includes('pizza')) return 'https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?w=200&h=200&fit=crop';
+            if (n.includes('salad')) return 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&h=200&fit=crop';
+            if (n.includes('fries') || n.includes('potato')) return 'https://images.unsplash.com/photo-1585238341710-4b4e6ceeb88f?w=200&h=200&fit=crop';
+            if (n.includes('wing')) return 'https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=200&h=200&fit=crop';
+            if (n.includes('cake') || n.includes('dessert')) return 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=200&h=200&fit=crop';
+            if (n.includes('tea') || n.includes('coffee')) return 'https://images.unsplash.com/photo-1559056199-641a0ac8b3f7?w=200&h=200&fit=crop';
+            if (n.includes('smoothie') || n.includes('juice')) return 'https://images.unsplash.com/photo-1612528443702-f6741f70a049?w=200&h=200&fit=crop';
+            if (n.includes('pasta')) return 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=200&h=200&fit=crop';
+            if (n.includes('soup')) return 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=200&h=200&fit=crop';
+            if (n.includes('roll')) return 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=200&h=200&fit=crop';
+            return 'https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=200&h=200&fit=crop';
         }
 
         function categorizeItem(item) {
@@ -1645,7 +1721,10 @@
                 
             el.innerHTML = `
                     <div class="item-image-placeholder">
-                        <span style="font-size: 3em;">${item.emoji}</span>
+                        ${item.imageURL ? 
+                            `<img src="${item.imageURL}" alt="${item.name}" style="width: 100%; height: 100%; object-fit: cover; display: block;">` :
+                            `<span style="font-size: 3em;">${item.emoji}</span>`
+                        }
                         ${popularBadge}
                     </div>
                     <div class="item-content">
@@ -1709,7 +1788,32 @@
             elements.subtotal.textContent = `$${subtotal.toFixed(2)}`;
             elements.total.textContent = `$${total.toFixed(2)}`;
 
+            // Update order summary bar
+            document.getElementById('order-item-count').textContent = itemCount;
+            document.getElementById('order-total').textContent = `$${total.toFixed(2)}`;
+
             renderCartItems();
+        }
+
+        function updateCategoryCounts() {
+            const categories = {
+                'all': allItems.length,
+                'popular': allItems.filter(item => item.popular === true || item.popular === 'TRUE').length,
+                'mains': allItems.filter(item => categorizeItem(item) === 'mains').length,
+                'appetizers': allItems.filter(item => categorizeItem(item) === 'appetizers').length,
+                'desserts': allItems.filter(item => categorizeItem(item) === 'desserts').length,
+                'beverages': allItems.filter(item => categorizeItem(item) === 'beverages').length
+            };
+
+            // Update each category chip with count
+            document.querySelectorAll('.category-chip').forEach(chip => {
+                const category = chip.getAttribute('data-category');
+                const count = categories[category] || 0;
+                const countSpan = chip.querySelector('.category-count');
+                if (countSpan) {
+                    countSpan.textContent = `(${count})`;
+                }
+            });
         }
 
         function renderCartItems() {
