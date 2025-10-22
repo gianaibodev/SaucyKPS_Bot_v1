@@ -734,6 +734,78 @@
             margin-top: 6px;
         }
 
+        /* Order Summary Styles */
+        .order-summary-section {
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .order-items-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .order-item:last-child {
+            border-bottom: none;
+        }
+
+        .order-item-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .order-item-emoji {
+            font-size: 1.2em;
+            width: 24px;
+            text-align: center;
+        }
+
+        .order-item-details {
+            flex: 1;
+        }
+
+        .order-item-name {
+            font-weight: 500;
+            font-size: 0.9em;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .order-item-price {
+            font-size: 0.8em;
+            color: var(--text-secondary);
+        }
+
+        .order-item-quantity {
+            background: var(--primary);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+            min-width: 24px;
+            text-align: center;
+        }
+
+        .order-item-total {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9em;
+        }
+
         /* Map Section Styles */
         .map-section {
             margin-bottom: 20px;
@@ -1435,13 +1507,19 @@
             <p class="notes-hint">These notes will be sent to the restaurant.</p>
         </div>
 
+        <!-- Order Summary Section -->
+        <div class="order-summary-section" id="order-summary-section" style="display: none;">
+            <h3 style="font-size: 0.95em; font-weight: 600; margin-bottom: 12px; color: var(--text-primary);">
+                📋 Order Summary
+            </h3>
+            <div class="order-items-list" id="order-items-list">
+                <!-- Order items will be populated here -->
+            </div>
+        </div>
+
         <div class="cart-items" id="cart-items-list"></div>
 
         <div class="cart-summary">
-            <div class="summary-row">
-                <span>Subtotal</span>
-                <span id="subtotal">$0.00</span>
-            </div>
             <div class="summary-row total">
                 <span>Total</span>
                 <span id="total">$0.00</span>
@@ -1868,19 +1946,51 @@
         function updateCartUI() {
             const itemCount = Object.values(cart).reduce((sum, item) => sum + item.quantity, 0);
             const subtotal = Object.values(cart).reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            const total = subtotal + DELIVERY_FEE;
 
             elements.cartBadge.textContent = itemCount;
             elements.floatingCart.className = itemCount > 0 ? 'floating-cart active' : 'floating-cart';
             
             elements.subtotal.textContent = `$${subtotal.toFixed(2)}`;
-            elements.total.textContent = `$${total.toFixed(2)}`;
+            elements.total.textContent = `$${subtotal.toFixed(2)}`;
 
             // Update order summary bar
             document.getElementById('order-item-count').textContent = itemCount;
-            document.getElementById('order-total').textContent = `$${total.toFixed(2)}`;
+            document.getElementById('order-total').textContent = `$${subtotal.toFixed(2)}`;
 
             renderCartItems();
+            updateOrderSummary();
+        }
+
+        function updateOrderSummary() {
+            const orderSummarySection = document.getElementById('order-summary-section');
+            const orderItemsList = document.getElementById('order-items-list');
+            
+            if (Object.keys(cart).length === 0) {
+                orderSummarySection.style.display = 'none';
+                return;
+            }
+
+            orderSummarySection.style.display = 'block';
+            
+            const items = Object.values(cart);
+            orderItemsList.innerHTML = items.map(item => `
+                <div class="order-item">
+                    <div class="order-item-info">
+                        <div class="order-item-emoji">
+                            ${(item.imageURL && item.imageURL.startsWith('http')) ? 
+                                `<img src="${item.imageURL}" alt="${item.name}" style="width: 20px; height: 20px; object-fit: cover; border-radius: 4px;">` :
+                                `<span>${item.imageURL || item.emoji || '🍽️'}</span>`
+                            }
+                        </div>
+                        <div class="order-item-details">
+                            <div class="order-item-name">${item.name}</div>
+                            <div class="order-item-price">$${parseFloat(item.price).toFixed(2)} each</div>
+                        </div>
+                    </div>
+                    <div class="order-item-quantity">${item.quantity}</div>
+                    <div class="order-item-total">$${(parseFloat(item.price) * item.quantity).toFixed(2)}</div>
+                </div>
+            `).join('');
         }
 
         function updateCategoryCounts() {
@@ -1952,21 +2062,29 @@
             console.log('Checkout function called!');
             try {
                 const notes = document.getElementById('order-notes').value.trim();
+                const deliveryAddress = document.getElementById('delivery-address').value.trim();
                 console.log('Notes:', notes);
+                console.log('Delivery Address:', deliveryAddress);
 
                 if (Object.keys(cart).length === 0) {
                     tg.showAlert("⚠️ Your cart is empty");
                     return;
                 }
 
+                if (!deliveryAddress) {
+                    tg.showAlert("⚠️ Please enter your delivery address");
+                    return;
+                }
+
                 const items = Object.values(cart).map(item => ({
                     id: item.id,
                     name: item.name,
-                    price: item.price,
-                    quantity: item.quantity
+                    price: parseFloat(item.price),
+                    quantity: parseInt(item.quantity)
                 }));
 
                 const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                console.log('Subtotal:', subtotal, 'Type:', typeof subtotal);
 
                 // Get user info with username for easy contact
                 const orderUser = userInfo || tg.initDataUnsafe.user || {
@@ -1993,8 +2111,8 @@
                     throw new Error("No items in cart");
                 }
 
-                if (subtotal <= 0) {
-                    throw new Error("Invalid total amount");
+                if (subtotal <= 0 || isNaN(subtotal)) {
+                    throw new Error("Invalid total amount: " + subtotal);
                 }
 
                 elements.checkoutButton.textContent = "Placing order...";
@@ -2003,7 +2121,7 @@
                 console.log('Submitting order:', {
                     user: formattedUser,
                     items: items,
-                    totalPrice: subtotal + DELIVERY_FEE,
+                    totalPrice: subtotal,
                     address: deliveryAddress
                 });
 
@@ -2017,7 +2135,7 @@
                         notes: notes || "No special requests",
                         cart: {
                             items: items,
-                            totalPrice: subtotal + DELIVERY_FEE
+                            totalPrice: parseFloat(subtotal)
                         },
                         timestamp: new Date().toISOString()
                     }),
@@ -2027,7 +2145,7 @@
                 console.log('Order submitted successfully, response:', response);
 
                 // Create detailed order summary
-                let orderSummary = `Total: $${(subtotal + DELIVERY_FEE).toFixed(2)}\n\n`;
+                let orderSummary = `Total: $${parseFloat(subtotal).toFixed(2)}\n\n`;
                 orderSummary += `Items in your order:\n`;
                 items.forEach(item => {
                     orderSummary += `• ${item.name} × ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}\n`;
@@ -2057,7 +2175,7 @@
                 });
                 
                 // Even if API fails, show order confirmation as fallback
-                let orderSummary = `Total: $${(subtotal + DELIVERY_FEE).toFixed(2)}\n\n`;
+                let orderSummary = `Total: $${parseFloat(subtotal).toFixed(2)}\n\n`;
                 orderSummary += `Items in your order:\n`;
                 items.forEach(item => {
                     orderSummary += `• ${item.name} × ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}\n`;
