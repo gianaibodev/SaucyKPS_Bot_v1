@@ -828,17 +828,18 @@
 
         .tutorial-modal {
             background: white;
-            border-radius: 24px;
-            padding: 40px 24px;
-            max-width: 90%;
+            border-radius: 28px;
+            padding: 50px 32px;
+            max-width: 95%;
             width: 100%;
-            max-height: 85vh;
+            max-height: 80vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.25);
             animation: slideUp 0.4s ease;
+            border: 1px solid rgba(255, 255, 255, 0.8);
         }
 
         @keyframes slideUp {
@@ -899,34 +900,25 @@
         .tutorial-step h2 {
             font-size: 1.8em;
             color: var(--text-primary);
-            margin-bottom: 8px;
+            margin-bottom: 16px;
             font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .tutorial-description-main {
+            font-size: 1em;
+            color: var(--text-primary);
+            line-height: 1.7;
+            margin-bottom: 16px;
+            font-weight: 500;
         }
 
         .tutorial-subtitle {
-            font-size: 1.1em;
-            color: var(--primary);
-            font-weight: 600;
-            margin-bottom: 16px;
-        }
-
-        .tutorial-description {
-            background: var(--background);
-            padding: 16px;
-            border-radius: 12px;
-            margin-top: 20px;
-            text-align: left;
-        }
-
-        .tutorial-description p {
-            font-size: 0.95em;
-            color: var(--text-primary);
-            line-height: 1.6;
-            margin-bottom: 8px;
-        }
-
-        .tutorial-description p:last-child {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            font-weight: 500;
             margin-bottom: 0;
+            font-style: italic;
         }
 
         .tutorial-controls {
@@ -958,18 +950,20 @@
             gap: 12px;
             justify-content: center;
             flex-wrap: wrap;
+            width: 100%;
         }
 
         .tutorial-btn {
-            padding: 12px 24px;
+            padding: 12px 28px;
             border: none;
-            border-radius: 8px;
-            font-size: 1em;
+            border-radius: 10px;
+            font-size: 0.95em;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
             flex: 1;
             min-width: 120px;
+            letter-spacing: 0.3px;
         }
 
         .tutorial-btn-secondary {
@@ -995,8 +989,9 @@
         }
 
         .tutorial-start-btn {
-            font-size: 1.1em;
+            font-size: 1.05em;
             min-width: 100%;
+            padding: 14px 28px;
         }
 
         .tutorial-progress {
@@ -1052,44 +1047,35 @@
                 <div class="tutorial-step active" id="step-1">
                     <div class="tutorial-icon">🎉</div>
                     <h2>Welcome to Saucy Kitchen!</h2>
-                    <p class="tutorial-subtitle">Kamusta! Excited kaming ipakita sa'yo kung paano mag-order.</p>
-                    <div class="tutorial-description">
-                        <p>Dito makikita mo lahat ng masarap na pagkain. Tingnan mo lang ang menu at piliin kung ano ang gusto mo.</p>
-                        <p style="font-size: 0.85em; color: var(--text-secondary); margin-top: 10px;">You can scroll through categories like Popular, Mains, Appetizers, and more!</p>
-                    </div>
+                    <p class="tutorial-description-main">Browse our delicious menu and choose what you want to eat. You can scroll through categories like Popular, Mains, Appetizers, Desserts, and more!</p>
+                    <p class="tutorial-subtitle">Tingnan mo lang ang menu at piliin kung ano ang gusto mo.</p>
                 </div>
 
                 <!-- Step 2: Add to Cart -->
                 <div class="tutorial-step" id="step-2">
                     <div class="tutorial-icon">🛒</div>
-                    <h2>Mag-Add ng Items sa Cart</h2>
-                    <p class="tutorial-subtitle">Piliin ang pagkain na gusto mo.</p>
-                    <div class="tutorial-description">
-                        <p>Makikita mo ang bawat pagkain na may presyo. Click lang ang "Add" button para idagdag sa iyong order.</p>
-                        <p style="font-size: 0.85em; color: var(--text-secondary); margin-top: 10px;">You can add multiple items! The cart badge shows how many items you have.</p>
-                    </div>
+                    <h2>Add Items to Your Cart</h2>
+                    <p class="tutorial-description-main">Click the "Add" button on any item to add it to your cart. You can add multiple items! The cart badge at the bottom shows how many items you have.</p>
+                    <p class="tutorial-subtitle">Click lang ang "Add" button para idagdag sa iyong order.</p>
                 </div>
 
                 <!-- Step 3: Checkout -->
                 <div class="tutorial-step" id="step-3">
                     <div class="tutorial-icon">✅</div>
-                    <h2>I-Checkout at Mag-Order</h2>
-                    <p class="tutorial-subtitle">Tayo na sa payment part!</p>
-                    <div class="tutorial-description">
-                        <p>Once na handa ka na, click ang shopping cart icon sa baba. Then fill in your delivery address, add any special requests, at click "Place Order" - tapos na!</p>
-                        <p style="font-size: 0.85em; color: var(--text-secondary); margin-top: 10px;">Your order will be confirmed right away. You'll get notifications every step!</p>
-                    </div>
+                    <h2>Checkout and Place Your Order</h2>
+                    <p class="tutorial-description-main">Click the shopping cart icon at the bottom, fill in your delivery address, add any special requests, and click "Place Order". Your order will be confirmed right away!</p>
+                    <p class="tutorial-subtitle">Click ang shopping cart icon sa baba, lagyan ng address, tapos na!</p>
                 </div>
             </div>
 
             <!-- Tutorial Controls -->
             <div class="tutorial-controls">
-                <button id="tutorial-skip" class="tutorial-skip-btn">Skip</button>
+                <button id="tutorial-skip" class="tutorial-skip-btn">Skip Tutorial</button>
                 
                 <div class="tutorial-nav">
-                    <button id="tutorial-back" class="tutorial-btn tutorial-btn-secondary">← Back</button>
+                    <button id="tutorial-back" class="tutorial-btn tutorial-btn-secondary" style="display: none;">← Back</button>
                     <button id="tutorial-next" class="tutorial-btn tutorial-btn-primary">Next →</button>
-                    <button id="tutorial-start" class="tutorial-btn tutorial-btn-primary tutorial-start-btn" style="display: none;">Let's Go! 🚀</button>
+                    <button id="tutorial-start" class="tutorial-btn tutorial-btn-primary tutorial-start-btn" style="display: none;">Get Started 🚀</button>
                 </div>
             </div>
 
@@ -1324,8 +1310,13 @@
                 const nextBtn = document.getElementById('tutorial-next');
                 const startBtn = document.getElementById('tutorial-start');
 
+                // Back button: show when not on step 1
                 backBtn.style.display = this.currentStep === 1 ? 'none' : 'block';
-                nextBtn.style.display = this.currentStep === this.totalSteps ? 'none' : 'block';
+                
+                // Next button: show when not on last step
+                nextBtn.style.display = this.currentStep < this.totalSteps ? 'block' : 'none';
+                
+                // Start button: show only on last step
                 startBtn.style.display = this.currentStep === this.totalSteps ? 'block' : 'none';
 
                 // Add haptic feedback
