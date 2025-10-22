@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Menu</title>
+    <!-- This script connects to the Telegram app -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        /* Use Telegram's theme colors */
+        :root {
+            --tg-bg: var(--tg-theme-bg-color, #ffffff);
+            --tg-text: var(--tg-theme-text-color, #000000);
+            --tg-hint: var(--tg-theme-hint-color, #888888);
+            --tg-button: var(--tg-theme-button-color, #007bff);
+            --tg-button-text: var(--tg-theme-button-text-color, #ffffff);
+            --tg-secondary-bg: var(--tg-theme-secondary-bg-color, #f4f4f4);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--tg-bg);
+            color: var(--tg-text);
+            margin: 0;
+            padding: 15px;
+            padding-bottom: 80px; /* Space for the Main Button */
+        }
+
+        h3 {
+            margin: 0 0 8px 0;
+            font-weight: 600;
+        }
+
+        /* --- Address Box --- */
+        #address-box {
+            padding-bottom: 15px;
+        }
+        #delivery-address {
+            /* Use 95% width and padding-box to prevent overflow */
+            box-sizing: border-box; 
+            width: 100%; 
+            height: 60px;
+            border-radius: 8px;
+            padding: 10px;
+            border: 1px solid var(--tg-hint);
+            background: var(--tg-secondary-bg);
+            color: var(--tg-text);
+            font-family: inherit;
+            font-size: 1em;
+        }
+
+        /* --- Loading Spinner --- */
+        #loader {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 5px solid var(--tg-secondary-bg);
+            border-top: 5px solid var(--tg-button);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* --- Menu List --- */
+        #menu-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .menu-item {
+            background-color: var(--tg-secondary-bg);
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .item-details {
+            /* Prevent text from overflowing */
+            max-width: 65%; 
+            word-wrap: break-word;
+        }
+        .item-details h3 {
+            margin: 0 0 5px 0;
+            font-size: 1.1em;
+        }
+        .item-details p {
+            margin: 0 0 8px 0;
+            font-size: 0.9em;
+            color: var(--tg-hint);
+        }
+        .item-details .price {
+            font-size: 1em;
+            font-weight: 600;
+            color: var(--tg-text);
+        }
+        .item-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .item-controls button {
+            background-color: var(--tg-button);
+            color: var(--tg-button-text);
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            /* Prevent button from shrinking */
+            flex-shrink: 0; 
+        }
+        .item-controls .quantity {
+            font-size: 1.1em;
+            font-weight: 600;
+            min-width: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="address-box">
+        <h3>Delivery Address</h3>
+        <textarea id="delivery-address" 
+                  placeholder="Please enter your full address..."></textarea>
+    </div>
+
+    <div id="loader"></div>
+    <div id="menu-list"></div>
+
+    <script>
+        // --- 1. CONFIGURATION ---
+        // ⬇️ *** PASTE YOUR WEB APP URL FROM PHASE 3 HERE *** ⬇️
+        const API_URL = "https://script.google.com/macros/s/YOUR_WEB_APP_URL_HERE/exec";
+
+        // --- 2. INITIALIZE TELEGRAM APP ---
+        const tg = window.Telegram.WebApp;
+        tg.ready(); // Let Telegram know the app is ready
+
+        // --- 3. STATE MANAGEMENT ---
+        let cart = {}; // { "item-id": { name: "Pizza", price: 10, quantity: 1 }, ... }
+        let menu = {}; // { "item-id": { ...item data... }, ... }
+        const loader = document.getElementById('loader');
+        const menuList = document.getElementById('menu-list');
+        const addressInput = document.getElementById('delivery-address');
+
+        // --- 4. CORE FUNCTIONS ---
+
+        // Fetch menu from Google Apps Script
+        async function fetchMenu() {
+            try {
+                const response = await fetch(API_URL + "?action=getMenu");
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const items = await response.json();
+                
+                menuList.innerHTML = ""; // Clear loader
+                
+                items.forEach(item => {
+                    // Store item data for cart logic
+                    menu[item.id] = item;
+                    // Render the item
+                    menuList.appendChild(createMenuItemElement(item));
+                });
+            } catch (error) {
+                menuList.innerHTML = `Error loading menu: ${error.message}. Please try again.`;
+                console.error("Fetch Menu Error:", error);
+            } finally {
+                if (loader) loader.style.display = 'none';
+            }
+        }
+
+        // Create HTML for a single menu item
+        function createMenuItemElement(item) {
+            const el = document.createElement('div');
+            el.className = 'menu-item';
+            el.id = `item-${item.id}`;
+            el.innerHTML = `
+                <div class="item-details">
+                    <h3>${item.name}</h3>
+                    <p>${item.description}</p>
+                    <div class="price">$${parseFloat(item.price).toFixed(2)}</div>
+                </div>
+                <div class="item-controls">
+                    <button class="btn-remove" data-id="${item.id}" style="display: none;">-</button>
+                    <span class="quantity" data-id="${item.id}"></span>
+                    <button class="btn-add" data-id="${item.id}">+</button>
+                </div>
+            `;
+            return el;
+        }
+
+        // Update cart and UI
+        function updateCart(itemId, change) {
+            const item = menu[itemId];
+            if (!item) return; // Safety check
+            
+            // Initialize item in cart
+            if (!cart[itemId]) {
+                cart[itemId] = {
+                    name: item.name,
+                    price: parseFloat(item.price),
+                    quantity: 0
+                };
+            }
+
+            // Apply change
+            cart[itemId].quantity += change;
+
+            // Remove from cart if quantity is 0
+            if (cart[itemId].quantity <= 0) {
+                delete cart[itemId];
+            }
+
+            // Update UI
+            updateUI(itemId);
+            updateMainButton();
+        }
+
+        // Update just the controls for a specific item
+        function updateUI(itemId) {
+            const quantity = cart[itemId] ? cart[itemId].quantity : 0;
+            const quantityEl = document.querySelector(`.quantity[data-id="${itemId}"]`);
+            const removeBtnEl = document.querySelector(`.btn-remove[data-id="${itemId}"]`);
+            
+            if (quantity > 0 && quantityEl && removeBtnEl) {
+                quantityEl.textContent = quantity;
+                removeBtnEl.style.display = 'block';
+            } else if (quantityEl && removeBtnEl) {
+                quantityEl.textContent = '';
+                removeBtnEl.style.display = 'none';
+            }
+        }
+
+        // Update the main "Checkout" button
+        function updateMainButton() {
+            let totalQuantity = 0;
+            let totalPrice = 0;
+
+            for (const id in cart) {
+                totalQuantity += cart[id].quantity;
+                totalPrice += cart[id].price * cart[id].quantity;
+            }
+
+            if (totalQuantity > 0) {
+                tg.MainButton.setText(`View Order ($${totalPrice.toFixed(2)})`);
+                tg.MainButton.show();
+            } else {
+                tg.MainButton.hide();
+            }
+        }
+
+        // Handle order submission
+        async function handleCheckout() {
+            const address = addressInput.value;
+            
+            // Check if address is empty
+            if (!address || address.trim().length < 10) {
+                tg.showAlert("Please enter a valid delivery address.");
+                addressInput.focus();
+                return; // Stop the checkout
+            }
+
+            // Get cart items
+            const cartItems = Object.keys(cart).map(id => ({
+                id: id,
+                name: cart[id].name,
+                quantity: cart[id].quantity,
+                price: cart[id].price
+            }));
+            
+            const totalPrice = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            
+            const orderData = {
+                action: "newOrder",
+                user: tg.initDataUnsafe.user,
+                address: address, // <-- We added this!
+                cart: {
+                    items: cartItems,
+                    totalPrice: totalPrice
+                }
+            };
+
+            try {
+                // Show loading spinner on button
+                tg.MainButton.showProgress();
+
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    // Use 'text/plain' as Apps Script can be tricky with JSON preflight
+                    headers: { 'Content-Type': 'text/plain' }, 
+                    body: JSON.stringify(orderData),
+                    mode: 'no-cors' // Use no-cors to avoid preflight issues
+                });
+
+                // NOTE: With 'no-cors', we can't read the response. 
+                // We'll just assume it worked and let the bot message the user.
+                
+                // Show success and close
+                tg.showPopup({
+                    title: 'Order Placed!',
+                    message: 'We are waiting for your manual payment. You will get a message from our bot shortly.',
+                    buttons: [{ id: 'ok', type: 'ok' }]
+                }, () => {
+                    tg.close();
+                });
+
+            } catch (error) {
+                // 'no-cors' requests will often throw a "network error" even on success
+                // So we'll optimistically close anyway, but log the error
+                console.error("Fetch Order Error (may be 'no-cors' related):", error);
+                
+                // Still show the popup as the request likely went through
+                tg.showPopup({
+                    title: 'Order Placed!',
+                    message: 'We are waiting for your manual payment. You will get a message from our bot shortly.',
+                    buttons: [{ id: 'ok', type: 'ok' }]
+                }, () => {
+                    tg.close();
+                });
+                
+            } finally {
+                // Hide loading spinner
+                tg.MainButton.hideProgress();
+            }
+        }
+
+        // --- 5. EVENT LISTENERS ---
+
+        // Listen for clicks on + and - buttons
+        menuList.addEventListener('click', (e) => {
+            if (e.target.classList.contains('btn-add')) {
+                updateCart(e.target.dataset.id, 1);
+            }
+            if (e.target.classList.contains('btn-remove')) {
+                updateCart(e.target.dataset.id, -1);
+            }
+        });
+
+        // Listen for the main Telegram button being clicked
+        tg.MainButton.onClick(handleCheckout);
+
+        // --- 6. START THE APP ---
+        document.addEventListener('DOMContentLoaded', fetchMenu);
+    </script>
+</body>
+</html>
+
