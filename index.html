@@ -7,9 +7,9 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --primary: #FF2D55;
-            --primary-light: #FF6B8A;
-            --primary-dark: #E02147;
+            --primary: #E74C3C;
+            --primary-light: #EC7063;
+            --primary-dark: #C0392B;
             --secondary: #5856D6;
             --accent: #FF9500;
             --success: #34C759;
@@ -921,6 +921,110 @@
             font-style: italic;
         }
 
+        .tutorial-bullets {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+            text-align: left;
+            background: rgba(231, 76, 60, 0.05);
+            padding: 16px;
+            border-radius: 12px;
+        }
+
+        .bullet-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .bullet-number {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: var(--primary);
+            min-width: 24px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .bullet-title {
+            font-size: 0.95em;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .bullet-text {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .tutorial-warning {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 16px;
+        }
+
+        .warning-icon {
+            font-size: 1.4em;
+            flex-shrink: 0;
+        }
+
+        .warning-title {
+            font-size: 0.95em;
+            font-weight: 700;
+            color: #F39C12;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .warning-text {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .tutorial-warning-full {
+            text-align: left;
+            padding: 10px;
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 10px;
+            margin-bottom: 16px;
+        }
+
+        .warning-message {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .warning-checklist {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .warning-check-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .check-icon {
+            font-size: 1.1em;
+            color: var(--success);
+            flex-shrink: 0;
+        }
+
         .tutorial-controls {
             width: 100%;
             display: flex;
@@ -1045,26 +1149,102 @@
             <div class="tutorial-content">
                 <!-- Step 1: Welcome -->
                 <div class="tutorial-step active" id="step-1">
-                    <div class="tutorial-icon">🎉</div>
-                    <h2>Welcome to Saucy Kitchen!</h2>
-                    <p class="tutorial-description-main">Browse our delicious menu and choose what you want to eat. You can scroll through categories like Popular, Mains, Appetizers, Desserts, and more!</p>
-                    <p class="tutorial-subtitle">Tingnan mo lang ang menu at piliin kung ano ang gusto mo.</p>
+                    <div class="tutorial-icon">🍽️</div>
+                    <h2>How It Works</h2>
+                    <div class="tutorial-bullets">
+                        <div class="bullet-item">
+                            <span class="bullet-number">1</span>
+                            <div>
+                                <span class="bullet-title">Pick Your Category</span>
+                                <span class="bullet-text">Popular, Mains, Appetizers, Desserts, or Drinks</span>
+                            </div>
+                        </div>
+                        <div class="bullet-item">
+                            <span class="bullet-number">2</span>
+                            <div>
+                                <span class="bullet-title">Add to Cart</span>
+                                <span class="bullet-text">Adjust quantities & add special requests</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="tutorial-subtitle">Madali lang, pare! Piliin ang category mo.</p>
                 </div>
 
                 <!-- Step 2: Add to Cart -->
                 <div class="tutorial-step" id="step-2">
                     <div class="tutorial-icon">🛒</div>
-                    <h2>Add Items to Your Cart</h2>
-                    <p class="tutorial-description-main">Click the "Add" button on any item to add it to your cart. You can add multiple items! The cart badge at the bottom shows how many items you have.</p>
-                    <p class="tutorial-subtitle">Click lang ang "Add" button para idagdag sa iyong order.</p>
+                    <h2>Order & Checkout</h2>
+                    <div class="tutorial-bullets">
+                        <div class="bullet-item">
+                            <span class="bullet-number">1</span>
+                            <div>
+                                <span class="bullet-title">Fill Your Address</span>
+                                <span class="bullet-text">Where you want your order delivered</span>
+                            </div>
+                        </div>
+                        <div class="bullet-item">
+                            <span class="bullet-number">2</span>
+                            <div>
+                                <span class="bullet-title">Confirm Payment</span>
+                                <span class="bullet-text">Review your order & total</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="tutorial-subtitle">Lagyan ng address, tapos na! Simple.</p>
                 </div>
 
                 <!-- Step 3: Checkout -->
                 <div class="tutorial-step" id="step-3">
-                    <div class="tutorial-icon">✅</div>
-                    <h2>Checkout and Place Your Order</h2>
-                    <p class="tutorial-description-main">Click the shopping cart icon at the bottom, fill in your delivery address, add any special requests, and click "Place Order". Your order will be confirmed right away!</p>
-                    <p class="tutorial-subtitle">Click ang shopping cart icon sa baba, lagyan ng address, tapos na!</p>
+                    <div class="tutorial-icon">🚴</div>
+                    <h2>Rider Will Chat You</h2>
+                    <div class="tutorial-bullets">
+                        <div class="bullet-item">
+                            <span class="bullet-number">✓</span>
+                            <div>
+                                <span class="bullet-title">Rider Confirms Order</span>
+                                <span class="bullet-text">They'll message you on Telegram right away</span>
+                            </div>
+                        </div>
+                        <div class="bullet-item">
+                            <span class="bullet-number">✓</span>
+                            <div>
+                                <span class="bullet-title">Send Your Location</span>
+                                <span class="bullet-text">Share your exact address through the rider's chat</span>
+                            </div>
+                        </div>
+                        <div class="bullet-item">
+                            <span class="bullet-number">✓</span>
+                            <div>
+                                <span class="bullet-title">Driver Updates</span>
+                                <span class="bullet-text">Rider sends real-time location & delivery status</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="tutorial-subtitle">Walang hassle, walang surprises. Dito na!</p>
+                </div>
+
+                <!-- Step 4: Important Warning -->
+                <div class="tutorial-step" id="step-4">
+                    <div class="tutorial-icon">⚠️</div>
+                    <h2>Important!</h2>
+                    <div class="tutorial-warning-full">
+                        <p class="warning-message">Always send your exact location through the driver's Telegram chat so they can find you easily.</p>
+                        <div class="warning-checklist">
+                            <div class="warning-check-item">
+                                <span class="check-icon">✓</span>
+                                <span>Driver messages you on Telegram</span>
+                            </div>
+                            <div class="warning-check-item">
+                                <span class="check-icon">✓</span>
+                                <span>You reply with your location</span>
+                            </div>
+                            <div class="warning-check-item">
+                                <span class="check-icon">✓</span>
+                                <span>Driver knows exactly where to find you</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="tutorial-subtitle">Huwag kalimutan! Location mo ang susi sa mabilis na delivery.</p>
                 </div>
             </div>
 
@@ -1084,6 +1264,7 @@
                 <div class="progress-dot active" id="dot-1"></div>
                 <div class="progress-dot" id="dot-2"></div>
                 <div class="progress-dot" id="dot-3"></div>
+                <div class="progress-dot" id="dot-4"></div>
             </div>
         </div>
     </div>
@@ -1191,13 +1372,9 @@
                 <span>Subtotal</span>
                 <span id="subtotal">$0.00</span>
             </div>
-            <div class="summary-row">
-                <span>Delivery</span>
-                <span>$2.99</span>
-            </div>
             <div class="summary-row total">
                 <span>Total</span>
-                <span id="total">$2.99</span>
+                <span id="total">$0.00</span>
             </div>
         </div>
 
@@ -1217,7 +1394,7 @@
         let cart = {};
         let currentCategory = 'all';
         let searchQuery = '';
-        const DELIVERY_FEE = 2.99;
+        const DELIVERY_FEE = 0;
         let userInfo = null;
         
         
@@ -1246,7 +1423,7 @@
         
         const TutorialSystem = {
             currentStep: 1,
-            totalSteps: 3,
+            totalSteps: 4,
             hasSeenTutorial: localStorage.getItem('saucyKPS_tutorialSeen'),
 
             init() {
@@ -1686,7 +1863,9 @@
         });
 
         // Initialize
-        initUserInfo();        fetchMenu();
+        initUserInfo();
+        TutorialSystem.init();
+        fetchMenu();
     </script>
 </body>
 </html>
