@@ -308,18 +308,15 @@
 
         .popular-badge {
             position: absolute;
-            top: 8px;
-            left: 8px;
+            top: 6px;
+            right: 6px;
             background: var(--primary);
             color: white;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 0.65em;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 0.6em;
             font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 2px;
-            box-shadow: 0 2px 8px rgba(255, 45, 85, 0.4);
+            box-shadow: 0 1px 4px rgba(255, 45, 85, 0.3);
         }
 
         .item-content {
@@ -1730,14 +1727,25 @@
         function filterItems() {
             console.log('Filtering items - currentCategory:', currentCategory, 'searchQuery:', searchQuery);
             const filtered = allItems.filter(item => {
-                const itemCategory = categorizeItem(item);
-                const matchesCategory = currentCategory === 'all' || itemCategory === currentCategory;
+                let matchesCategory;
+                
+                if (currentCategory === 'all') {
+                    matchesCategory = true;
+                } else if (currentCategory === 'popular') {
+                    // Special handling for popular items
+                    matchesCategory = item.popular === true || item.popular === 'TRUE';
+                } else {
+                    // Regular category filtering
+                    const itemCategory = categorizeItem(item);
+                    matchesCategory = itemCategory === currentCategory;
+                }
+                
                 const matchesSearch = !searchQuery || 
                     item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                     (item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase()));
                 
                 if (!matchesCategory) {
-                    console.log(`Item "${item.name}" filtered out - category: ${itemCategory}, current: ${currentCategory}`);
+                    console.log(`Item "${item.name}" filtered out - category: ${currentCategory}, popular: ${item.popular}`);
                 }
                 
                 return matchesCategory && matchesSearch;
@@ -1770,7 +1778,7 @@
             const el = document.createElement('div');
             el.className = 'menu-item';
                 
-                const popularBadge = item.popular ? '<div class="popular-badge">🔥 Popular</div>' : '';
+                const popularBadge = ''; // No popular badge
                 const quantity = cart[item.id]?.quantity || 0;
                 
             el.innerHTML = `
@@ -1951,7 +1959,14 @@
                 elements.checkoutButton.textContent = "Placing order...";
                 elements.checkoutButton.disabled = true;
 
-                await fetch(API_URL, {
+                console.log('Submitting order:', {
+                    user: formattedUser,
+                    items: items,
+                    totalPrice: subtotal + DELIVERY_FEE,
+                    address: deliveryAddress
+                });
+
+                const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain' }, 
                     body: JSON.stringify({
@@ -1968,11 +1983,21 @@
                     mode: 'no-cors'
                 });
 
-                console.log('Order submitted successfully');
+                console.log('Order submitted successfully, response:', response);
+
+                // Create detailed order summary
+                let orderSummary = `Total: $${(subtotal + DELIVERY_FEE).toFixed(2)}\n\n`;
+                orderSummary += `Items in your order:\n`;
+                items.forEach(item => {
+                    orderSummary += `• ${item.name} × ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}\n`;
+                });
+                orderSummary += `\n📱 Payment Instructions:\n`;
+                orderSummary += `Please send a screenshot of the QR code payment to our direct message.\n\n`;
+                orderSummary += `Riders can contact you via: @${formattedUser.username}`;
 
                 tg.showPopup({
                     title: '✅ Order Confirmed!',
-                    message: `Total: $${(subtotal + DELIVERY_FEE).toFixed(2)}\n\nWe'll send payment instructions shortly!\n\nRiders can contact you via: @${formattedUser.username}`,
+                    message: orderSummary,
                     buttons: [{ id: 'ok', type: 'ok' }]
                 }, () => {
                     cart = {};
@@ -1983,7 +2008,20 @@
                 });
             } catch (error) {
                 console.error('Checkout error:', error);
-                tg.showAlert('❌ Something went wrong. Please try again.');
+                console.error('Error details:', {
+                    message: error.message,
+                    stack: error.stack,
+                    name: error.name
+                });
+                
+                let errorMessage = '❌ Something went wrong. Please try again.';
+                if (error.message.includes('fetch')) {
+                    errorMessage = '❌ Network error. Please check your connection and try again.';
+                } else if (error.message.includes('JSON')) {
+                    errorMessage = '❌ Server error. Please try again in a moment.';
+                }
+                
+                tg.showAlert(errorMessage);
             } finally {
                 elements.checkoutButton.textContent = "Place Order";
                 elements.checkoutButton.disabled = false;
