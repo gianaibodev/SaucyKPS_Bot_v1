@@ -40,9 +40,10 @@
         /* Hero Section */
         .hero {
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            padding: 20px 20px 30px;
+            padding: 25px 20px 35px;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 4px 20px rgba(255, 45, 85, 0.15);
         }
 
         .hero::before {
@@ -63,16 +64,19 @@
 
         .hero h1 {
             color: white;
-            font-size: 1.8em;
+            font-size: 1.9em;
             font-weight: 700;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             letter-spacing: -0.5px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .hero p {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 0.9em;
-            margin-bottom: 15px;
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 0.95em;
+            margin-bottom: 18px;
+            font-weight: 400;
+            line-height: 1.4;
         }
 
         .delivery-time {
@@ -184,11 +188,30 @@
             display: flex;
             gap: 10px;
             padding-bottom: 5px;
+            position: relative;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .category-chips::-webkit-scrollbar {
+            display: none;
+        }
+
+        .category-indicator {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+            z-index: 1;
         }
 
         .category-chip {
             flex-shrink: 0;
-            padding: 10px 20px;
+            padding: 12px 20px;
             background: white;
             border: 2px solid var(--border);
             border-radius: 25px;
@@ -198,6 +221,11 @@
             cursor: pointer;
             transition: all 0.3s ease;
             white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            text-align: center;
         }
 
         .category-chip.active {
@@ -209,32 +237,28 @@
         .category-count {
             font-size: 0.85em;
             opacity: 0.8;
-            margin-left: 2px;
+            margin-left: 4px;
+            font-weight: 500;
         }
 
         /* Loading */
         .loader-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 300px;
             gap: 15px;
+            padding: 40px 20px;
+            text-align: center;
+            background: var(--background);
+            z-index: 1000;
         }
 
-        .loader {
-            width: 50px;
-            height: 50px;
-            border: 4px solid var(--border);
-            border-top: 4px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
 
         /* Menu Items */
         .menu-container {
@@ -985,6 +1009,32 @@
             transform: scale(0.98);
         }
 
+        /* Order Summary Bar Button */
+        .order-button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 0.95em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-left: 15px;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(255, 45, 85, 0.3);
+        }
+
+        .order-button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 45, 85, 0.4);
+        }
+
+        .order-button:active {
+            transform: translateY(0);
+        }
+
         /* Empty States */
         .empty-state {
             text-align: center;
@@ -1603,6 +1653,86 @@
             font-weight: 300;
         }
 
+        /* Order Items Preview */
+        .order-items-preview {
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            padding: 12px 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            transition: max-height 0.3s ease;
+        }
+
+        .order-items-preview.collapsed {
+            max-height: 0;
+            padding: 0 20px;
+            overflow: hidden;
+        }
+
+        .order-items-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .order-items-title {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .order-items-toggle {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.8em;
+            cursor: pointer;
+            padding: 4px;
+            transition: transform 0.2s ease;
+        }
+
+        .order-items-toggle.expanded {
+            transform: rotate(180deg);
+        }
+
+        .order-items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .order-item-preview {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border-light);
+            font-size: 0.85em;
+        }
+
+        .order-item-preview:last-child {
+            border-bottom: none;
+        }
+
+        .order-item-preview-name {
+            color: var(--text-primary);
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .order-item-preview-details {
+            color: var(--text-secondary);
+            font-size: 0.8em;
+            margin-left: 8px;
+        }
+
+        .order-item-preview-price {
+            color: var(--primary);
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
     </style>
 </head>
 <body>
@@ -1626,8 +1756,8 @@
                         <div class="bullet-item">
                             <span class="bullet-number">2</span>
                             <div>
-                                <span class="bullet-title">Add to Cart</span>
-                                <span class="bullet-text">Adjust quantities & add special requests</span>
+                                <span class="bullet-title">Tap "Order" or "Add"</span>
+                                <span class="bullet-text">First item shows "Order", additional items show "Add"</span>
                             </div>
                         </div>
                     </div>
@@ -1760,16 +1890,16 @@
         <div class="category-chips" id="category-chips">
             <div class="category-chip active" data-category="all">All <span class="category-count">(0)</span></div>
             <div class="category-chip" data-category="popular">🔥 Popular <span class="category-count">(0)</span></div>
-            <div class="category-chip" data-category="filipino sunrice">🍳 Silog Meals <span class="category-count">(0)</span></div>
-            <div class="category-chip" data-category="dish of the day">🍖 Main Dishes <span class="category-count">(0)</span></div>
-            <div class="category-chip" data-category="vegetable meal">🥗 Vegetables <span class="category-count">(0)</span></div>
+            <div class="category-chip" data-category="filipino sunrice">🍳 Filipino Sunrice <span class="category-count">(0)</span></div>
+            <div class="category-chip" data-category="dish of the day">🍖 Dish of the Day <span class="category-count">(0)</span></div>
+            <div class="category-chip" data-category="vegetable meal">🥗 Vegetable Meal <span class="category-count">(0)</span></div>
             <div class="category-chip" data-category="seafood">🐟 Seafood <span class="category-count">(0)</span></div>
             <div class="category-chip" data-category="snacks">🍜 Snacks <span class="category-count">(0)</span></div>
         </div>
     </div>
 
     <!-- Order Summary Bar -->
-    <div class="order-summary-bar">
+    <div class="order-summary-bar" id="order-summary-bar">
         <div class="order-summary-content">
             <div class="summary-item">
                 <span class="summary-label">Items:</span>
@@ -1780,12 +1910,24 @@
                 <span class="summary-label">Total:</span>
                 <span class="summary-value" id="order-total">$0.00</span>
             </div>
+            <button class="order-button" id="order-button">
+                Order Now
+            </button>
+        </div>
+        <!-- Itemized Order List -->
+        <div class="order-items-preview" id="order-items-preview" style="display: none;">
+            <div class="order-items-header">
+                <span class="order-items-title">Your Order:</span>
+                <button class="order-items-toggle" id="order-items-toggle">▼</button>
+            </div>
+            <div class="order-items-list" id="order-items-list">
+                <!-- Items will be populated here -->
+            </div>
         </div>
     </div>
 
     <!-- Loading -->
     <div id="loader" class="loader-container">
-        <div class="loader"></div>
         <p id="loading-text" style="color: var(--text-secondary);">Loading menu...</p>
         <div class="loading-progress" id="loading-progress" style="width: 0%; height: 3px; background: var(--primary); margin-top: 10px; border-radius: 2px; transition: width 0.3s ease;"></div>
     </div>
@@ -1998,7 +2140,13 @@
             checkoutUserName: document.getElementById('checkout-user-name'),
             checkoutUserTelegram: document.getElementById('checkout-user-telegram'),
             checkoutDeliveryAddress: document.getElementById('checkout-delivery-address'),
-            checkoutOrderNotes: document.getElementById('checkout-order-notes')
+            checkoutOrderNotes: document.getElementById('checkout-order-notes'),
+            // Order summary bar elements
+            orderSummaryBar: document.getElementById('order-summary-bar'),
+            orderButton: document.getElementById('order-button'),
+            orderItemsPreview: document.getElementById('order-items-preview'),
+            orderItemsToggle: document.getElementById('order-items-toggle'),
+            orderItemsList: document.getElementById('order-items-list')
         };
 
         // ========== ONBOARDING TUTORIAL SYSTEM ==========
@@ -2506,7 +2654,7 @@
                             ` : `
                                 <button class="add-button" onclick="updateCart('${item.id}', 1)">
                                     <svg class="cart-icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus-circle"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
-                                    Add
+                                    ${Object.keys(cart).length === 0 ? 'Order' : 'Add'}
                                 </button>
                             `}
                 </div>
@@ -2557,6 +2705,16 @@
             document.getElementById('order-item-count').textContent = itemCount;
             document.getElementById('order-total').textContent = `$${total.toFixed(2)}`;
 
+            // Show/hide order summary bar
+            if (itemCount > 0) {
+                elements.orderSummaryBar.style.display = 'block';
+                elements.orderItemsPreview.style.display = 'block';
+                updateOrderItemsPreview();
+            } else {
+                elements.orderSummaryBar.style.display = 'none';
+                elements.orderItemsPreview.style.display = 'none';
+            }
+
             renderCartItems();
             updateOrderSummary();
             
@@ -2595,6 +2753,29 @@
                     </div>
                     <div class="order-item-quantity">${item.quantity}</div>
                     <div class="order-item-total">$${(parseFloat(item.price) * item.quantity).toFixed(2)}</div>
+                </div>
+            `).join('');
+        }
+
+        // Update order items preview in the bottom bar
+        function updateOrderItemsPreview() {
+            if (Object.keys(cart).length === 0) {
+                elements.orderItemsList.innerHTML = '';
+                return;
+            }
+
+            const items = Object.values(cart);
+            elements.orderItemsList.innerHTML = items.map((item, index) => `
+                <div class="order-item-preview">
+                    <div class="order-item-preview-name">
+                        ${index + 1}. ${item.name}
+                    </div>
+                    <div class="order-item-preview-details">
+                        ×${item.quantity}
+                    </div>
+                    <div class="order-item-preview-price">
+                        $${(parseFloat(item.price) * item.quantity).toFixed(2)}
+                    </div>
                 </div>
             `).join('');
         }
@@ -3011,6 +3192,29 @@
         
         if (elements.placeOrderBtn) {
             elements.placeOrderBtn.addEventListener('click', placeOrder);
+        }
+
+        // Order items preview toggle
+        if (elements.orderItemsToggle) {
+            elements.orderItemsToggle.addEventListener('click', () => {
+                const isCollapsed = elements.orderItemsPreview.classList.contains('collapsed');
+                if (isCollapsed) {
+                    elements.orderItemsPreview.classList.remove('collapsed');
+                    elements.orderItemsToggle.textContent = '▲';
+                    elements.orderItemsToggle.classList.add('expanded');
+                } else {
+                    elements.orderItemsPreview.classList.add('collapsed');
+                    elements.orderItemsToggle.textContent = '▼';
+                    elements.orderItemsToggle.classList.remove('expanded');
+                }
+            });
+        }
+
+        // Order button in summary bar
+        if (elements.orderButton) {
+            elements.orderButton.addEventListener('click', () => {
+                showCart();
+            });
         }
 
         // Add pull-to-refresh functionality
