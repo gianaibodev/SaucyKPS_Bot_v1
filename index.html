@@ -460,6 +460,343 @@
             pointer-events: all;
         }
 
+        /* Checkout Page */
+        .checkout-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--background);
+            z-index: 2000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+            padding-bottom: 100px;
+        }
+
+        .checkout-page.active {
+            transform: translateX(0);
+        }
+
+        .checkout-header {
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .checkout-back-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .checkout-title {
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+
+        .checkout-content {
+            padding: 20px;
+        }
+
+        .checkout-section {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px var(--shadow);
+        }
+
+        .checkout-section h3 {
+            margin-bottom: 15px;
+            color: var(--text-primary);
+            font-size: 1.1em;
+        }
+
+        .checkout-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1em;
+            margin-bottom: 15px;
+            transition: border-color 0.2s;
+        }
+
+        .checkout-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .checkout-textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1em;
+            min-height: 80px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .checkout-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .checkout-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .checkout-item:last-child {
+            border-bottom: none;
+        }
+
+        .checkout-item-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .checkout-item-emoji {
+            font-size: 1.5em;
+        }
+
+        .checkout-item-details h4 {
+            margin: 0 0 5px 0;
+            font-size: 1em;
+            color: var(--text-primary);
+        }
+
+        .checkout-item-details p {
+            margin: 0;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+        }
+
+        .checkout-item-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .checkout-quantity-btn {
+            width: 32px;
+            height: 32px;
+            border: 2px solid var(--primary);
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+
+        .checkout-quantity-display {
+            min-width: 30px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .checkout-summary {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 2px 10px var(--shadow);
+        }
+
+        .checkout-summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        .checkout-summary-row.total {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: var(--primary);
+            border-top: 2px solid var(--border);
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.2s;
+        }
+
+        .checkout-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .checkout-btn:disabled {
+            background: var(--text-secondary);
+            cursor: not-allowed;
+        }
+
+        /* Tutorial System */
+        .tutorial-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .tutorial-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .tutorial-modal {
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 90%;
+            width: 400px;
+            text-align: center;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .tutorial-overlay.active .tutorial-modal {
+            transform: scale(1);
+        }
+
+        .tutorial-step {
+            display: none;
+        }
+
+        .tutorial-step.active {
+            display: block;
+        }
+
+        .tutorial-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .tutorial-step h2 {
+            margin-bottom: 15px;
+            color: var(--text-primary);
+            font-size: 1.5em;
+        }
+
+        .tutorial-step p {
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 25px;
+        }
+
+        .tutorial-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 25px;
+        }
+
+        .tutorial-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tutorial-btn.skip {
+            background: var(--text-secondary);
+            color: white;
+        }
+
+        .tutorial-btn.back {
+            background: var(--border);
+            color: var(--text-primary);
+        }
+
+        .tutorial-btn.next {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tutorial-btn.start {
+            background: var(--success);
+            color: white;
+            font-size: 1.1em;
+            padding: 12px 25px;
+        }
+
+        .tutorial-progress {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .progress-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--border);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .progress-dot.active {
+            background: var(--primary);
+            transform: scale(1.2);
+        }
+
         .cart-handle {
             width: 40px;
             height: 4px;
@@ -1533,9 +1870,82 @@
         </button>
     </div>
 
+    <!-- Checkout Page -->
+    <div class="checkout-page" id="checkout-page">
+        <div class="checkout-header">
+            <button class="checkout-back-btn" id="checkout-back-btn">←</button>
+            <h2 class="checkout-title">Checkout</h2>
+        </div>
+        
+        <div class="checkout-content">
+            <!-- User Info Section -->
+            <div class="checkout-section">
+                <h3>👤 Customer Information</h3>
+                <div class="user-card">
+                    <div class="user-avatar" id="checkout-user-avatar">👤</div>
+                    <div class="user-details">
+                        <div class="user-name" id="checkout-user-name">Loading...</div>
+                        <div class="user-telegram" id="checkout-user-telegram">@username</div>
+                    </div>
+                    <div class="verified-badge">✓</div>
+                </div>
+            </div>
+
+            <!-- Delivery Address Section -->
+            <div class="checkout-section">
+                <h3>📍 Delivery Address</h3>
+                <input 
+                    type="text" 
+                    class="checkout-input" 
+                    id="checkout-delivery-address"
+                    placeholder="Enter your delivery address..."
+                />
+            </div>
+
+            <!-- Order Notes Section -->
+            <div class="checkout-section">
+                <h3>📝 Order Notes</h3>
+                <textarea 
+                    class="checkout-textarea" 
+                    id="checkout-order-notes"
+                    placeholder="Add any special instructions for the kitchen..."
+                ></textarea>
+            </div>
+
+            <!-- Order Items Section -->
+            <div class="checkout-section">
+                <h3>🛒 Your Order</h3>
+                <div id="checkout-items-list">
+                    <!-- Items will be populated here -->
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="checkout-summary">
+                <div class="checkout-summary-row">
+                    <span>Subtotal</span>
+                    <span id="checkout-subtotal">$0.00</span>
+                </div>
+                <div class="checkout-summary-row">
+                    <span>Delivery Fee</span>
+                    <span id="checkout-delivery-fee">$0.00</span>
+                </div>
+                <div class="checkout-summary-row total">
+                    <span>Total</span>
+                    <span id="checkout-total">$0.00</span>
+                </div>
+            </div>
+
+            <!-- Place Order Button -->
+            <button class="checkout-btn" id="place-order-btn">
+                Place Order - <span id="checkout-total-amount">$0.00</span>
+            </button>
+        </div>
+    </div>
+
     <script>
         // Your deployed Google Apps Script URL
-        const API_URL = "https://script.google.com/macros/s/AKfycbwDXh3i_AhI--q9YVlgxvGU5jKNx-XbYjf5G6lPI8xrMNWDkE_p6hpyZXMriRMK1s6K5Q/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbwzC_46ZlGb3lWNweCvGEMq61rKjom8lkXrHSFWWpN_LyoKc0mg8CXovevhVVoaktrDFg/exec";
 
         const tg = window.Telegram.WebApp;
         tg.ready();
@@ -1567,7 +1977,21 @@
             clearCart: document.getElementById('clear-cart'),
             userAvatar: document.getElementById('user-avatar'),
             userName: document.getElementById('user-name'),
-            userTelegram: document.getElementById('user-telegram')
+            userTelegram: document.getElementById('user-telegram'),
+            // Checkout page elements
+            checkoutPage: document.getElementById('checkout-page'),
+            checkoutBackBtn: document.getElementById('checkout-back-btn'),
+            checkoutItemsList: document.getElementById('checkout-items-list'),
+            checkoutSubtotal: document.getElementById('checkout-subtotal'),
+            checkoutDeliveryFee: document.getElementById('checkout-delivery-fee'),
+            checkoutTotal: document.getElementById('checkout-total'),
+            checkoutTotalAmount: document.getElementById('checkout-total-amount'),
+            placeOrderBtn: document.getElementById('place-order-btn'),
+            checkoutUserAvatar: document.getElementById('checkout-user-avatar'),
+            checkoutUserName: document.getElementById('checkout-user-name'),
+            checkoutUserTelegram: document.getElementById('checkout-user-telegram'),
+            checkoutDeliveryAddress: document.getElementById('checkout-delivery-address'),
+            checkoutOrderNotes: document.getElementById('checkout-order-notes')
         };
 
         // ========== ONBOARDING TUTORIAL SYSTEM ==========
@@ -2127,20 +2551,27 @@
 
         function updateCartUI() {
             const itemCount = Object.values(cart).reduce((sum, item) => sum + item.quantity, 0);
-            const subtotal = Object.values(cart).reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const subtotal = Object.values(cart).reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
+            const total = subtotal + DELIVERY_FEE;
 
             elements.cartBadge.textContent = itemCount;
             elements.floatingCart.className = itemCount > 0 ? 'floating-cart active' : 'floating-cart';
             
             elements.subtotal.textContent = `$${subtotal.toFixed(2)}`;
-            elements.total.textContent = `$${subtotal.toFixed(2)}`;
+            elements.total.textContent = `$${total.toFixed(2)}`;
 
             // Update order summary bar
             document.getElementById('order-item-count').textContent = itemCount;
-            document.getElementById('order-total').textContent = `$${subtotal.toFixed(2)}`;
+            document.getElementById('order-total').textContent = `$${total.toFixed(2)}`;
 
             renderCartItems();
             updateOrderSummary();
+            
+            // Update checkout page if it's visible
+            if (elements.checkoutPage.classList.contains('active')) {
+                renderCheckoutItems();
+                updateCheckoutTotals();
+            }
         }
 
         function updateOrderSummary() {
@@ -2240,11 +2671,97 @@
             document.body.style.overflow = '';
         }
 
-        async function checkout() {
-            console.log('Checkout function called!');
+        // ========== CHECKOUT PAGE FUNCTIONS ==========
+        
+        function showCheckout() {
+            // Copy data from cart sheet to checkout page
+            elements.checkoutDeliveryAddress.value = elements.addressInput.value;
+            elements.checkoutOrderNotes.value = document.getElementById('order-notes').value;
+            
+            // Update checkout user info
+            elements.checkoutUserAvatar.textContent = elements.userAvatar.textContent;
+            elements.checkoutUserName.textContent = elements.userName.textContent;
+            elements.checkoutUserTelegram.textContent = elements.userTelegram.textContent;
+            
+            // Render checkout items
+            renderCheckoutItems();
+            
+            // Update checkout totals
+            updateCheckoutTotals();
+            
+            // Show checkout page
+            elements.checkoutPage.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideCheckout() {
+            elements.checkoutPage.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function renderCheckoutItems() {
+            if (Object.keys(cart).length === 0) {
+                elements.checkoutItemsList.innerHTML = `
+                    <div class="empty-cart">
+                        <div class="empty-icon">🛒</div>
+                        <h3>Your cart is empty</h3>
+                        <p>Add some delicious items!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            elements.checkoutItemsList.innerHTML = Object.values(cart).map(item => `
+                <div class="checkout-item">
+                    <div class="checkout-item-info">
+                        <div class="checkout-item-emoji">
+                            ${(item.imageURL && item.imageURL.startsWith('http')) ? 
+                                `<img src="${item.imageURL}" alt="${item.name}" style="width: 30px; height: 30px; object-fit: cover; border-radius: 6px;">` :
+                                `<span>${item.imageURL || item.emoji || '🍽️'}</span>`
+                            }
+                        </div>
+                        <div class="checkout-item-details">
+                            <h4>${item.name}</h4>
+                            <p>$${parseFloat(item.price).toFixed(2)} each</p>
+                        </div>
+                    </div>
+                    <div class="checkout-item-controls">
+                        <button class="checkout-quantity-btn" onclick="updateCart('${item.id}', -1)">−</button>
+                        <div class="checkout-quantity-display">${item.quantity}</div>
+                        <button class="checkout-quantity-btn" onclick="updateCart('${item.id}', 1)">+</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateCheckoutTotals() {
+            const subtotal = Object.values(cart).reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
+            const deliveryFee = DELIVERY_FEE;
+            const total = subtotal + deliveryFee;
+
+            elements.checkoutSubtotal.textContent = `$${subtotal.toFixed(2)}`;
+            elements.checkoutDeliveryFee.textContent = `$${deliveryFee.toFixed(2)}`;
+            elements.checkoutTotal.textContent = `$${total.toFixed(2)}`;
+            elements.checkoutTotalAmount.textContent = `$${total.toFixed(2)}`;
+        }
+
+        // Updated checkout function - now shows checkout page instead of direct order
+        function checkout() {
+            if (Object.keys(cart).length === 0) {
+                tg.showAlert("⚠️ Your cart is empty");
+                return;
+            }
+            
+            // Show checkout page instead of direct order
+            showCheckout();
+        }
+
+        // New function to handle the actual order placement from checkout page
+        async function placeOrder() {
+            console.log('Place order function called!');
             try {
-                const notes = document.getElementById('order-notes').value.trim();
-                const deliveryAddress = document.getElementById('delivery-address').value.trim();
+                const notes = elements.checkoutOrderNotes.value.trim();
+                const deliveryAddress = elements.checkoutDeliveryAddress.value.trim();
                 console.log('Notes:', notes);
                 console.log('Delivery Address:', deliveryAddress);
 
@@ -2266,7 +2783,10 @@
                 }));
 
                 const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-                console.log('Subtotal:', subtotal, 'Type:', typeof subtotal);
+                const deliveryFee = DELIVERY_FEE;
+                const total = subtotal + deliveryFee;
+                
+                console.log('Subtotal:', subtotal, 'Delivery Fee:', deliveryFee, 'Total:', total);
 
                 // Get user info with username for easy contact
                 const orderUser = userInfo || tg.initDataUnsafe.user || {
@@ -2293,23 +2813,26 @@
                     throw new Error("No items in cart");
                 }
 
-                if (subtotal <= 0 || isNaN(subtotal)) {
-                    throw new Error("Invalid total amount: " + subtotal);
+                if (total <= 0 || isNaN(total)) {
+                    throw new Error("Invalid total amount: " + total);
                 }
 
-                elements.checkoutButton.textContent = "Placing order...";
-                elements.checkoutButton.disabled = true;
+                elements.placeOrderBtn.textContent = "Placing order...";
+                elements.placeOrderBtn.disabled = true;
 
                 console.log('Submitting order:', {
                     user: formattedUser,
                     items: items,
-                    totalPrice: subtotal,
-                    address: deliveryAddress
+                    subtotal: subtotal,
+                    deliveryFee: deliveryFee,
+                    totalPrice: total,
+                    address: deliveryAddress,
+                    notes: notes
                 });
 
                 const response = await fetch(API_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'text/plain' }, 
+                    headers: { 'Content-Type': 'application/json' }, 
                     body: JSON.stringify({
                         action: "newOrder",
                         user: formattedUser,
@@ -2317,70 +2840,63 @@
                         notes: notes || "No special requests",
                         cart: {
                             items: items,
-                            totalPrice: parseFloat(subtotal)
+                            subtotal: parseFloat(subtotal),
+                            deliveryFee: parseFloat(deliveryFee),
+                            totalPrice: parseFloat(total)
                         },
                         timestamp: new Date().toISOString()
                     }),
-                    mode: 'no-cors'
+                    mode: 'cors'
                 });
 
                 console.log('Order submitted successfully, response:', response);
 
                 // Create detailed order summary
-                let orderSummary = `Total: $${parseFloat(subtotal).toFixed(2)}\n\n`;
-                orderSummary += `Items in your order:\n`;
+                let orderSummary = `Order Total: $${total.toFixed(2)}\n`;
+                orderSummary += `Subtotal: $${subtotal.toFixed(2)}\n`;
+                if (deliveryFee > 0) {
+                    orderSummary += `Delivery Fee: $${deliveryFee.toFixed(2)}\n`;
+                }
+                orderSummary += `\nItems in your order:\n`;
                 items.forEach(item => {
                     orderSummary += `• ${item.name} × ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}\n`;
                 });
+                orderSummary += `\n📍 Delivery Address:\n${deliveryAddress}\n`;
+                if (notes) {
+                    orderSummary += `\n📝 Special Instructions:\n${notes}\n`;
+                }
                 orderSummary += `\n📱 Payment Instructions:\n`;
                 orderSummary += `Please send a screenshot of the QR code payment to our direct message.\n\n`;
                 orderSummary += `Riders can contact you via: @${formattedUser.username}`;
 
-                // Show success popup regardless of API response (since we can't read response with no-cors)
+                // Show success popup
                 tg.showPopup({
                     title: '✅ Order Confirmed!',
                     message: orderSummary,
                     buttons: [{ id: 'ok', type: 'ok' }]
                 }, () => {
+                    // Clear cart and reset
                     cart = {};
                     updateCartUI();
+                    hideCheckout();
                     hideCart();
-                    document.getElementById('order-notes').value = '';
+                    elements.checkoutDeliveryAddress.value = '';
+                    elements.checkoutOrderNotes.value = '';
                     tg.close();
                 });
             } catch (error) {
-                console.error('Checkout error:', error);
+                console.error('Place order error:', error);
                 console.error('Error details:', {
                     message: error.message,
                     stack: error.stack,
                     name: error.name
                 });
                 
-                // Even if API fails, show order confirmation as fallback
-                let orderSummary = `Total: $${parseFloat(subtotal).toFixed(2)}\n\n`;
-                orderSummary += `Items in your order:\n`;
-                items.forEach(item => {
-                    orderSummary += `• ${item.name} × ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}\n`;
-                });
-                orderSummary += `\n📱 Payment Instructions:\n`;
-                orderSummary += `Please send a screenshot of the QR code payment to our direct message.\n\n`;
-                orderSummary += `Riders can contact you via: @${formattedUser.username}`;
-                orderSummary += `\n\n⚠️ Note: Order may not be recorded in system. Please contact us directly.`;
-
-                tg.showPopup({
-                    title: '⚠️ Order Submitted (Offline)',
-                    message: orderSummary,
-                    buttons: [{ id: 'ok', type: 'ok' }]
-                }, () => {
-                    cart = {};
-                    updateCartUI();
-                    hideCart();
-                    document.getElementById('order-notes').value = '';
-                    tg.close();
-                });
+                // Show error popup
+                tg.showAlert(`❌ Order failed: ${error.message}`);
             } finally {
-                elements.checkoutButton.textContent = "Place Order";
-                elements.checkoutButton.disabled = false;
+                elements.placeOrderBtn.textContent = `Place Order - $${(Object.values(cart).reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0) + DELIVERY_FEE).toFixed(2)}`;
+                elements.placeOrderBtn.disabled = false;
             }
         }
 
@@ -2451,6 +2967,15 @@
                 renderMenu();
             }
         });
+
+        // Checkout page event listeners
+        if (elements.checkoutBackBtn) {
+            elements.checkoutBackBtn.addEventListener('click', hideCheckout);
+        }
+        
+        if (elements.placeOrderBtn) {
+            elements.placeOrderBtn.addEventListener('click', placeOrder);
+        }
 
         // Add pull-to-refresh functionality
         let startY = 0;
