@@ -3446,46 +3446,77 @@
                     });
 
                     console.log('Order submitted successfully, response:', response);
+                    console.log('Response status:', response.status);
+                    console.log('Response ok:', response.ok);
+                    console.log('Response headers:', [...response.headers.entries()]);
                     
                     if (response.ok) {
                         const responseText = await response.text();
                         console.log('Response text:', responseText);
+                        console.log('Response text length:', responseText.length);
                         
-                        // Create detailed order summary
-                        let orderSummary = `✅ Order Confirmed!\n\n`;
-                        orderSummary += `Order Total: $${total.toFixed(2)}\n`;
-                        orderSummary += `Subtotal: $${subtotal.toFixed(2)}\n`;
-                        if (deliveryFee > 0) {
-                            orderSummary += `Delivery Fee: $${deliveryFee.toFixed(2)}\n`;
+                        // Try to parse the response
+                        let responseData;
+                        try {
+                            responseData = JSON.parse(responseText);
+                            console.log('Parsed response data:', responseData);
+                            
+                            // Check if the response indicates success
+                            if (responseData.success === true) {
+                                console.log('✅ Order was successful!');
+                            } else {
+                                console.log('❌ Order failed:', responseData.message || 'Unknown error');
+                            }
+                        } catch (parseError) {
+                            console.error('Failed to parse response as JSON:', parseError);
+                            console.log('Raw response text:', responseText);
+                            console.log('Response text type:', typeof responseText);
+                            console.log('Response text length:', responseText.length);
                         }
-                        orderSummary += `\nItems in your order:\n`;
-                        items.forEach(item => {
-                            orderSummary += `• ${item.name} × ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}\n`;
-                        });
-                        orderSummary += `\n📍 Delivery Address:\n${deliveryAddress}\n`;
-                        if (notes) {
-                            orderSummary += `\n📝 Special Instructions:\n${notes}\n`;
-                        }
-                        orderSummary += `\n📱 Payment Instructions:\n`;
-                        orderSummary += `Please send a screenshot of the QR code payment to our direct message.\n\n`;
-                        orderSummary += `Riders can contact you via: @${formattedUser.username}`;
+                        
+                        // Only show success if the response indicates success
+                        if (responseData && responseData.success === true) {
+                            // Create detailed order summary
+                            let orderSummary = `✅ Order Confirmed!\n\n`;
+                            orderSummary += `Order ID: ${responseData.orderId || 'N/A'}\n`;
+                            orderSummary += `Order Total: $${total.toFixed(2)}\n`;
+                            orderSummary += `Subtotal: $${subtotal.toFixed(2)}\n`;
+                            if (deliveryFee > 0) {
+                                orderSummary += `Delivery Fee: $${deliveryFee.toFixed(2)}\n`;
+                            }
+                            orderSummary += `\nItems in your order:\n`;
+                            items.forEach(item => {
+                                orderSummary += `• ${item.name} × ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}\n`;
+                            });
+                            orderSummary += `\n📍 Delivery Address:\n${deliveryAddress}\n`;
+                            if (notes) {
+                                orderSummary += `\n📝 Special Instructions:\n${notes}\n`;
+                            }
+                            orderSummary += `\n📱 Payment Instructions:\n`;
+                            orderSummary += `Please send a screenshot of the QR code payment to our direct message.\n\n`;
+                            orderSummary += `Riders can contact you via: @${formattedUser.username}`;
 
-                        // Show success popup
-                        tg.showPopup({
-                            title: '✅ Order Confirmed!',
-                            message: orderSummary,
-                            buttons: [{ id: 'ok', type: 'ok' }]
-                        }, () => {
-                            // Clear cart and reset
-                            cart = {};
-                            updateCartUI();
-                            hideCheckout();
-                            hideCart();
-                            elements.checkoutDeliveryAddress.value = '';
-                            elements.checkoutOrderNotes.value = '';
-                            tg.close();
-                        });
-                        return;
+                            // Show success popup
+                            tg.showPopup({
+                                title: '✅ Order Confirmed!',
+                                message: orderSummary,
+                                buttons: [{ id: 'ok', type: 'ok' }]
+                            }, () => {
+                                // Clear cart and reset
+                                cart = {};
+                                updateCartUI();
+                                hideCheckout();
+                                hideCart();
+                                elements.checkoutDeliveryAddress.value = '';
+                                elements.checkoutOrderNotes.value = '';
+                                tg.close();
+                            });
+                            return;
+                        } else {
+                            // Response was not successful
+                            const errorMsg = responseData ? responseData.message : 'Order failed for unknown reason';
+                            throw new Error(errorMsg);
+                        }
                     } else {
                         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
@@ -3505,6 +3536,8 @@
                 let errorMessage = "Unknown error occurred";
                 if (error.message.includes("Failed to fetch")) {
                     errorMessage = "Network connection failed. Please check your internet connection and try again.";
+                } else if (error.message.includes("load failed")) {
+                    errorMessage = "Order submission failed. The server may be temporarily unavailable. Please try again.";
                 } else if (error.message.includes("HTTP 403")) {
                     errorMessage = "Access denied. Please contact support.";
                 } else if (error.message.includes("HTTP 404")) {
