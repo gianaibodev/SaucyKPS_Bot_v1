@@ -1958,6 +1958,13 @@
         const DELIVERY_FEE = 0;
         let userInfo = null;
         
+        // Menu loading state variables
+        let isLoading = false;
+        let loadingPromise = null;
+        let menuCache = null;
+        let cacheTimestamp = 0;
+        const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+        
         
 
         const elements = {
@@ -2131,14 +2138,7 @@
             console.log('User Info:', userInfo);
         }
 
-        // Cache for menu data
-        let menuCache = null;
-        let cacheTimestamp = 0;
-        const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes (increased cache time)
-        
-        // Loading state management
-        let isLoading = false;
-        let loadingPromise = null;
+        // Cache and loading state variables are defined above
 
         // No sample data - app will only use real Google Sheets data
 
@@ -2231,6 +2231,7 @@
         // Make functions available globally
         window.testAPI = testAPI;
         window.testConnectivity = testConnectivity;
+        window.refreshMenu = refreshMenu;
 
         // Fetch Menu
         async function fetchMenu() {
@@ -2326,24 +2327,15 @@
                     });
                 }
                 
-                // If API failed, show loading state
+                // If API failed, load fallback menu
                 if (!apiSuccess) {
-                    console.log('API failed - showing loading state');
-                    loadingText.textContent = 'Loading menu...';
-                    loadingProgress.style.width = '100%';
-                    // Don't throw error, just show loading state
-                    elements.menuContainer.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-icon">🍽️</div>
-                            <h3>Menu Loading...</h3>
-                            <p>Please wait while we load the menu...</p>
-                            <div style="margin-top: 20px;">
-                                <button onclick="refreshMenu()" style="margin: 10px 5px; padding: 12px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600;">Refresh Menu</button>
-                            </div>
-                        </div>
-                    `;
-                    elements.menuContainer.style.display = 'block';
-                    return;
+                    console.log('API failed - loading fallback menu');
+                    loadingText.textContent = 'Loading fallback menu...';
+                    loadingProgress.style.width = '80%';
+                    
+                    // Load fallback menu data
+                    items = getFallbackMenu();
+                    console.log('Loaded fallback menu with', items.length, 'items');
                 }
 
                 loadingText.textContent = 'Finalizing menu...';
@@ -2376,14 +2368,15 @@
                 
             } catch (error) {
                 console.error('Unexpected error:', error);
-                // Show loading state instead of error
+                // Show error state
                 elements.menuContainer.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-icon">🍽️</div>
-                        <h3>Menu Loading...</h3>
-                        <p>Connecting to our kitchen menu...</p>
+                        <div class="empty-icon">❌</div>
+                        <h3>Menu Loading Error</h3>
+                        <p>Something went wrong while loading the menu. Please try again.</p>
                         <div style="margin-top: 20px;">
                             <button onclick="refreshMenu()" style="margin: 10px 5px; padding: 12px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600;">Try Again</button>
+                            <button onclick="testAPI()" style="margin: 10px 5px; padding: 12px 20px; background: var(--secondary); color: white; border: none; border-radius: 8px; font-weight: 600;">Test Connection</button>
                         </div>
                     </div>
                 `;
@@ -2912,6 +2905,49 @@
                 </div>
             `;
             elements.menuContainer.style.display = 'block';
+        }
+
+        // Refresh menu function
+        function refreshMenu() {
+            console.log('Refreshing menu...');
+            // Clear cache to force fresh load
+            menuCache = null;
+            cacheTimestamp = 0;
+            // Reload menu
+            fetchMenu();
+        }
+
+        // Fallback menu data when API fails
+        function getFallbackMenu() {
+            return [
+                // FILIPINO SUNRICE
+                { id: 1, name: "CHICK SILOG", description: "Chicken with garlic rice and egg", price: 8.99, category: "FILIPINO SUNRICE", popular: true, imageURL: "🍳" },
+                { id: 2, name: "PORK TAPSILOG", description: "Tapa, sinangag, at itlog", price: 8.99, category: "FILIPINO SUNRICE", popular: true, imageURL: "🍳" },
+                { id: 3, name: "TOCILOG", description: "Tocino with garlic rice and egg", price: 8.99, category: "FILIPINO SUNRICE", popular: true, imageURL: "🍳" },
+                { id: 4, name: "LIEMPO SILOG", description: "Grilled pork belly with garlic rice and egg", price: 10.99, category: "FILIPINO SUNRICE", popular: true, imageURL: "🍳" },
+                { id: 5, name: "BAC SILOG", description: "Bacon with garlic rice and egg", price: 9.49, category: "FILIPINO SUNRICE", popular: true, imageURL: "🍳" },
+                
+                // DISH OF THE DAY
+                { id: 6, name: "FRIED CHICKEN WITH GRAVY", description: "Crispy fried chicken with rich gravy", price: 12.99, category: "DISH OF THE DAY", popular: true, imageURL: "🍗" },
+                { id: 7, name: "CHICKEN ADOBO", description: "Classic Filipino chicken adobo", price: 9.99, category: "DISH OF THE DAY", popular: true, imageURL: "🍗" },
+                { id: 8, name: "PORK ADOBO", description: "Classic Filipino pork adobo", price: 9.99, category: "DISH OF THE DAY", popular: true, imageURL: "🐷" },
+                { id: 9, name: "LECHON KAWALI", description: "Crispy fried pork belly", price: 12.99, category: "DISH OF THE DAY", popular: true, imageURL: "🐷" },
+                { id: 10, name: "PORK SISIG", description: "Sizzling pork sisig", price: 10.99, category: "DISH OF THE DAY", popular: true, imageURL: "🐷" },
+                
+                // VEGETABLE MEAL
+                { id: 11, name: "TORTANG TALONG", description: "Eggplant omelet", price: 7.99, category: "VEGETABLE MEAL", popular: true, imageURL: "🍳" },
+                { id: 12, name: "PAKBET", description: "Mixed vegetables with shrimp paste", price: 7.99, category: "VEGETABLE MEAL", popular: true, imageURL: "🥗" },
+                
+                // SEAFOOD
+                { id: 13, name: "FRIED TILAPIA SOLO MEAL", description: "Fried tilapia with rice", price: 8.99, category: "SEAFOOD", popular: true, imageURL: "🐟" },
+                { id: 14, name: "SINIGANG NA TILAPIA", description: "Tilapia in sour soup", price: 9.99, category: "SEAFOOD", popular: true, imageURL: "🍲" },
+                
+                // SNACKS
+                { id: 15, name: "BANANA TURON 3PCS", description: "Banana spring rolls (3 pieces)", price: 4.99, category: "SNACKS", popular: true, imageURL: "🍌" },
+                { id: 16, name: "PINOY SPAGHETTI", description: "Filipino-style spaghetti", price: 8.99, category: "SNACKS", popular: true, imageURL: "🍝" },
+                { id: 17, name: "PANCIT CANTON", description: "Canton noodles", price: 7.99, category: "SNACKS", popular: true, imageURL: "🍜" },
+                { id: 18, name: "CREAMY SOPAS", description: "Creamy chicken soup", price: 6.99, category: "SNACKS", popular: true, imageURL: "🍲" }
+            ];
         }
 
         // No sample menu function - app only uses real Google Sheets data
