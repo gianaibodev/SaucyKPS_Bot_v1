@@ -92,6 +92,97 @@
             font-weight: 600;
         }
 
+        /* Cart Button in Hero */
+        .cart-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .cart-button:hover {
+            background: white;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .cart-button:active {
+            transform: scale(0.95);
+        }
+
+        .cart-icon {
+            font-size: 1.4em;
+            color: var(--primary);
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--accent);
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7em;
+            font-weight: 700;
+            border: 2px solid white;
+            min-width: 20px;
+            animation: cartPulse 0.6s ease-out;
+            box-shadow: 0 2px 8px rgba(255, 45, 85, 0.4);
+        }
+
+        @keyframes cartPulse {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .cart-badge.show {
+            display: flex;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--success);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 0.9em;
+            font-weight: 600;
+            z-index: 1001;
+            opacity: 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast.hide {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-20px);
+        }
+
         /* Search Bar */
         .search-bar {
             margin: -20px 15px 15px;
@@ -356,6 +447,17 @@
             transform: scale(0.95);
         }
 
+        .add-button.success {
+            background: var(--success);
+            animation: addSuccess 0.6s ease-out;
+        }
+
+        @keyframes addSuccess {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); background: var(--success); }
+            100% { transform: scale(1); }
+        }
+
         .cart-icon-svg {
             width: 18px;
             height: 18px;
@@ -540,10 +642,86 @@
             align-items: center;
             padding: 15px 0;
             border-bottom: 1px solid var(--border);
+            background: white;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
         .checkout-item:last-child {
             border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .checkout-item-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .checkout-item-emoji {
+            font-size: 1.5em;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--background);
+            border-radius: 8px;
+        }
+
+        .checkout-item-details h4 {
+            margin: 0 0 4px 0;
+            font-size: 1em;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .checkout-item-details p {
+            margin: 0;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+        }
+
+        .checkout-item-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkout-quantity-btn {
+            width: 32px;
+            height: 32px;
+            border: 2px solid var(--border);
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: 600;
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
+
+        .checkout-quantity-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .checkout-quantity-btn:active {
+            transform: scale(0.95);
+        }
+
+        .checkout-quantity-display {
+            min-width: 30px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1em;
+            color: var(--text-primary);
         }
 
         .checkout-item-info {
@@ -1574,15 +1752,34 @@
             background: white;
             border-top: 1px solid var(--border);
             padding: 12px 20px;
-            display: flex;
-            justify-content: center;
+            display: none;
+            flex-direction: column;
             z-index: 100;
             box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+            transform: translateY(100%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .order-summary-bar.show {
+            display: flex;
+            transform: translateY(0);
+        }
+
+        .order-header {
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .order-title {
+            font-size: 1em;
+            font-weight: 700;
+            color: var(--text-primary);
         }
 
         .order-summary-content {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 20px;
         }
 
@@ -1616,13 +1813,62 @@
             padding: 12px 20px;
             max-height: 200px;
             overflow-y: auto;
-            transition: max-height 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 8px;
         }
 
         .order-items-preview.collapsed {
             max-height: 0;
             padding: 0 20px;
             overflow: hidden;
+            margin-top: 0;
+            border-top: none;
+        }
+
+        /* Order Details Toggle */
+        .order-details-toggle {
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        .toggle-details-btn {
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            margin: 0 auto;
+        }
+
+        .toggle-details-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .toggle-details-btn.expanded {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .toggle-text {
+            font-weight: 500;
+        }
+
+        .toggle-icon {
+            font-size: 0.8em;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-details-btn.expanded .toggle-icon {
+            transform: rotate(180deg);
         }
 
         .order-items-header {
@@ -1662,7 +1908,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 6px 0;
+            padding: 8px 0;
             border-bottom: 1px solid var(--border-light);
             font-size: 0.85em;
         }
@@ -1671,22 +1917,62 @@
             border-bottom: none;
         }
 
-        .order-item-preview-name {
-            color: var(--text-primary);
-            font-weight: 500;
+        .order-item-preview-info {
+            display: flex;
+            flex-direction: column;
             flex: 1;
         }
 
-        .order-item-preview-details {
-            color: var(--text-secondary);
-            font-size: 0.8em;
-            margin-left: 8px;
+        .order-item-preview-name {
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 2px;
         }
 
         .order-item-preview-price {
             color: var(--primary);
             font-weight: 600;
-            margin-left: 8px;
+            font-size: 0.9em;
+        }
+
+        .order-item-preview-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--background);
+            padding: 4px 6px;
+            border-radius: 8px;
+        }
+
+        .quantity-btn-small {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            border: none;
+            background: white;
+            color: var(--primary);
+            font-size: 0.9em;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .quantity-btn-small:active {
+            transform: scale(0.9);
+            background: var(--primary);
+            color: white;
+        }
+
+        .quantity-display-small {
+            min-width: 20px;
+            text-align: center;
+            font-size: 0.85em;
+            font-weight: 600;
+            color: var(--text-primary);
         }
 
     </style>
@@ -1828,6 +2114,12 @@
                 ⚡ 25-35 min delivery
             </div>
         </div>
+        
+        <!-- Cart Button -->
+        <div class="cart-button" id="cart-button">
+            <span class="cart-icon">🛒</span>
+            <span class="cart-badge" id="cart-badge">0</span>
+        </div>
     </div>
 
     <!-- Search Bar -->
@@ -1856,6 +2148,12 @@
 
     <!-- Order Summary Bar -->
     <div class="order-summary-bar" id="order-summary-bar">
+        <!-- Your Order Header -->
+        <div class="order-header">
+            <span class="order-title">🛒 Your Order</span>
+        </div>
+        
+        <!-- Order Summary Content -->
         <div class="order-summary-content">
             <div class="summary-item">
                 <span class="summary-label">Items:</span>
@@ -1870,12 +2168,17 @@
                 Order Now
             </button>
         </div>
+        
+        <!-- Order Details Toggle -->
+        <div class="order-details-toggle" id="order-details-toggle">
+            <button class="toggle-details-btn" id="toggle-details-btn">
+                <span class="toggle-text">View Order Details</span>
+                <span class="toggle-icon">▼</span>
+            </button>
+        </div>
+        
         <!-- Itemized Order List -->
         <div class="order-items-preview" id="order-items-preview" style="display: none;">
-            <div class="order-items-header">
-                <span class="order-items-title">Your Order:</span>
-                <button class="order-items-toggle" id="order-items-toggle">▼</button>
-            </div>
             <div class="order-items-list" id="order-items-list">
                 <!-- Items will be populated here -->
             </div>
@@ -1890,6 +2193,9 @@
             <div class="loading-progress" id="loading-progress" style="width: 0%; height: 4px; background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%); border-radius: 2px; transition: width 0.3s ease; min-width: 200px;"></div>
         </div>
     </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
 
     <!-- Menu Container -->
     <div id="menu-container" class="menu-container" style="display: none;"></div>
@@ -2066,7 +2372,10 @@
         const elements = {
             loader: document.getElementById('loader'),
             menuContainer: document.getElementById('menu-container'),
+            cartButton: document.getElementById('cart-button'),
+            cartBadge: document.getElementById('cart-badge'),
             cartSheet: document.getElementById('cart-sheet'),
+            toast: document.getElementById('toast'),
             cartOverlay: document.getElementById('cart-overlay'),
             cartItemsList: document.getElementById('cart-items-list'),
             subtotal: document.getElementById('subtotal'),
@@ -2096,8 +2405,9 @@
             // Order summary bar elements
             orderSummaryBar: document.getElementById('order-summary-bar'),
             orderButton: document.getElementById('order-button'),
+            orderDetailsToggle: document.getElementById('order-details-toggle'),
+            toggleDetailsBtn: document.getElementById('toggle-details-btn'),
             orderItemsPreview: document.getElementById('order-items-preview'),
-            orderItemsToggle: document.getElementById('order-items-toggle'),
             orderItemsList: document.getElementById('order-items-list')
         };
 
@@ -2597,18 +2907,10 @@
                         <div class="item-description">${item.description || 'Delicious and freshly prepared'}</div>
                         <div class="item-footer">
                             <div class="item-price">$${parseFloat(item.price).toFixed(2)}</div>
-                            ${quantity > 0 ? `
-                                <div class="quantity-controls">
-                                    <button class="quantity-btn" onclick="updateCart('${item.id}', -1)">−</button>
-                                    <div class="quantity-display">${quantity}</div>
-                                    <button class="quantity-btn" onclick="updateCart('${item.id}', 1)">+</button>
-                                </div>
-                            ` : `
-                                <button class="add-button" onclick="updateCart('${item.id}', 1)">
-                                    <svg class="cart-icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus-circle"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
-                                    ${Object.keys(cart).length === 0 ? 'Order' : 'Add'}
-                                </button>
-                            `}
+                            <button class="add-button" onclick="updateCart('${item.id}', 1)">
+                                <svg class="cart-icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus-circle"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+                                ${Object.keys(cart).length === 0 ? 'Order' : 'Add'}
+                            </button>
                 </div>
                 </div>
             `;
@@ -2638,6 +2940,20 @@
                 delete cart[itemId];
             }
 
+            // Add success animation to the button and show toast
+            if (change > 0) {
+                const button = document.querySelector(`[onclick="updateCart('${itemId}', 1)"]`);
+                if (button) {
+                    button.classList.add('success');
+                    setTimeout(() => {
+                        button.classList.remove('success');
+                    }, 600);
+                }
+                
+                // Show toast notification
+                showToast(`✅ ${item.name} added to cart!`);
+            }
+
             updateCartUI();
             renderMenu();
         };
@@ -2647,8 +2963,19 @@
             const subtotal = Object.values(cart).reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
             const total = subtotal + DELIVERY_FEE;
             
-            elements.subtotal.textContent = `$${subtotal.toFixed(2)}`;
-            elements.total.textContent = `$${total.toFixed(2)}`;
+            // Update cart badge
+            if (elements.cartBadge) {
+                if (itemCount > 0) {
+                    elements.cartBadge.textContent = itemCount;
+                    elements.cartBadge.classList.add('show');
+                } else {
+                    elements.cartBadge.classList.remove('show');
+                }
+            }
+            
+            // Update cart sheet totals
+            if (elements.subtotal) elements.subtotal.textContent = `$${subtotal.toFixed(2)}`;
+            if (elements.total) elements.total.textContent = `$${total.toFixed(2)}`;
 
             // Update order summary bar
             const orderItemCount = document.getElementById('order-item-count');
@@ -2657,14 +2984,28 @@
             if (orderItemCount) orderItemCount.textContent = itemCount;
             if (orderTotal) orderTotal.textContent = `$${total.toFixed(2)}`;
 
-            // Show/hide order summary bar
+            // Show/hide order summary bar with animation
             if (itemCount > 0) {
-                if (elements.orderSummaryBar) elements.orderSummaryBar.style.display = 'flex';
-                if (elements.orderItemsPreview) elements.orderItemsPreview.style.display = 'block';
+                if (elements.orderSummaryBar) {
+                    elements.orderSummaryBar.classList.add('show');
+                }
+                if (elements.orderDetailsToggle) {
+                    elements.orderDetailsToggle.style.display = 'block';
+                }
+                if (elements.orderItemsPreview) {
+                    elements.orderItemsPreview.style.display = 'none'; // Start collapsed
+                }
                 updateOrderItemsPreview();
             } else {
-                if (elements.orderSummaryBar) elements.orderSummaryBar.style.display = 'none';
-                if (elements.orderItemsPreview) elements.orderItemsPreview.style.display = 'none';
+                if (elements.orderSummaryBar) {
+                    elements.orderSummaryBar.classList.remove('show');
+                }
+                if (elements.orderDetailsToggle) {
+                    elements.orderDetailsToggle.style.display = 'none';
+                }
+                if (elements.orderItemsPreview) {
+                    elements.orderItemsPreview.style.display = 'none';
+                }
             }
 
             renderCartItems();
@@ -2719,14 +3060,18 @@
             const items = Object.values(cart);
             elements.orderItemsList.innerHTML = items.map((item, index) => `
                 <div class="order-item-preview">
-                    <div class="order-item-preview-name">
-                        ${index + 1}. ${item.name}
+                    <div class="order-item-preview-info">
+                        <div class="order-item-preview-name">
+                            ${index + 1}. ${item.name}
+                        </div>
+                        <div class="order-item-preview-price">
+                            $${(parseFloat(item.price) * item.quantity).toFixed(2)}
+                        </div>
                     </div>
-                    <div class="order-item-preview-details">
-                        ×${item.quantity}
-                    </div>
-                    <div class="order-item-preview-price">
-                        $${(parseFloat(item.price) * item.quantity).toFixed(2)}
+                    <div class="order-item-preview-controls">
+                        <button class="quantity-btn-small" onclick="updateCart('${item.id}', -1)">−</button>
+                        <div class="quantity-display-small">${item.quantity}</div>
+                        <button class="quantity-btn-small" onclick="updateCart('${item.id}', 1)">+</button>
                     </div>
                 </div>
             `).join('');
@@ -2800,6 +3145,9 @@
         // ========== CHECKOUT PAGE FUNCTIONS ==========
         
         function showCheckout() {
+            console.log('showCheckout called, cart:', cart);
+            console.log('checkoutPage element:', elements.checkoutPage);
+            
             // Copy data from cart sheet to checkout page
             elements.checkoutDeliveryAddress.value = elements.addressInput.value;
             elements.checkoutOrderNotes.value = document.getElementById('order-notes').value;
@@ -2818,6 +3166,8 @@
             // Show checkout page
             elements.checkoutPage.classList.add('active');
             document.body.style.overflow = 'hidden';
+            
+            console.log('Checkout page should now be visible');
         }
 
         function hideCheckout() {
@@ -2826,6 +3176,9 @@
         }
 
         function renderCheckoutItems() {
+            console.log('renderCheckoutItems called, cart:', cart);
+            console.log('checkoutItemsList element:', elements.checkoutItemsList);
+            
             if (Object.keys(cart).length === 0) {
                 elements.checkoutItemsList.innerHTML = `
                     <div class="empty-cart">
@@ -2837,7 +3190,7 @@
                 return;
             }
 
-            elements.checkoutItemsList.innerHTML = Object.values(cart).map(item => `
+            const itemsHTML = Object.values(cart).map(item => `
                 <div class="checkout-item">
                     <div class="checkout-item-info">
                         <div class="checkout-item-emoji">
@@ -2858,6 +3211,9 @@
                     </div>
                 </div>
             `).join('');
+            
+            console.log('Generated HTML:', itemsHTML);
+            elements.checkoutItemsList.innerHTML = itemsHTML;
         }
 
         function updateCheckoutTotals() {
@@ -3085,7 +3441,22 @@
 
         // No sample menu function - app only uses real Google Sheets data
 
+        // Toast notification function
+        function showToast(message) {
+            if (elements.toast) {
+                elements.toast.textContent = message;
+                elements.toast.classList.remove('hide');
+                elements.toast.classList.add('show');
+                
+                setTimeout(() => {
+                    elements.toast.classList.remove('show');
+                    elements.toast.classList.add('hide');
+                }, 2000);
+            }
+        }
+
         // Event Listeners
+        elements.cartButton.addEventListener('click', showCart);
         elements.cartOverlay.addEventListener('click', hideCart);
         
         // Add checkout button event listener with debugging
@@ -3145,18 +3516,25 @@
             elements.placeOrderBtn.addEventListener('click', placeOrder);
         }
 
-        // Order items preview toggle
-        if (elements.orderItemsToggle) {
-            elements.orderItemsToggle.addEventListener('click', () => {
-                const isCollapsed = elements.orderItemsPreview.classList.contains('collapsed');
-                if (isCollapsed) {
-                    elements.orderItemsPreview.classList.remove('collapsed');
-                    elements.orderItemsToggle.textContent = '▲';
-                    elements.orderItemsToggle.classList.add('expanded');
+        // Order details toggle
+        if (elements.toggleDetailsBtn) {
+            elements.toggleDetailsBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const isExpanded = elements.toggleDetailsBtn.classList.contains('expanded');
+                if (isExpanded) {
+                    // Hide details
+                    elements.orderItemsPreview.style.display = 'none';
+                    elements.toggleDetailsBtn.classList.remove('expanded');
+                    elements.toggleDetailsBtn.querySelector('.toggle-text').textContent = 'View Order Details';
+                    elements.toggleDetailsBtn.querySelector('.toggle-icon').textContent = '▼';
                 } else {
-                    elements.orderItemsPreview.classList.add('collapsed');
-                    elements.orderItemsToggle.textContent = '▼';
-                    elements.orderItemsToggle.classList.remove('expanded');
+                    // Show details
+                    elements.orderItemsPreview.style.display = 'block';
+                    elements.toggleDetailsBtn.classList.add('expanded');
+                    elements.toggleDetailsBtn.querySelector('.toggle-text').textContent = 'Hide Order Details';
+                    elements.toggleDetailsBtn.querySelector('.toggle-icon').textContent = '▲';
                 }
             });
         }
