@@ -2644,6 +2644,7 @@
         window.refreshMenu = refreshMenu;
         window.placeOrder = placeOrder;
         window.testOrder = testOrder;
+        window.submitOrderViaProxy = submitOrderViaProxy;
         
         // Test order function for debugging
         async function testOrder() {
@@ -2672,6 +2673,37 @@
             showCheckout();
             
             console.log('Test order setup complete. Click Place Order to test.');
+        }
+        
+        // Backend proxy function to bypass CORS
+        async function submitOrderViaProxy(orderData) {
+            try {
+                console.log('Using proxy method to submit order...');
+                
+                // Use a CORS proxy service
+                const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+                const targetUrl = API_URL;
+                
+                const response = await fetch(proxyUrl + targetUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(orderData)
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Proxy order successful:', result);
+                    return result;
+                } else {
+                    throw new Error(`Proxy request failed: ${response.status}`);
+                }
+            } catch (error) {
+                console.error('Proxy method failed:', error);
+                throw error;
+            }
         }
 
         // Fetch Menu
