@@ -2638,6 +2638,42 @@
             console.log('=== END CONNECTIVITY TEST ===');
         }
 
+        // Test GET request to debug the issue
+        async function testGetRequest() {
+            try {
+                console.log('Testing GET request...');
+                const url = `${API_URL}?action=testGet&test=hello`;
+                console.log('Test URL:', url);
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8'
+                    },
+                    redirect: 'follow'
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+                
+                const responseText = await response.text();
+                console.log('Response text:', responseText);
+                
+                try {
+                    const result = JSON.parse(responseText);
+                    console.log('Parsed result:', result);
+                    return result;
+                } catch (parseError) {
+                    console.error('Failed to parse response:', parseError);
+                    console.log('Raw response:', responseText);
+                    return null;
+                }
+            } catch (error) {
+                console.error('Test GET request failed:', error);
+                return null;
+            }
+        }
+
         // Make functions available globally
         window.testAPI = testAPI;
         window.testConnectivity = testConnectivity;
@@ -2647,6 +2683,7 @@
         window.submitOrderViaProxy = submitOrderViaProxy;
         window.testDirectOrder = testDirectOrder;
         window.submitOrderViaGet = submitOrderViaGet;
+        window.testGetRequest = testGetRequest;
         
         // Submit order via GET request (bypasses CORS completely)
         async function submitOrderViaGet(orderData) {
