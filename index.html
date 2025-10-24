@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Saucy KPS Restaurant</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --primary: #FE6601;
@@ -2346,8 +2347,18 @@
     </div>
 
     <script>
-        // Your deployed Google Apps Script URL
-        const API_URL = "https://script.google.com/macros/s/AKfycbz0fzd07WFbA7qlkQ5OATCj2N3LLTd1J9FEX91LcYiEyeV2LX8WhQXSNoXhvqu-r4I5OA/exec";
+        // FULL SUPABASE CONFIGURATION
+        const SUPABASE_URL = 'https://ojuhzknpzxneilvxhlcm.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qdWh6a25wenhuZWlsdnhobGNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEyOTU1NjUsImV4cCI6MjA3Njg3MTU2NX0.ngjHcMcDZarhe4wIDGU97MFWt5I7Rz-zsrboAaplyys';
+        
+        // Initialize Supabase client for everything
+        let supabase;
+        try {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log('Supabase client initialized successfully');
+        } catch (error) {
+            console.error('Failed to initialize Supabase client:', error);
+        }
 
         const tg = window.Telegram.WebApp;
         tg.ready();
@@ -2411,118 +2422,163 @@
             orderItemsList: document.getElementById('order-items-list')
         };
 
-        // ========== ONBOARDING TUTORIAL SYSTEM ==========
+        // ========== SIMPLE TUTORIAL SYSTEM ==========
         
-        const TutorialSystem = {
-            currentStep: 1,
-            totalSteps: 4,
-            hasSeenTutorial: localStorage.getItem('saucyKPS_tutorialSeen'),
-
-            init() {
-                if (!this.hasSeenTutorial) {
-                    this.showTutorial();
-                } else {
-                    this.hideTutorial();
-                }
-                this.setupEventListeners();
-            },
-
-            setupEventListeners() {
-                const skipBtn = document.getElementById('tutorial-skip');
-                const backBtn = document.getElementById('tutorial-back');
-                const nextBtn = document.getElementById('tutorial-next');
-                const startBtn = document.getElementById('tutorial-start');
-                const progressDots = document.querySelectorAll('.progress-dot');
-
-                // Add null checks to prevent errors
-                if (skipBtn) skipBtn.addEventListener('click', () => this.completeTutorial());
-                if (backBtn) backBtn.addEventListener('click', () => this.previousStep());
-                if (nextBtn) nextBtn.addEventListener('click', () => this.nextStep());
-                if (startBtn) startBtn.addEventListener('click', () => this.completeTutorial());
-                
-                progressDots.forEach((dot, index) => {
-                    dot.addEventListener('click', () => this.goToStep(index + 1));
-                });
-            },
-
-            showTutorial() {
-                const overlay = document.getElementById('tutorial-overlay');
-                overlay.classList.add('active');
-                this.updateStep();
-            },
-
-            hideTutorial() {
-                const overlay = document.getElementById('tutorial-overlay');
-                overlay.classList.remove('active');
-            },
-
-            updateStep() {
-                // Hide all steps
-                document.querySelectorAll('.tutorial-step').forEach(step => {
-                    step.classList.remove('active');
-                });
-
-                // Show current step
-                const currentStepEl = document.getElementById(`step-${this.currentStep}`);
-                if (currentStepEl) {
-                    currentStepEl.classList.add('active');
-                }
-
-                // Update progress dots
-                document.querySelectorAll('.progress-dot').forEach((dot, index) => {
-                    dot.classList.remove('active');
-                    if (index + 1 === this.currentStep) {
-                        dot.classList.add('active');
-                    }
-                });
-
-                // Update buttons - with null checks
-                const backBtn = document.getElementById('tutorial-back');
-                const nextBtn = document.getElementById('tutorial-next');
-                const startBtn = document.getElementById('tutorial-start');
-
-                // Back button: show when not on step 1
-                if (backBtn) backBtn.style.display = this.currentStep === 1 ? 'none' : 'block';
-                
-                // Next button: show when not on last step
-                if (nextBtn) nextBtn.style.display = this.currentStep < this.totalSteps ? 'block' : 'none';
-                
-                // Start button: show only on last step
-                if (startBtn) startBtn.style.display = this.currentStep === this.totalSteps ? 'block' : 'none';
-
-                // Add haptic feedback
-                try {
-                    tg.HapticFeedback.impactOccurred('light');
-                } catch (e) {}
-            },
-
-            nextStep() {
-                if (this.currentStep < this.totalSteps) {
-                    this.currentStep++;
-                    this.updateStep();
-                }
-            },
-
-            previousStep() {
-                if (this.currentStep > 1) {
-                    this.currentStep--;
-                    this.updateStep();
-                }
-            },
-
-            goToStep(stepNumber) {
-                if (stepNumber >= 1 && stepNumber <= this.totalSteps) {
-                    this.currentStep = stepNumber;
-                    this.updateStep();
-                }
-            },
-
-            completeTutorial() {
-                localStorage.setItem('saucyKPS_tutorialSeen', 'true');
-                this.hideTutorial();
-                console.log('Tutorial completed!');
+        let tutorialCurrentStep = 1;
+        const tutorialTotalSteps = 4;
+        
+        function initTutorial() {
+            console.log('Initializing tutorial...');
+            const hasSeenTutorial = localStorage.getItem('saucyKPS_tutorialSeen');
+            
+            if (!hasSeenTutorial) {
+                showTutorial();
+            } else {
+                hideTutorial();
             }
-        };
+            
+            setupTutorialEventListeners();
+        }
+        
+        function setupTutorialEventListeners() {
+            console.log('Setting up tutorial event listeners...');
+            
+            // Skip button
+            const skipBtn = document.getElementById('tutorial-skip');
+            if (skipBtn) {
+                skipBtn.onclick = () => {
+                    console.log('Skip clicked');
+                    completeTutorial();
+                };
+            }
+            
+            // Next button
+            const nextBtn = document.getElementById('tutorial-next');
+            if (nextBtn) {
+                nextBtn.onclick = () => {
+                    console.log('Next clicked');
+                    nextStep();
+                };
+            }
+            
+            // Back button
+            const backBtn = document.getElementById('tutorial-back');
+            if (backBtn) {
+                backBtn.onclick = () => {
+                    console.log('Back clicked');
+                    previousStep();
+                };
+            }
+            
+            // Start button
+            const startBtn = document.getElementById('tutorial-start');
+            if (startBtn) {
+                startBtn.onclick = () => {
+                    console.log('Start clicked');
+                    completeTutorial();
+                };
+            }
+            
+            // Progress dots
+            document.querySelectorAll('.progress-dot').forEach((dot, index) => {
+                dot.onclick = () => {
+                    console.log('Dot clicked:', index + 1);
+                    goToStep(index + 1);
+                };
+            });
+        }
+        
+        function showTutorial() {
+            console.log('Showing tutorial');
+            const overlay = document.getElementById('tutorial-overlay');
+            if (overlay) {
+                overlay.classList.add('active');
+                updateTutorialStep();
+            }
+        }
+        
+        function hideTutorial() {
+            console.log('Hiding tutorial');
+            const overlay = document.getElementById('tutorial-overlay');
+            if (overlay) {
+                overlay.classList.remove('active');
+            }
+        }
+        
+        function updateTutorialStep() {
+            console.log('Updating tutorial step:', tutorialCurrentStep);
+            
+            // Hide all steps
+            document.querySelectorAll('.tutorial-step').forEach(step => {
+                step.classList.remove('active');
+            });
+            
+            // Show current step
+            const currentStepEl = document.getElementById(`step-${tutorialCurrentStep}`);
+            if (currentStepEl) {
+                currentStepEl.classList.add('active');
+            }
+            
+            // Update progress dots
+            document.querySelectorAll('.progress-dot').forEach((dot, index) => {
+                dot.classList.remove('active');
+                if (index + 1 === tutorialCurrentStep) {
+                    dot.classList.add('active');
+                }
+            });
+            
+            // Update buttons
+            const backBtn = document.getElementById('tutorial-back');
+            const nextBtn = document.getElementById('tutorial-next');
+            const startBtn = document.getElementById('tutorial-start');
+            
+            if (backBtn) {
+                backBtn.style.display = tutorialCurrentStep === 1 ? 'none' : 'block';
+            }
+            if (nextBtn) {
+                nextBtn.style.display = tutorialCurrentStep < tutorialTotalSteps ? 'block' : 'none';
+            }
+            if (startBtn) {
+                startBtn.style.display = tutorialCurrentStep === tutorialTotalSteps ? 'block' : 'none';
+            }
+        }
+        
+        function nextStep() {
+            console.log('Next step called, current:', tutorialCurrentStep);
+            if (tutorialCurrentStep < tutorialTotalSteps) {
+                tutorialCurrentStep++;
+                console.log('Moving to step:', tutorialCurrentStep);
+                updateTutorialStep();
+            }
+        }
+        
+        function previousStep() {
+            console.log('Previous step called, current:', tutorialCurrentStep);
+            if (tutorialCurrentStep > 1) {
+                tutorialCurrentStep--;
+                console.log('Moving to step:', tutorialCurrentStep);
+                updateTutorialStep();
+            }
+        }
+        
+        function goToStep(stepNumber) {
+            console.log('Go to step called:', stepNumber);
+            if (stepNumber >= 1 && stepNumber <= tutorialTotalSteps) {
+                tutorialCurrentStep = stepNumber;
+                updateTutorialStep();
+            }
+        }
+        
+        function completeTutorial() {
+            console.log('Completing tutorial');
+            localStorage.setItem('saucyKPS_tutorialSeen', 'true');
+            hideTutorial();
+        }
+        
+        // Make functions available globally
+        window.skipTutorial = completeTutorial;
+        window.nextTutorialStep = nextStep;
+        window.prevTutorialStep = previousStep;
 
         // ================================================
 
@@ -2765,19 +2821,282 @@
         window.refreshMenu = refreshMenu;
         window.placeOrder = placeOrder;
         window.testOrder = testOrder;
-        window.submitOrderViaProxy = submitOrderViaProxy;
-        window.testDirectOrder = testDirectOrder;
-        window.submitOrderViaGet = submitOrderViaGet;
-        window.submitOrderViaPost = submitOrderViaPost;
-        window.submitOrderViaImage = submitOrderViaImage;
-        window.submitOrderViaForm = submitOrderViaForm;
-        window.submitOrderViaJSONP = submitOrderViaJSONP;
-        window.testGetRequest = testGetRequest;
-        window.testFailingURL = testFailingURL;
-        window.testAllCORSBypassMethods = testAllCORSBypassMethods;
+        window.testSupabaseConnection = testSupabaseConnection;
+        window.skipTutorial = completeTutorial;
+        window.nextTutorialStep = nextStep;
+        window.prevTutorialStep = previousStep;
         
-        // Submit order via JSONP (completely bypasses CORS)
-        function submitOrderViaJSONP(orderData) {
+        // =====================================================
+        // DEBUGGING FUNCTIONS FOR MENU DISPLAY
+        // =====================================================
+        
+        // Debug menu display issue
+        async function debugMenuDisplay() {
+            console.log('🔍 Debugging menu display issue...');
+            
+            try {
+                // Check Supabase connection
+                console.log('1. Testing Supabase connection...');
+                const { data: menuItems, error } = await supabase
+                    .from('menuitems')
+                    .select('*')
+                    .order('category', { ascending: true })
+                    .order('name', { ascending: true });
+                
+                if (error) {
+                    console.error('❌ Supabase error:', error);
+                    return;
+                }
+                
+                console.log('✅ Supabase connection successful');
+                console.log('📊 Total records in database:', menuItems.length);
+                
+                // Check data structure
+                console.log('2. Checking data structure...');
+                console.log('📋 Sample record:', menuItems[0]);
+                
+                // Check for null/undefined values
+                const validItems = menuItems.filter(item => 
+                    item.name && 
+                    item.category && 
+                    item.price !== null && 
+                    item.price !== undefined
+                );
+                
+                console.log('📊 Valid items (after filtering):', validItems.length);
+                console.log('📊 Invalid items:', menuItems.length - validItems.length);
+                
+                // Check categories
+                const categories = [...new Set(menuItems.map(item => item.category))];
+                console.log('📂 Categories found:', categories);
+                
+                // Check if items are being filtered somewhere
+                console.log('3. Checking current allItems array...');
+                console.log('📊 Current allItems length:', allItems.length);
+                console.log('📋 Current allItems sample:', allItems.slice(0, 3));
+                
+                // Check if there's a limit in the query
+                console.log('4. Testing with limit...');
+                const { data: limitedItems } = await supabase
+                    .from('menuitems')
+                    .select('*')
+                    .limit(100);
+                console.log('📊 Items with limit 100:', limitedItems.length);
+                
+                // Check RLS policies
+                console.log('5. Checking RLS policies...');
+                const { data: policyCheck } = await supabase
+                    .from('menuitems')
+                    .select('name')
+                    .limit(1);
+                console.log('📊 RLS policy test:', policyCheck ? 'Working' : 'Failed');
+                
+                return {
+                    totalInDB: menuItems.length,
+                    validItems: validItems.length,
+                    currentDisplayed: allItems.length,
+                    categories: categories
+                };
+                
+            } catch (error) {
+                console.error('❌ Debug error:', error);
+            }
+        }
+        
+        // Test menu rendering
+        function testMenuRendering() {
+            console.log('🧪 Testing menu rendering...');
+            
+            console.log('📊 allItems length:', allItems.length);
+            console.log('📋 allItems sample:', allItems.slice(0, 5));
+            
+            // Check if items are being filtered by category
+            const categories = [...new Set(allItems.map(item => item.category))];
+            console.log('📂 Categories in allItems:', categories);
+            
+            // Check if there's a limit in renderMenu function
+            console.log('🔍 Checking renderMenu function...');
+            
+            // Force re-render
+            renderMenu();
+            updateCategoryCounts();
+            
+            console.log('✅ Menu rendering test complete');
+        }
+        
+        // Check specific category
+        function checkCategory(categoryName) {
+            console.log(`🔍 Checking category: ${categoryName}`);
+            
+            const categoryItems = allItems.filter(item => item.category === categoryName);
+            console.log(`📊 Items in ${categoryName}:`, categoryItems.length);
+            console.log(`📋 Items:`, categoryItems.map(item => item.name));
+            
+            return categoryItems;
+        }
+        
+        // Force reload menu from Supabase
+        async function forceReloadMenu() {
+            console.log('🔄 Force reloading menu from Supabase...');
+            
+            // Clear cache
+            menuCache = null;
+            cacheTimestamp = 0;
+            
+            // Reload
+            await fetchMenu();
+            
+            console.log('✅ Menu reloaded');
+        }
+        
+        // =====================================================
+        // COMPREHENSIVE TESTING FUNCTIONS
+        // =====================================================
+        
+        // Test complete order placement system
+        async function testCompleteOrderSystem() {
+            console.log('🧪 Testing complete order placement system...');
+            
+            try {
+                // Test 1: Supabase Connection
+                console.log('1️⃣ Testing Supabase connection...');
+                const { data: menuItems, error: menuError } = await supabase
+                    .from('menuitems')
+                    .select('Name, Price, Category')
+                    .limit(5);
+                
+                if (menuError) {
+                    console.error('❌ Supabase connection failed:', menuError);
+                    return false;
+                }
+                console.log('✅ Supabase connection successful');
+                
+                // Test 2: Create Test Order
+                console.log('2️⃣ Creating test order...');
+                const testOrder = {
+                    order_number: 'TEST-' + Date.now(),
+                    customer_name: 'Test Customer',
+                    customer_phone: 'testuser123',
+                    delivery_address: '123 Test Street, Test City',
+                    items: [
+                        {
+                            id: 'CHICK SILOG',
+                            name: 'CHICK SILOG',
+                            price: 8.99,
+                            quantity: 1
+                        }
+                    ],
+                    subtotal: 8.99,
+                    delivery_fee: 0,
+                    total_price: 8.99,
+                    status: 'Pending',
+                    payment_status: 'Unpaid',
+                    notes: 'Test order from browser console'
+                };
+                
+                const { data: order, error: orderError } = await supabase
+                    .from('orders')
+                    .insert([testOrder])
+                    .select()
+                    .single();
+                
+                if (orderError) {
+                    console.error('❌ Order creation failed:', orderError);
+                    return false;
+                }
+                console.log('✅ Order created successfully:', order.id);
+                
+                // Test 3: Create Order Items
+                console.log('3️⃣ Creating order items...');
+                const testOrderItems = [
+                    {
+                        order_id: order.id,
+                        menu_item_name: 'CHICK SILOG',
+                        item_name: 'CHICK SILOG',
+                        item_price: 8.99,
+                        quantity: 1,
+                        total_price: 8.99
+                    }
+                ];
+                
+                const { error: itemsError } = await supabase
+                    .from('order_items')
+                    .insert(testOrderItems);
+                
+                if (itemsError) {
+                    console.error('❌ Order items creation failed:', itemsError);
+                    return false;
+                }
+                console.log('✅ Order items created successfully');
+                
+                // Test 4: Send Telegram Notification
+                console.log('4️⃣ Testing Telegram notification...');
+                try {
+                    await sendTelegramNotificationDirect(order, {
+                        customerName: testOrder.customer_name,
+                        phone: testOrder.customer_phone,
+                        address: testOrder.delivery_address,
+                        items: testOrder.items,
+                        subtotal: testOrder.subtotal,
+                        deliveryFee: testOrder.delivery_fee,
+                        totalPrice: testOrder.total_price,
+                        notes: testOrder.notes
+                    });
+                    console.log('✅ Telegram notification sent');
+                } catch (telegramError) {
+                    console.log('⚠️ Telegram notification failed (non-critical):', telegramError.message);
+                }
+                
+                console.log('🎉 ALL TESTS PASSED! Your order system is working perfectly!');
+                return true;
+                
+            } catch (error) {
+                console.error('❌ Test failed:', error);
+                return false;
+            }
+        }
+        
+        // Quick menu count check
+        async function checkMenuCount() {
+            console.log('🔍 Checking menu count...');
+            
+            try {
+                const { data: menuItems, error } = await supabase
+                    .from('menuitems')
+                    .select('Name, Category');
+                
+                if (error) {
+                    console.error('❌ Error:', error);
+                    return;
+                }
+                
+                console.log('📊 Total menu items:', menuItems.length);
+                
+                const categories = [...new Set(menuItems.map(item => item.Category))];
+                console.log('📂 Categories:', categories);
+                
+                categories.forEach(cat => {
+                    const count = menuItems.filter(item => item.Category === cat).length;
+                    console.log(`  ${cat}: ${count} items`);
+                });
+                
+            } catch (error) {
+                console.error('❌ Check failed:', error);
+            }
+        }
+        
+        // Make debugging functions available globally
+        window.debugMenuDisplay = debugMenuDisplay;
+        window.testMenuRendering = testMenuRendering;
+        window.checkCategory = checkCategory;
+        window.forceReloadMenu = forceReloadMenu;
+        window.testCompleteOrderSystem = testCompleteOrderSystem;
+        window.checkMenuCount = checkMenuCount;
+        
+        // =====================================================
+        // MENU FETCHING FROM SUPABASE
+        // =====================================================
+        async function fetchMenu() {
             return new Promise((resolve, reject) => {
                 try {
                     console.log('Submitting order via JSONP (CORS bypass)...');
@@ -3123,7 +3442,7 @@
             }
         }
 
-        // Fetch Menu
+        // Fetch Menu from Supabase
         async function fetchMenu() {
             // Prevent multiple simultaneous requests
             if (isLoading) {
@@ -3148,134 +3467,168 @@
                 // Update loading text and progress
                 const loadingText = document.getElementById('loading-text');
                 const loadingProgress = document.getElementById('loading-progress');
-                loadingText.textContent = 'Connecting to server...';
+                loadingText.textContent = 'Loading menu from Supabase...';
                 loadingProgress.style.width = '20%';
                 
-                console.log('Fetching menu from:', API_URL);
+                console.log('Fetching menu from Supabase...');
                 
-                let items = null;
-                let apiSuccess = false;
-                
-                try {
-                    // Create abort controller for timeout
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout for Google Apps Script
-                    
-                    const fetchUrl = API_URL + "?action=getMenu&_=" + Date.now() + "&v=" + Math.random();
-                    console.log('Fetching from:', fetchUrl);
-                    
-                    loadingPromise = fetch(fetchUrl, {
-                        signal: controller.signal,
-                        method: 'GET',
-                        mode: 'cors',
-                        redirect: 'follow',
-                        headers: {
-                            'Accept': 'application/json'
-                        }
-                    });
-                    
-                    const response = await loadingPromise;
-                    clearTimeout(timeoutId);
-                    
-                    loadingText.textContent = 'Processing menu data...';
-                    loadingProgress.style.width = '60%';
-                    
-                    console.log('Response status:', response.status);
-                    console.log('Response type:', response.type);
-                    console.log('Response URL:', response.url);
-                    
-                    // Try to get the response text
-                    const text = await response.text();
-                    console.log('Response text length:', text.length);
-                    console.log('Response text (first 1000 chars):', text.substring(0, 1000));
-                    
-                    // Check if response contains HTML error page
-                    if (text.includes('<html>') || text.includes('<!DOCTYPE html>')) {
-                        console.error('Received HTML error page instead of JSON');
-                        throw new Error('Server returned HTML error page');
-                    }
-                    
-                    try {
-                        items = JSON.parse(text);
-                        if (Array.isArray(items) && items.length > 0) {
-                            apiSuccess = true;
-                            console.log('Successfully loaded from API:', items.length, 'items');
-                            console.log('First item:', items[0]);
-                        } else {
-                            console.log('API returned empty array or invalid data');
-                        }
-                    } catch (parseError) {
-                        console.error('JSON parse error:', parseError);
-                        console.log('Raw response that failed to parse:', text);
-                    }
-                } catch (apiError) {
-                    console.error('API fetch failed:', apiError);
-                    console.error('Error details:', {
-                        name: apiError.name,
-                        message: apiError.message,
-                        stack: apiError.stack
-                    });
+                // Check if Supabase client is initialized
+                if (!supabase) {
+                    throw new Error('Supabase client not initialized. Please check your credentials.');
                 }
                 
-                // If API failed, load fallback menu
-                if (!apiSuccess) {
-                    console.log('API failed - loading fallback menu');
-                    loadingText.textContent = 'Loading fallback menu...';
-                    loadingProgress.style.width = '80%';
-                    
-                    // Load fallback menu data
-                    items = getFallbackMenu();
-                    console.log('Loaded fallback menu with', items.length, 'items');
+                // Fetch menu items from Supabase (no limit to get all items)
+                const { data: menuItems, error } = await supabase
+                    .from('menuitems')
+                    .select('*');
+                
+                console.log('🔍 DEBUG: Raw menu items from Supabase:', menuItems);
+                console.log('🔍 DEBUG: Total items fetched:', menuItems ? menuItems.length : 0);
+                
+                loadingText.textContent = 'Processing menu data...';
+                loadingProgress.style.width = '60%';
+                
+                if (error) {
+                    console.error('Supabase error:', error);
+                    throw new Error(`Failed to fetch menu: ${error.message}`);
                 }
-
-                loadingText.textContent = 'Finalizing menu...';
-                loadingProgress.style.width = '80%';
-
-                allItems = items.map(item => ({
-                    ...item,
-                    // Use imageURL from data if it's a URL, otherwise use the emoji
-                    emoji: (item.imageURL && item.imageURL.startsWith('http')) ? item.imageURL : (item.imageURL || '🍽️')
+                
+                if (!menuItems || menuItems.length === 0) {
+                    throw new Error('No menu items found in database');
+                }
+                
+                console.log('Menu items fetched:', menuItems.length);
+                
+                // Sort items by category first, then by name alphabetically
+                const sortedMenuItems = menuItems.sort((a, b) => {
+                    // First sort by category
+                    const categoryA = a.category.toLowerCase();
+                    const categoryB = b.category.toLowerCase();
+                    if (categoryA !== categoryB) {
+                        return categoryA.localeCompare(categoryB);
+                    }
+                    // Then sort by name within each category
+                    return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+                });
+                
+                // Transform data to match expected format
+                allItems = sortedMenuItems.map(item => ({
+                    id: item.name, // Use name as ID since it's the primary key
+                    name: item.name,
+                    description: item.description || '',
+                    price: parseFloat(item.price),
+                    category: item.category,
+                    popular: item.popular || false,
+                    emoji: item.imageurl || '🍽️',
+                    imageURL: item.imageurl || '🍽️'
                 }));
-
-                // Cache the processed data
+                
+                console.log('🔍 DEBUG: Transformed allItems length:', allItems.length);
+                console.log('🔍 DEBUG: Sample transformed items:', allItems.slice(0, 3));
+                
+                // Check for any filtering issues
+                const categories = [...new Set(allItems.map(item => item.category))];
+                console.log('🔍 DEBUG: Categories found:', categories);
+                console.log('🔍 DEBUG: Category counts:', categories.map(cat => ({
+                    category: cat,
+                    count: allItems.filter(item => item.category === cat).length
+                })));
+                
+                // Cache the data
                 menuCache = allItems;
-                cacheTimestamp = Date.now();
+                cacheTimestamp = now;
                 
-                loadingText.textContent = 'Almost ready...';
-                loadingProgress.style.width = '100%';
-
-                console.log('All items loaded:', allItems.length);
-                console.log('Data source:', apiSuccess ? 'API' : 'Sample Data');
-                console.log('Sample items:', allItems.slice(0, 3).map(i => ({name: i.name, category: i.category, emoji: i.emoji})));
+                loadingText.textContent = 'Rendering menu...';
+                loadingProgress.style.width = '80%';
                 
+                // Render the menu
                 renderMenu();
                 updateCategoryCounts();
                 
-                // API success - real data loaded
-                if (apiSuccess) {
-                    console.log('✅ Successfully loaded real menu data from Google Sheets');
-                }
+                loadingText.textContent = 'Complete!';
+                loadingProgress.style.width = '100%';
+                
+                // Hide loader after a short delay
+                setTimeout(() => {
+                    elements.loader.style.display = 'none';
+                }, 500);
+                
+                console.log('Menu loaded successfully from Supabase');
                 
             } catch (error) {
-                console.error('Unexpected error:', error);
-                // Show error state
-                elements.menuContainer.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">❌</div>
-                        <h3>Menu Loading Error</h3>
-                        <p>Something went wrong while loading the menu. Please try again.</p>
-                        <div style="margin-top: 20px;">
-                            <button onclick="refreshMenu()" style="margin: 10px 5px; padding: 12px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600;">Try Again</button>
-                            <button onclick="testAPI()" style="margin: 10px 5px; padding: 12px 20px; background: var(--secondary); color: white; border: none; border-radius: 8px; font-weight: 600;">Test Connection</button>
-                        </div>
-                    </div>
-                `;
-                elements.menuContainer.style.display = 'block';
+                console.error('Failed to fetch menu:', error);
+                
+                // Show error message
+                showToast('Failed to load menu from database. Loading fallback menu...', 'warning');
+                
+                // Load fallback menu
+                allItems = getFallbackMenu();
+                renderMenu();
+                updateCategoryCounts();
+                
+                // Hide loader
+                elements.loader.style.display = 'none';
+                
             } finally {
                 isLoading = false;
                 loadingPromise = null;
-                elements.loader.style.display = 'none';
             }
+        }
+
+        // Fallback menu data in case Supabase fails
+        function getFallbackMenu() {
+            return [
+                {
+                    id: 'CHICK SILOG',
+                    name: 'CHICK SILOG',
+                    description: 'Chicken with garlic rice and egg',
+                    price: 8.99,
+                    category: 'FILIPINO SUNRICE',
+                    popular: true,
+                    emoji: '🍳',
+                    imageURL: '🍳'
+                },
+                {
+                    id: 'PORK TAPSILOG',
+                    name: 'PORK TAPSILOG',
+                    description: 'Tapa, sinangag, at itlog',
+                    price: 8.99,
+                    category: 'FILIPINO SUNRICE',
+                    popular: true,
+                    emoji: '🍳',
+                    imageURL: '🍳'
+                },
+                {
+                    id: 'TOCILOG',
+                    name: 'TOCILOG',
+                    description: 'Tocino with garlic rice and egg',
+                    price: 8.99,
+                    category: 'FILIPINO SUNRICE',
+                    popular: true,
+                    emoji: '🍳',
+                    imageURL: '🍳'
+                },
+                {
+                    id: 'FRIED CHICKEN WITH GRAVY',
+                    name: 'FRIED CHICKEN WITH GRAVY',
+                    description: 'Crispy fried chicken with rich gravy',
+                    price: 12.99,
+                    category: 'DISH OF THE DAY',
+                    popular: true,
+                    emoji: '🍗',
+                    imageURL: '🍗'
+                },
+                {
+                    id: 'CHICKEN ADOBO',
+                    name: 'CHICKEN ADOBO',
+                    description: 'Classic Filipino chicken adobo',
+                    price: 9.99,
+                    category: 'DISH OF THE DAY',
+                    popular: true,
+                    emoji: '🍗',
+                    imageURL: '🍗'
+                }
+            ];
         }
 
         function getItemEmoji(name) {
@@ -3318,7 +3671,11 @@
         }
 
         function filterItems() {
-            console.log('Filtering items - currentCategory:', currentCategory, 'searchQuery:', searchQuery);
+            console.log('🔍 DEBUG: filterItems called');
+            console.log('🔍 DEBUG: allItems length:', allItems.length);
+            console.log('🔍 DEBUG: currentCategory:', currentCategory);
+            console.log('🔍 DEBUG: searchQuery:', searchQuery);
+            
             const filtered = allItems.filter(item => {
                 let matchesCategory;
                 
@@ -3348,7 +3705,13 @@
         }
 
         function renderMenu() {
+            console.log('🔍 DEBUG: renderMenu called');
+            console.log('🔍 DEBUG: allItems length:', allItems.length);
+            console.log('🔍 DEBUG: currentCategory:', currentCategory);
+            
             const filteredItems = filterItems();
+            console.log('🔍 DEBUG: filteredItems length:', filteredItems.length);
+            
             elements.menuContainer.innerHTML = '';
             elements.menuContainer.style.display = 'block';
 
@@ -3801,190 +4164,205 @@
             });
         }
 
-        // New function to handle the actual order placement from checkout page
+        // FULL SUPABASE: Order placement using Supabase
         async function placeOrder() {
-            console.log('=== PLACE ORDER FUNCTION CALLED ===');
-            console.log('Cart contents:', cart);
-            console.log('API URL:', API_URL);
-            try {
-                const notes = elements.checkoutOrderNotes.value.trim();
-                const deliveryAddress = elements.checkoutDeliveryAddress.value.trim();
-                console.log('Notes:', notes);
-                console.log('Delivery Address:', deliveryAddress);
-
-                if (Object.keys(cart).length === 0) {
-                    tg.showAlert("⚠️ Your cart is empty");
-                    return;
-                }
-
-                if (!deliveryAddress) {
-                    tg.showAlert("⚠️ Please enter your delivery address");
-                    return;
-                }
-
-                // Prepare order data
-                const items = Object.values(cart).map(item => ({
+            console.log('Place order function called!');
+            
+            if (Object.keys(cart).length === 0) {
+                tg.showAlert("⚠️ Your cart is empty");
+                return;
+            }
+            
+            const deliveryAddress = elements.checkoutDeliveryAddress.value.trim();
+            if (!deliveryAddress) {
+                tg.showAlert("⚠️ Please enter your delivery address");
+                return;
+            }
+            
+            // Get order data
+            const orderData = {
+                customerName: userInfo ? `${userInfo.first_name} ${userInfo.last_name || ''}`.trim() : 'Customer',
+                phone: userInfo?.username || `ID: ${userInfo?.id || 'unknown'}`,
+                address: deliveryAddress,
+                notes: elements.checkoutOrderNotes.value.trim(),
+                items: Object.values(cart).map(item => ({
                     id: item.id,
                     name: item.name,
-                    price: parseFloat(item.price),
-                    quantity: parseInt(item.quantity)
+                    price: item.price,
+                    quantity: item.quantity
+                })),
+                subtotal: calculateSubtotal(),
+                deliveryFee: DELIVERY_FEE,
+                totalPrice: calculateTotal(),
+                timestamp: new Date().toISOString()
+            };
+            
+            console.log('Submitting order via Supabase:', orderData);
+            
+            try {
+                // Show loading state
+                elements.placeOrderBtn.disabled = true;
+                elements.placeOrderBtn.textContent = 'Placing Order...';
+                
+                // Generate order number
+                const orderNumber = 'SK' + Date.now();
+                
+                // Insert order into Supabase
+                const { data: order, error: orderError } = await supabase
+                    .from('orders')
+                    .insert([{
+                        order_number: orderNumber,
+                        customer_name: orderData.customerName,
+                        customer_phone: orderData.phone,
+                        delivery_address: orderData.address,
+                        items: orderData.items,
+                        subtotal: orderData.subtotal,
+                        delivery_fee: orderData.deliveryFee,
+                        total_price: orderData.totalPrice,
+                        status: 'Pending',
+                        payment_status: 'Unpaid',
+                        notes: orderData.notes
+                    }])
+                    .select()
+                    .single();
+                
+                if (orderError) {
+                    console.error('Order creation error:', orderError);
+                    throw new Error(`Failed to create order: ${orderError.message}`);
+                }
+                
+                console.log('Order created successfully:', order);
+                
+                // Insert order items
+                const orderItems = orderData.items.map(item => ({
+                    order_id: order.id,
+                    menu_item_name: item.id, // Using Name as the foreign key
+                    item_name: item.name,
+                    item_price: item.price,
+                    quantity: item.quantity,
+                    total_price: item.price * item.quantity
                 }));
+                
+                const { error: itemsError } = await supabase
+                    .from('order_items')
+                    .insert(orderItems);
+                
+                if (itemsError) {
+                    console.error('Order items creation error:', itemsError);
+                    // Don't throw here, order was created successfully
+                }
+                
+                // Clear cart
+                cart = {};
+                updateCartUI();
+                hideCheckout();
+                
+                // Show success message
+                showToast('Order placed successfully! Order #' + orderNumber, 'success');
+                
+                // Send Telegram notification via Supabase Edge Function
+                await sendTelegramNotificationViaSupabase(order, orderData);
+                
+            } catch (error) {
+                console.error('Order placement failed:', error);
+                showToast('Failed to place order. Please try again.', 'error');
+            } finally {
+                // Reset button state
+                elements.placeOrderBtn.disabled = false;
+                elements.placeOrderBtn.textContent = `Place Order - $${calculateTotal().toFixed(2)}`;
+            }
+        }
 
-                const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-                const deliveryFee = DELIVERY_FEE;
-                const total = subtotal + deliveryFee;
+        // Helper functions for calculations
+        function calculateSubtotal() {
+            return Object.values(cart).reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
+        }
 
-                // Get user info with username for easy contact
-                const orderUser = userInfo || tg.initDataUnsafe.user || {
-                    id: 123456,
-                    first_name: "Customer",
-                    last_name: "",
-                    username: "customer"
-                };
+        function calculateTotal() {
+            return calculateSubtotal() + DELIVERY_FEE;
+        }
 
-                // Create formatted user object
-                const formattedUser = {
-                    id: orderUser.id,
-                    firstName: orderUser.first_name || "Customer",
-                    lastName: orderUser.last_name || "",
-                    username: orderUser.username || `user_${orderUser.id}`
-                };
+        // =====================================================
+        // TELEGRAM NOTIFICATION VIA SUPABASE EDGE FUNCTION
+        // =====================================================
+        async function sendTelegramNotificationViaSupabase(order, orderData) {
+            try {
+                console.log('Sending Telegram notification via Supabase Edge Function...');
+                
+                // Call Supabase Edge Function for Telegram notification
+                const { data, error } = await supabase.functions.invoke('send-telegram-notification', {
+                    body: {
+                        order: order,
+                        orderData: orderData,
+                        botToken: '8318381464:AAH2YMr_oZP8f27UZ1q2l7I0_eOaIaIFVWI',
+                        adminChatId: '1049527829',
+                        deliveryGroupId: '-1001003046741577'
+                    }
+                });
+                
+                if (error) {
+                    console.error('Supabase Edge Function error:', error);
+                    // Fallback to direct Telegram API call
+                    await sendTelegramNotificationDirect(order, orderData);
+                } else {
+                    console.log('Telegram notification sent via Edge Function:', data);
+                }
+                
+            } catch (error) {
+                console.error('Telegram notification error:', error);
+                // Fallback to direct Telegram API call
+                await sendTelegramNotificationDirect(order, orderData);
+            }
+        }
+        
+        // Fallback: Direct Telegram API call
+        async function sendTelegramNotificationDirect(order, orderData) {
+            try {
+                const botToken = '8318381464:AAH2YMr_oZP8f27UZ1q2l7I0_eOaIaIFVWI';
+                const adminChatId = '1049527829';
+                
+                // Format order message
+                const orderMessage = `
+🍽️ NEW ORDER #${order.order_number}
 
-                // Use GET method to bypass CORS completely
-                try {
-                    elements.placeOrderBtn.textContent = "Placing order...";
-                    elements.placeOrderBtn.disabled = true;
+👤 Customer: ${orderData.customerName}
+📞 Phone: ${orderData.phone}
+📍 Address: ${orderData.address}
 
-                    const orderData = {
-                        customerName: `${formattedUser.firstName} ${formattedUser.lastName}`.trim(),
-                        phone: formattedUser.username || `user_${formattedUser.id}`,
-                        address: deliveryAddress,
-                        items: items,
-                        total: parseFloat(total),
-                        notes: notes || "No special requests",
-                        timestamp: new Date().toISOString()
-                    };
+🛒 Items:
+${orderData.items.map(item => `• ${item.name} x${item.quantity} - $${(item.price * item.quantity).toFixed(2)}`).join('\n')}
 
-                    console.log('Submitting order via GET method (bypasses CORS)...');
-                    console.log('Order data:', orderData);
+💰 Subtotal: $${orderData.subtotal.toFixed(2)}
+🚚 Delivery: $${orderData.deliveryFee.toFixed(2)}
+💵 Total: $${orderData.totalPrice.toFixed(2)}
 
-                // Use POST method with CORS workaround
-                const response = await fetch(API_URL, {
+📝 Notes: ${orderData.notes || 'None'}
+
+Status: ${order.status} | Payment: ${order.payment_status}
+                `.trim();
+                
+                // Send to Telegram
+                const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+                const response = await fetch(telegramUrl, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'text/plain;charset=utf-8'
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        action: 'newOrder',
-                        ...orderData
-                    }),
-                    redirect: 'follow'
+                        chat_id: adminChatId,
+                        text: orderMessage,
+                        parse_mode: 'HTML'
+                    })
                 });
                 
-                console.log('POST response status:', response.status);
-                console.log('POST response ok:', response.ok);
-                
-                const responseText = await response.text();
-                console.log('POST response text:', responseText);
-                
-                let result;
                 if (response.ok) {
-                    try {
-                        result = JSON.parse(responseText);
-                        console.log('POST order successful:', result);
-                    } catch (parseError) {
-                        console.error('Failed to parse POST JSON response:', parseError);
-                        // Return success if response indicates it worked
-                        result = {
-                            success: true,
-                            message: 'Order submitted successfully via POST',
-                            orderId: 'POST-' + Date.now()
-                        };
-                    }
+                    console.log('Direct Telegram notification sent successfully');
                 } else {
-                    throw new Error(`POST request failed: ${response.status} - ${responseText}`);
+                    console.error('Failed to send direct Telegram notification');
                 }
-
-                    // Check if the response indicates success
-                    if (result && result.success === true) {
-                        console.log('✅ Order was successful!');
-                        
-                        // Create detailed order summary
-                        let orderSummary = `✅ Order Confirmed!\n\n`;
-                        orderSummary += `Order ID: ${result.orderId || 'N/A'}\n`;
-                        orderSummary += `Order Total: $${total.toFixed(2)}\n`;
-                        orderSummary += `Subtotal: $${subtotal.toFixed(2)}\n`;
-                        if (deliveryFee > 0) {
-                            orderSummary += `Delivery Fee: $${deliveryFee.toFixed(2)}\n`;
-                        }
-                        orderSummary += `\nItems in your order:\n`;
-                        items.forEach(item => {
-                            orderSummary += `• ${item.name} × ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}\n`;
-                        });
-                        orderSummary += `\n📍 Delivery Address:\n${deliveryAddress}\n`;
-                        if (notes) {
-                            orderSummary += `\n📝 Special Instructions:\n${notes}\n`;
-                        }
-                        orderSummary += `\n📱 Payment Instructions:\n`;
-                        orderSummary += `Please send a screenshot of the QR code payment to our direct message.\n\n`;
-                        orderSummary += `Riders can contact you via: @${formattedUser.username}`;
-
-                        // Show success popup
-                        tg.showPopup({
-                            title: '✅ Order Confirmed!',
-                            message: orderSummary,
-                            buttons: [{ id: 'ok', type: 'ok' }]
-                        }, () => {
-                            // Clear cart and reset
-                            cart = {};
-                            updateCartUI();
-                            hideCheckout();
-                            hideCart();
-                            elements.checkoutDeliveryAddress.value = '';
-                            elements.checkoutOrderNotes.value = '';
-                            tg.close();
-                        });
-                        return;
-                    } else {
-                        // Response was not successful
-                        const errorMsg = result ? result.message : 'Order failed for unknown reason';
-                        throw new Error(errorMsg);
-                    }
-                } catch (apiError) {
-                    console.error('GET order failed:', apiError);
-                    throw apiError; // Re-throw to be handled by outer catch
-                }
+                
             } catch (error) {
-                console.error('Place order error:', error);
-                console.error('Error details:', {
-                    message: error.message,
-                    stack: error.stack,
-                    name: error.name
-                });
-                
-                // Determine specific error message
-                let errorMessage = "Unknown error occurred";
-                if (error.message.includes("Failed to fetch")) {
-                    errorMessage = "Network connection failed. Please check your internet connection and try again.";
-                } else if (error.message.includes("load failed")) {
-                    errorMessage = "Order submission failed. The server may be temporarily unavailable. Please try again.";
-                } else if (error.message.includes("HTTP 403")) {
-                    errorMessage = "Access denied. Please contact support.";
-                } else if (error.message.includes("HTTP 404")) {
-                    errorMessage = "Service not found. Please contact support.";
-                } else if (error.message.includes("HTTP 500")) {
-                    errorMessage = "Server error. Please try again later.";
-                } else if (error.message.includes("Page not found")) {
-                    errorMessage = "Order service is temporarily unavailable. Please try again in a few minutes.";
-                } else if (error.message) {
-                    errorMessage = error.message;
-                }
-                
-                // Show error popup
-                tg.showAlert(`❌ Order failed: ${errorMessage}`);
-            } finally {
-                elements.placeOrderBtn.textContent = `Place Order - $${(Object.values(cart).reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0) + DELIVERY_FEE).toFixed(2)}`;
-                elements.placeOrderBtn.disabled = false;
+                console.error('Direct Telegram notification error:', error);
             }
         }
 
@@ -4183,13 +4561,49 @@
             }
         });
 
+        // Test Supabase connection
+        async function testSupabaseConnection() {
+            console.log('Testing Supabase connection...');
+            try {
+                if (!supabase) {
+                    console.error('Supabase client not initialized');
+                    return false;
+                }
+                
+                const { data, error } = await supabase
+                    .from('menuitems')
+                    .select('count')
+                    .limit(1);
+                
+                if (error) {
+                    console.error('Supabase test error:', error);
+                    return false;
+                }
+                
+                console.log('Supabase connection successful');
+                return true;
+            } catch (error) {
+                console.error('Supabase test failed:', error);
+                return false;
+            }
+        }
+
         // Initialize with optimized loading
         initUserInfo();
-        TutorialSystem.init();
+        initTutorial();
         
-        // Start loading menu after a small delay to let UI render first
-        setTimeout(() => {
-            fetchMenu();
+        // Test connection first, then load menu
+        setTimeout(async () => {
+            const connectionOk = await testSupabaseConnection();
+            if (connectionOk) {
+                fetchMenu();
+            } else {
+                console.log('Supabase connection failed, loading fallback menu');
+                allItems = getFallbackMenu();
+                renderMenu();
+                updateCategoryCounts();
+                elements.loader.style.display = 'none';
+            }
         }, 100);
     </script>
 </body>
