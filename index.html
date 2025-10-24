@@ -123,54 +123,6 @@
             font-size: 1.2em;
         }
 
-        /* Floating Cart Button */
-        .floating-cart {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 8px 24px rgba(255, 45, 85, 0.4);
-            cursor: pointer;
-            z-index: 1000;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: none;
-        }
-
-        .floating-cart.active {
-            display: flex;
-        }
-
-        .floating-cart:active {
-            transform: scale(0.95);
-        }
-
-        .cart-icon {
-            font-size: 1.6em;
-            color: white;
-        }
-
-        .cart-badge {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: var(--accent);
-            color: white;
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7em;
-            font-weight: 700;
-            border: 2px solid white;
-        }
 
         /* Categories */
         .categories {
@@ -248,15 +200,19 @@
             left: 0;
             right: 0;
             bottom: 0;
+            width: 100vw;
+            height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 15px;
+            gap: 20px;
             padding: 40px 20px;
             text-align: center;
             background: var(--background);
             z-index: 1000;
+            margin: 0;
+            box-sizing: border-box;
         }
 
 
@@ -1928,18 +1884,16 @@
 
     <!-- Loading -->
     <div id="loader" class="loader-container">
-        <p id="loading-text" style="color: var(--text-secondary);">Loading menu...</p>
-        <div class="loading-progress" id="loading-progress" style="width: 0%; height: 3px; background: var(--primary); margin-top: 10px; border-radius: 2px; transition: width 0.3s ease;"></div>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+            <div style="font-size: 2em; color: var(--primary);">🍽️</div>
+            <p id="loading-text" style="color: var(--text-primary); font-size: 1.1em; font-weight: 600; margin: 0;">Loading menu...</p>
+            <div class="loading-progress" id="loading-progress" style="width: 0%; height: 4px; background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%); border-radius: 2px; transition: width 0.3s ease; min-width: 200px;"></div>
+        </div>
     </div>
 
     <!-- Menu Container -->
     <div id="menu-container" class="menu-container" style="display: none;"></div>
 
-    <!-- Floating Cart Button -->
-    <div class="floating-cart" id="floating-cart">
-        <span class="cart-icon">🛒</span>
-        <span class="cart-badge" id="cart-badge">0</span>
-    </div>
 
     <!-- Cart Overlay -->
     <div class="cart-overlay" id="cart-overlay"></div>
@@ -2112,8 +2066,6 @@
         const elements = {
             loader: document.getElementById('loader'),
             menuContainer: document.getElementById('menu-container'),
-            floatingCart: document.getElementById('floating-cart'),
-            cartBadge: document.getElementById('cart-badge'),
             cartSheet: document.getElementById('cart-sheet'),
             cartOverlay: document.getElementById('cart-overlay'),
             cartItemsList: document.getElementById('cart-items-list'),
@@ -2694,32 +2646,32 @@
             const itemCount = Object.values(cart).reduce((sum, item) => sum + item.quantity, 0);
             const subtotal = Object.values(cart).reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
             const total = subtotal + DELIVERY_FEE;
-
-            elements.cartBadge.textContent = itemCount;
-            elements.floatingCart.className = itemCount > 0 ? 'floating-cart active' : 'floating-cart';
             
             elements.subtotal.textContent = `$${subtotal.toFixed(2)}`;
             elements.total.textContent = `$${total.toFixed(2)}`;
 
             // Update order summary bar
-            document.getElementById('order-item-count').textContent = itemCount;
-            document.getElementById('order-total').textContent = `$${total.toFixed(2)}`;
+            const orderItemCount = document.getElementById('order-item-count');
+            const orderTotal = document.getElementById('order-total');
+            
+            if (orderItemCount) orderItemCount.textContent = itemCount;
+            if (orderTotal) orderTotal.textContent = `$${total.toFixed(2)}`;
 
             // Show/hide order summary bar
             if (itemCount > 0) {
-                elements.orderSummaryBar.style.display = 'block';
-                elements.orderItemsPreview.style.display = 'block';
+                if (elements.orderSummaryBar) elements.orderSummaryBar.style.display = 'flex';
+                if (elements.orderItemsPreview) elements.orderItemsPreview.style.display = 'block';
                 updateOrderItemsPreview();
             } else {
-                elements.orderSummaryBar.style.display = 'none';
-                elements.orderItemsPreview.style.display = 'none';
+                if (elements.orderSummaryBar) elements.orderSummaryBar.style.display = 'none';
+                if (elements.orderItemsPreview) elements.orderItemsPreview.style.display = 'none';
             }
 
             renderCartItems();
             updateOrderSummary();
             
             // Update checkout page if it's visible
-            if (elements.checkoutPage.classList.contains('active')) {
+            if (elements.checkoutPage && elements.checkoutPage.classList.contains('active')) {
                 renderCheckoutItems();
                 updateCheckoutTotals();
             }
@@ -3134,7 +3086,6 @@
         // No sample menu function - app only uses real Google Sheets data
 
         // Event Listeners
-        elements.floatingCart.addEventListener('click', showCart);
         elements.cartOverlay.addEventListener('click', hideCart);
         
         // Add checkout button event listener with debugging
@@ -3210,10 +3161,14 @@
             });
         }
 
-        // Order button in summary bar
+        // Order button in summary bar - goes directly to checkout
         if (elements.orderButton) {
             elements.orderButton.addEventListener('click', () => {
-                showCart();
+                if (Object.keys(cart).length === 0) {
+                    tg.showAlert("⚠️ Your cart is empty");
+                    return;
+                }
+                showCheckout();
             });
         }
 
