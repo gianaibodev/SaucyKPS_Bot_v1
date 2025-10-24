@@ -1534,7 +1534,8 @@
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbwYIcjTrHUWPNDK0Xjllzjex3N3e8D1R9dcnijln5WttNN_iA7-2e2KQ3qDBaTuOOSG/exec";
+        // Your deployed Google Apps Script URL
+        const API_URL = "https://script.google.com/macros/s/AKfycbwzC_46ZlGb3lWNweCvGEMq61rKjom8lkXrHSFWWpN_LyoKc0mg8CXovevhVVoaktrDFg/exec";
 
         const tg = window.Telegram.WebApp;
         tg.ready();
@@ -1715,117 +1716,7 @@
         let isLoading = false;
         let loadingPromise = null;
 
-        // Sample menu data as fallback
-        const SAMPLE_MENU_DATA = [
-            {
-                id: 1,
-                name: "Tapsilog",
-                description: "Tapa, sinangag, at itlog - the perfect Filipino breakfast combo",
-                price: 8.99,
-                category: "FILIPINO SUNRICE",
-                popular: true,
-                imageURL: "🍳"
-            },
-            {
-                id: 2,
-                name: "Chicken Adobo",
-                description: "Classic Filipino chicken adobo with rice",
-                price: 9.99,
-                category: "DISH OF THE DAY",
-                popular: true,
-                imageURL: "🍗"
-            },
-            {
-                id: 3,
-                name: "Pork Sinigang",
-                description: "Sour soup with pork and vegetables",
-                price: 10.99,
-                category: "DISH OF THE DAY",
-                popular: false,
-                imageURL: "🍲"
-            },
-            {
-                id: 4,
-                name: "Pinakbet",
-                description: "Mixed vegetables with shrimp paste",
-                price: 7.99,
-                category: "VEGETABLE MEAL",
-                popular: false,
-                imageURL: "🥗"
-            },
-            {
-                id: 5,
-                name: "Grilled Bangus",
-                description: "Grilled milkfish with garlic rice",
-                price: 11.99,
-                category: "SEAFOOD",
-                popular: true,
-                imageURL: "🐟"
-            },
-            {
-                id: 6,
-                name: "Lumpia",
-                description: "Crispy spring rolls with sweet sauce",
-                price: 4.99,
-                category: "SNACKS",
-                popular: true,
-                imageURL: "🌯"
-            },
-            {
-                id: 7,
-                name: "Longsilog",
-                description: "Longganisa, sinangag, at itlog",
-                price: 8.49,
-                category: "FILIPINO SUNRICE",
-                popular: false,
-                imageURL: "🍳"
-            },
-            {
-                id: 8,
-                name: "Beef Caldereta",
-                description: "Beef stew with potatoes and carrots",
-                price: 12.99,
-                category: "DISH OF THE DAY",
-                popular: false,
-                imageURL: "🥘"
-            },
-            {
-                id: 9,
-                name: "Ginataang Kalabasa",
-                description: "Squash in coconut milk with shrimp",
-                price: 8.99,
-                category: "VEGETABLE MEAL",
-                popular: false,
-                imageURL: "🥗"
-            },
-            {
-                id: 10,
-                name: "Fried Tilapia",
-                description: "Crispy fried tilapia with rice",
-                price: 9.99,
-                category: "SEAFOOD",
-                popular: false,
-                imageURL: "🐟"
-            },
-            {
-                id: 11,
-                name: "Turon",
-                description: "Banana spring rolls with caramel",
-                price: 3.99,
-                category: "SNACKS",
-                popular: true,
-                imageURL: "🍌"
-            },
-            {
-                id: 12,
-                name: "Hotsilog",
-                description: "Hotdog, sinangag, at itlog",
-                price: 7.99,
-                category: "FILIPINO SUNRICE",
-                popular: false,
-                imageURL: "🌭"
-            }
-        ];
+        // No sample data - app will only use real Google Sheets data
 
         // Function to force refresh menu (bypass cache)
         function refreshMenu() {
@@ -1846,8 +1737,7 @@
                 
                 const response = await fetch(testUrl, {
                     method: 'GET',
-                    mode: 'cors',
-                    cache: 'no-cache'
+                    redirect: 'follow'
                 });
                 
                 console.log('Response received!');
@@ -1856,6 +1746,7 @@
                 console.log('Headers:', [...response.headers.entries()]);
                 console.log('OK:', response.ok);
                 console.log('Type:', response.type);
+                console.log('URL:', response.url);
                 
                 const text = await response.text();
                 console.log('Raw response text length:', text.length);
@@ -1870,6 +1761,18 @@
                         console.log('Data length:', data ? data.length : 'null/undefined');
                         console.log('First item:', data && data[0]);
                         console.log('Full data:', data);
+                        
+                        // If we got data, update the app immediately
+                        if (Array.isArray(data) && data.length > 0) {
+                            console.log('🎉 API is working! Updating app with real data...');
+                            allItems = data.map(item => ({
+                                ...item,
+                                emoji: (item.imageURL && item.imageURL.startsWith('http')) ? item.imageURL : (item.imageURL || '🍽️')
+                            }));
+                            renderMenu();
+                            updateCategoryCounts();
+                            elements.loader.style.display = 'none';
+                        }
                     } catch (e) {
                         console.error('❌ JSON parse error:', e);
                         console.log('Text that failed to parse:', text);
@@ -1941,17 +1844,18 @@
                 try {
                     // Create abort controller for timeout
                     const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+                    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout for Google Apps Script
                     
                     const fetchUrl = API_URL + "?action=getMenu&_=" + Date.now() + "&v=" + Math.random();
                     console.log('Fetching from:', fetchUrl);
                     
                     loadingPromise = fetch(fetchUrl, {
                         signal: controller.signal,
+                        method: 'GET',
                         mode: 'cors',
+                        redirect: 'follow',
                         headers: {
-                            'Accept': 'application/json',
-                            'Cache-Control': 'no-cache'
+                            'Accept': 'application/json'
                         }
                     });
                     
@@ -1962,31 +1866,48 @@
                     loadingProgress.style.width = '60%';
                     
                     console.log('Response status:', response.status);
+                    console.log('Response type:', response.type);
+                    console.log('Response URL:', response.url);
                     
-                    if (response.ok) {
-                        const text = await response.text();
-                        console.log('Response text (first 500 chars):', text.substring(0, 500));
-                        
-                        try {
-                            items = JSON.parse(text);
-                            if (Array.isArray(items) && items.length > 0) {
-                                apiSuccess = true;
-                                console.log('Successfully loaded from API:', items.length, 'items');
-                            }
-                        } catch (parseError) {
-                            console.error('JSON parse error:', parseError);
+                    // Try to get the response text
+                    const text = await response.text();
+                    console.log('Response text length:', text.length);
+                    console.log('Response text (first 1000 chars):', text.substring(0, 1000));
+                    
+                    // Check if response contains HTML error page
+                    if (text.includes('<html>') || text.includes('<!DOCTYPE html>')) {
+                        console.error('Received HTML error page instead of JSON');
+                        throw new Error('Server returned HTML error page');
+                    }
+                    
+                    try {
+                        items = JSON.parse(text);
+                        if (Array.isArray(items) && items.length > 0) {
+                            apiSuccess = true;
+                            console.log('Successfully loaded from API:', items.length, 'items');
+                            console.log('First item:', items[0]);
+                        } else {
+                            console.log('API returned empty array or invalid data');
                         }
+                    } catch (parseError) {
+                        console.error('JSON parse error:', parseError);
+                        console.log('Raw response that failed to parse:', text);
                     }
                 } catch (apiError) {
                     console.error('API fetch failed:', apiError);
+                    console.error('Error details:', {
+                        name: apiError.name,
+                        message: apiError.message,
+                        stack: apiError.stack
+                    });
                 }
                 
-                // If API failed, use sample data
+                // If API failed, show error - no fallback data
                 if (!apiSuccess) {
-                    console.log('API failed, using sample data');
-                    loadingText.textContent = 'Loading sample menu...';
-                    loadingProgress.style.width = '70%';
-                    items = SAMPLE_MENU_DATA;
+                    console.log('API failed - no fallback data available');
+                    loadingText.textContent = 'Failed to load menu from server';
+                    loadingProgress.style.width = '100%';
+                    throw new Error('Failed to load menu from Google Sheets');
                 }
 
                 loadingText.textContent = 'Finalizing menu...';
@@ -2012,23 +1933,15 @@
                 renderMenu();
                 updateCategoryCounts();
                 
-                // Show a subtle notification if using sample data
-                if (!apiSuccess) {
-                    setTimeout(() => {
-                        console.log('Using sample data - API unavailable');
-                    }, 1000);
+                // API success - real data loaded
+                if (apiSuccess) {
+                    console.log('✅ Successfully loaded real menu data from Google Sheets');
                 }
                 
             } catch (error) {
                 console.error('Unexpected error:', error);
-                // Fallback to sample data even on unexpected errors
-                console.log('Using sample data due to error');
-                allItems = SAMPLE_MENU_DATA.map(item => ({
-                    ...item,
-                    emoji: item.imageURL || '🍽️'
-                }));
-                renderMenu();
-                updateCategoryCounts();
+                // No fallback data - show error state
+                showEmptyState();
             } finally {
                 isLoading = false;
                 loadingPromise = null;
@@ -2058,7 +1971,11 @@
             // Return the category directly from the spreadsheet in lowercase
             if (item.category) {
                 const cat = item.category.toLowerCase().trim();
-                // Map the exact categories from your spreadsheet
+                // Map the categories from your Google Apps Script
+                if (cat === 'mains') return 'dish of the day';
+                if (cat === 'appetizers') return 'snacks';
+                if (cat === 'desserts') return 'snacks';
+                if (cat === 'beverages') return 'snacks';
                 if (cat === 'filipino sunrice') return 'filipino sunrice';
                 if (cat === 'dish of the day') return 'dish of the day';
                 if (cat === 'vegetable meal') return 'vegetable meal';
@@ -2457,32 +2374,18 @@
                         <li>Network connection issue</li>
                     </ul>
                     <div style="margin-top: 20px;">
-                        <button onclick="loadSampleMenu()" style="margin: 10px 5px; padding: 12px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600;">Use Sample Menu</button>
-                        <button onclick="refreshMenu()" style="margin: 10px 5px; padding: 12px 20px; background: var(--secondary); color: white; border: none; border-radius: 8px; font-weight: 600;">Retry API</button>
+                        <button onclick="refreshMenu()" style="margin: 10px 5px; padding: 12px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600;">Retry API</button>
+                        <button onclick="testAPI()" style="margin: 10px 5px; padding: 12px 20px; background: var(--secondary); color: white; border: none; border-radius: 8px; font-weight: 600;">Test API</button>
                     </div>
                     <div style="margin-top: 15px;">
                         <button onclick="testConnectivity()" style="margin: 5px; padding: 8px 16px; background: var(--warning); color: white; border: none; border-radius: 6px; font-size: 0.9em;">Test Connection</button>
-                        <button onclick="testAPI()" style="margin: 5px; padding: 8px 16px; background: var(--accent); color: white; border: none; border-radius: 6px; font-size: 0.9em;">Test API</button>
                     </div>
                 </div>
             `;
             elements.menuContainer.style.display = 'block';
         }
 
-        // Function to load sample menu directly
-        function loadSampleMenu() {
-            console.log('Loading sample menu...');
-            allItems = SAMPLE_MENU_DATA.map(item => ({
-                ...item,
-                emoji: item.imageURL || '🍽️'
-            }));
-            renderMenu();
-            updateCategoryCounts();
-            elements.loader.style.display = 'none';
-        }
-
-        // Make loadSampleMenu available globally
-        window.loadSampleMenu = loadSampleMenu;
+        // No sample menu function - app only uses real Google Sheets data
 
         // Event Listeners
         elements.floatingCart.addEventListener('click', showCart);
