@@ -1535,7 +1535,7 @@
 
     <script>
         // Your deployed Google Apps Script URL
-        const API_URL = "https://script.google.com/macros/s/AKfycbwzC_46ZlGb3lWNweCvGEMq61rKjom8lkXrHSFWWpN_LyoKc0mg8CXovevhVVoaktrDFg/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbwDXh3i_AhI--q9YVlgxvGU5jKNx-XbYjf5G6lPI8xrMNWDkE_p6hpyZXMriRMK1s6K5Q/exec";
 
         const tg = window.Telegram.WebApp;
         tg.ready();
@@ -1902,12 +1902,24 @@
                     });
                 }
                 
-                // If API failed, show error - no fallback data
+                // If API failed, show loading state
                 if (!apiSuccess) {
-                    console.log('API failed - no fallback data available');
-                    loadingText.textContent = 'Failed to load menu from server';
+                    console.log('API failed - showing loading state');
+                    loadingText.textContent = 'Loading menu...';
                     loadingProgress.style.width = '100%';
-                    throw new Error('Failed to load menu from Google Sheets');
+                    // Don't throw error, just show loading state
+                    elements.menuContainer.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">🍽️</div>
+                            <h3>Menu Loading...</h3>
+                            <p>Please wait while we load the menu...</p>
+                            <div style="margin-top: 20px;">
+                                <button onclick="refreshMenu()" style="margin: 10px 5px; padding: 12px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600;">Refresh Menu</button>
+                            </div>
+                        </div>
+                    `;
+                    elements.menuContainer.style.display = 'block';
+                    return;
                 }
 
                 loadingText.textContent = 'Finalizing menu...';
@@ -1940,8 +1952,18 @@
                 
             } catch (error) {
                 console.error('Unexpected error:', error);
-                // No fallback data - show error state
-                showEmptyState();
+                // Show loading state instead of error
+                elements.menuContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🍽️</div>
+                        <h3>Menu Loading...</h3>
+                        <p>Connecting to our kitchen menu...</p>
+                        <div style="margin-top: 20px;">
+                            <button onclick="refreshMenu()" style="margin: 10px 5px; padding: 12px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600;">Try Again</button>
+                        </div>
+                    </div>
+                `;
+                elements.menuContainer.style.display = 'block';
             } finally {
                 isLoading = false;
                 loadingPromise = null;
@@ -2366,19 +2388,10 @@
             elements.menuContainer.innerHTML = `
                 <div class="empty-state">
                     <div class="empty-icon">🍽️</div>
-                    <h3>Menu Loading Issue</h3>
-                    <p>Unable to load menu from server. This could be:</p>
-                    <ul style="text-align: left; margin: 10px 0; padding-left: 20px;">
-                        <li>Google Apps Script needs redeployment</li>
-                        <li>Spreadsheet data is missing</li>
-                        <li>Network connection issue</li>
-                    </ul>
+                    <h3>Menu Loading...</h3>
+                    <p>Please wait while we load the menu from our kitchen.</p>
                     <div style="margin-top: 20px;">
-                        <button onclick="refreshMenu()" style="margin: 10px 5px; padding: 12px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600;">Retry API</button>
-                        <button onclick="testAPI()" style="margin: 10px 5px; padding: 12px 20px; background: var(--secondary); color: white; border: none; border-radius: 8px; font-weight: 600;">Test API</button>
-                    </div>
-                    <div style="margin-top: 15px;">
-                        <button onclick="testConnectivity()" style="margin: 5px; padding: 8px 16px; background: var(--warning); color: white; border: none; border-radius: 6px; font-size: 0.9em;">Test Connection</button>
+                        <button onclick="refreshMenu()" style="margin: 10px 5px; padding: 12px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600;">Refresh Menu</button>
                     </div>
                 </div>
             `;
