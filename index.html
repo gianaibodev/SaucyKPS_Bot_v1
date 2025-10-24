@@ -2645,6 +2645,76 @@
         window.placeOrder = placeOrder;
         window.testOrder = testOrder;
         window.submitOrderViaProxy = submitOrderViaProxy;
+        window.testDirectOrder = testDirectOrder;
+        window.submitOrderViaGet = submitOrderViaGet;
+        
+        // Submit order via GET request (bypasses CORS completely)
+        async function submitOrderViaGet(orderData) {
+            try {
+                console.log('Submitting order via GET request...');
+                
+                // Convert order data to URL parameters
+                const params = new URLSearchParams();
+                params.append('action', 'newOrder');
+                params.append('customerName', orderData.customerName);
+                params.append('phone', orderData.phone);
+                params.append('address', orderData.address);
+                params.append('items', JSON.stringify(orderData.items));
+                params.append('total', orderData.total.toString());
+                params.append('notes', orderData.notes);
+                params.append('timestamp', orderData.timestamp);
+                
+                const url = `${API_URL}?${params.toString()}`;
+                console.log('GET order URL:', url);
+                
+                // Use GET request with proper headers (from Stack Overflow solution)
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8'
+                    },
+                    redirect: 'follow'
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('GET order successful:', result);
+                    return result;
+                } else {
+                    throw new Error(`GET request failed: ${response.status}`);
+                }
+                
+            } catch (error) {
+                console.error('GET order failed:', error);
+                throw error;
+            }
+        }
+        
+        // Test direct order submission (bypasses CORS by using GET with callback)
+        async function testDirectOrder() {
+            try {
+                console.log('Testing direct order submission...');
+                
+                // Create a test order
+                const testOrder = {
+                    customerName: "Test Customer",
+                    phone: "testuser123",
+                    address: "123 Test Street, Test City",
+                    items: [
+                        {id: 1, name: "Test Item", price: 10.99, quantity: 1}
+                    ],
+                    total: 10.99,
+                    notes: "Test order via direct method",
+                    timestamp: new Date().toISOString()
+                };
+                
+                const result = await submitOrderViaGet(testOrder);
+                console.log('Direct order successful:', result);
+                
+            } catch (error) {
+                console.error('Direct order failed:', error);
+            }
+        }
         
         // Test order function for debugging
         async function testOrder() {
@@ -2680,28 +2750,39 @@
             try {
                 console.log('Using proxy method to submit order...');
                 
-                // Use a CORS proxy service
-                const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-                const targetUrl = API_URL;
+                // Try multiple CORS proxy services
+                const proxyUrls = [
+                    'https://api.allorigins.win/raw?url=',
+                    'https://corsproxy.io/?',
+                    'https://thingproxy.freeboard.io/fetch/'
+                ];
                 
-                const response = await fetch(proxyUrl + targetUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: JSON.stringify(orderData)
-                });
-                
-                if (response.ok) {
-                    const result = await response.json();
-                    console.log('Proxy order successful:', result);
-                    return result;
-                } else {
-                    throw new Error(`Proxy request failed: ${response.status}`);
+                for (const proxyUrl of proxyUrls) {
+                    try {
+                        console.log(`Trying proxy: ${proxyUrl}`);
+                        const response = await fetch(proxyUrl + encodeURIComponent(API_URL), {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(orderData)
+                        });
+                        
+                        if (response.ok) {
+                            const result = await response.json();
+                            console.log('Proxy order successful:', result);
+                            return result;
+                        } else {
+                            console.log(`Proxy ${proxyUrl} failed with status: ${response.status}`);
+                        }
+                    } catch (proxyError) {
+                        console.log(`Proxy ${proxyUrl} failed:`, proxyError.message);
+                    }
                 }
+                
+                throw new Error('All proxy services failed');
             } catch (error) {
-                console.error('Proxy method failed:', error);
+                console.error('All proxy methods failed:', error);
                 throw error;
             }
         }
@@ -3433,24 +3514,12 @@
                     username: orderUser.username || `user_${orderUser.id}`
                 };
 
-                // Try API first, then fallback if it fails
+                // Use GET method to bypass CORS completely
                 try {
                     elements.placeOrderBtn.textContent = "Placing order...";
                     elements.placeOrderBtn.disabled = true;
 
-                    console.log('Submitting order to API:', {
-                        user: formattedUser,
-                        items: items,
-                        subtotal: subtotal,
-                        deliveryFee: deliveryFee,
-                        totalPrice: total,
-                        address: deliveryAddress,
-                        notes: notes
-                    });
-
-                    console.log('Making POST request to:', API_URL);
-                    console.log('Request body:', JSON.stringify({
-                        action: "newOrder",
+                    const orderData = {
                         customerName: `${formattedUser.firstName} ${formattedUser.lastName}`.trim(),
                         phone: formattedUser.username || `user_${formattedUser.id}`,
                         address: deliveryAddress,
@@ -3458,102 +3527,62 @@
                         total: parseFloat(total),
                         notes: notes || "No special requests",
                         timestamp: new Date().toISOString()
-                    }));
+                    };
 
-                    const response = await fetch(API_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' }, 
-                        body: JSON.stringify({
-                            action: "newOrder",
-                            customerName: `${formattedUser.firstName} ${formattedUser.lastName}`.trim(),
-                            phone: formattedUser.username || `user_${formattedUser.id}`,
-                            address: deliveryAddress,
-                            items: items,
-                            total: parseFloat(total),
-                            notes: notes || "No special requests",
-                            timestamp: new Date().toISOString()
-                        }),
-                        mode: 'cors',
-                        redirect: 'follow'
-                    });
+                    console.log('Submitting order via GET method (bypasses CORS)...');
+                    console.log('Order data:', orderData);
 
-                    console.log('Order submitted successfully, response:', response);
-                    console.log('Response status:', response.status);
-                    console.log('Response ok:', response.ok);
-                    console.log('Response headers:', [...response.headers.entries()]);
-                    
-                    if (response.ok) {
-                        const responseText = await response.text();
-                        console.log('Response text:', responseText);
-                        console.log('Response text length:', responseText.length);
+                    // Use GET method which doesn't trigger CORS preflight
+                    const result = await submitOrderViaGet(orderData);
+                    console.log('Order submitted successfully:', result);
+
+                    // Check if the response indicates success
+                    if (result && result.success === true) {
+                        console.log('✅ Order was successful!');
                         
-                        // Try to parse the response
-                        let responseData;
-                        try {
-                            responseData = JSON.parse(responseText);
-                            console.log('Parsed response data:', responseData);
-                            
-                            // Check if the response indicates success
-                            if (responseData.success === true) {
-                                console.log('✅ Order was successful!');
-                            } else {
-                                console.log('❌ Order failed:', responseData.message || 'Unknown error');
-                            }
-                        } catch (parseError) {
-                            console.error('Failed to parse response as JSON:', parseError);
-                            console.log('Raw response text:', responseText);
-                            console.log('Response text type:', typeof responseText);
-                            console.log('Response text length:', responseText.length);
+                        // Create detailed order summary
+                        let orderSummary = `✅ Order Confirmed!\n\n`;
+                        orderSummary += `Order ID: ${result.orderId || 'N/A'}\n`;
+                        orderSummary += `Order Total: $${total.toFixed(2)}\n`;
+                        orderSummary += `Subtotal: $${subtotal.toFixed(2)}\n`;
+                        if (deliveryFee > 0) {
+                            orderSummary += `Delivery Fee: $${deliveryFee.toFixed(2)}\n`;
                         }
-                        
-                        // Only show success if the response indicates success
-                        if (responseData && responseData.success === true) {
-                            // Create detailed order summary
-                            let orderSummary = `✅ Order Confirmed!\n\n`;
-                            orderSummary += `Order ID: ${responseData.orderId || 'N/A'}\n`;
-                            orderSummary += `Order Total: $${total.toFixed(2)}\n`;
-                            orderSummary += `Subtotal: $${subtotal.toFixed(2)}\n`;
-                            if (deliveryFee > 0) {
-                                orderSummary += `Delivery Fee: $${deliveryFee.toFixed(2)}\n`;
-                            }
-                            orderSummary += `\nItems in your order:\n`;
-                            items.forEach(item => {
-                                orderSummary += `• ${item.name} × ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}\n`;
-                            });
-                            orderSummary += `\n📍 Delivery Address:\n${deliveryAddress}\n`;
-                            if (notes) {
-                                orderSummary += `\n📝 Special Instructions:\n${notes}\n`;
-                            }
-                            orderSummary += `\n📱 Payment Instructions:\n`;
-                            orderSummary += `Please send a screenshot of the QR code payment to our direct message.\n\n`;
-                            orderSummary += `Riders can contact you via: @${formattedUser.username}`;
+                        orderSummary += `\nItems in your order:\n`;
+                        items.forEach(item => {
+                            orderSummary += `• ${item.name} × ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}\n`;
+                        });
+                        orderSummary += `\n📍 Delivery Address:\n${deliveryAddress}\n`;
+                        if (notes) {
+                            orderSummary += `\n📝 Special Instructions:\n${notes}\n`;
+                        }
+                        orderSummary += `\n📱 Payment Instructions:\n`;
+                        orderSummary += `Please send a screenshot of the QR code payment to our direct message.\n\n`;
+                        orderSummary += `Riders can contact you via: @${formattedUser.username}`;
 
-                            // Show success popup
-                            tg.showPopup({
-                                title: '✅ Order Confirmed!',
-                                message: orderSummary,
-                                buttons: [{ id: 'ok', type: 'ok' }]
-                            }, () => {
-                                // Clear cart and reset
-                                cart = {};
-                                updateCartUI();
-                                hideCheckout();
-                                hideCart();
-                                elements.checkoutDeliveryAddress.value = '';
-                                elements.checkoutOrderNotes.value = '';
-                                tg.close();
-                            });
-                            return;
-                        } else {
-                            // Response was not successful
-                            const errorMsg = responseData ? responseData.message : 'Order failed for unknown reason';
-                            throw new Error(errorMsg);
-                        }
+                        // Show success popup
+                        tg.showPopup({
+                            title: '✅ Order Confirmed!',
+                            message: orderSummary,
+                            buttons: [{ id: 'ok', type: 'ok' }]
+                        }, () => {
+                            // Clear cart and reset
+                            cart = {};
+                            updateCartUI();
+                            hideCheckout();
+                            hideCart();
+                            elements.checkoutDeliveryAddress.value = '';
+                            elements.checkoutOrderNotes.value = '';
+                            tg.close();
+                        });
+                        return;
                     } else {
-                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        // Response was not successful
+                        const errorMsg = result ? result.message : 'Order failed for unknown reason';
+                        throw new Error(errorMsg);
                     }
                 } catch (apiError) {
-                    console.error('API order failed:', apiError);
+                    console.error('GET order failed:', apiError);
                     throw apiError; // Re-throw to be handled by outer catch
                 }
             } catch (error) {
