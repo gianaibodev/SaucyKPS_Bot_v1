@@ -4744,6 +4744,7 @@ Status: ${order.status} | Payment: ${order.payment_status}
                       
                       if (error) throw error;
                       displayOrders(data || []);
+                      console.log('Orders loaded successfully:', data?.length || 0);
                   } catch (error) {
                       console.error('Error loading orders:', error);
                       document.getElementById('orders-list').innerHTML = '<p>Error loading orders</p>';
@@ -4757,34 +4758,49 @@ Status: ${order.status} | Payment: ${order.payment_status}
                       return;
                   }
                   
-                  container.innerHTML = orders.map(order => `
+                  // Helper function to escape HTML
+                  const escapeHtml = (str) => {
+                      if (!str) return '';
+                      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+                  };
+                  
+                  container.innerHTML = orders.map(order => {
+                      const safeName = escapeHtml(order.customer_name || '');
+                      const safePhone = escapeHtml(order.customer_phone || '');
+                      const safeAddress = escapeHtml(order.delivery_address || '');
+                      const safeNotes = escapeHtml(order.notes || '');
+                      const orderId = order.id;
+                      const paymentStatus = order.payment_status || 'Pending';
+                      
+                      return `
                       <div style="background: #f9f9f9; border: 2px solid #e5e5e5; padding: 20px; border-radius: 12px; margin-bottom: 15px;">
                           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                              <span style="font-weight: 700; font-size: 18px; color: #FE6601;">#${order.order_number}</span>
-                              <span style="padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; background: ${order.payment_status === 'Paid' ? '#d4edda' : '#fff3cd'}; color: ${order.payment_status === 'Paid' ? '#155724' : '#856404'};">
-                                  ${order.payment_status}
+                              <span style="font-weight: 700; font-size: 18px; color: #FE6601;">#${escapeHtml(order.order_number || '')}</span>
+                              <span style="padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; background: ${paymentStatus === 'Paid' ? '#d4edda' : '#fff3cd'}; color: ${paymentStatus === 'Paid' ? '#155724' : '#856404'};">
+                                  ${paymentStatus}
                               </span>
                           </div>
                           <div style="margin-bottom: 15px;">
-                              <p style="margin-bottom: 8px; color: #666;">👤 ${order.customer_name}</p>
-                              <p style="margin-bottom: 8px; color: #666;">📞 ${order.customer_phone}</p>
-                              <p style="margin-bottom: 8px; color: #666;">📍 ${order.delivery_address}</p>
-                              <p style="margin-bottom: 8px; color: #666;">💰 Total: $${order.total_price.toFixed(2)}</p>
+                              <p style="margin-bottom: 8px; color: #666;">👤 ${safeName}</p>
+                              <p style="margin-bottom: 8px; color: #666;">📞 ${safePhone}</p>
+                              <p style="margin-bottom: 8px; color: #666;">📍 ${safeAddress}</p>
+                              <p style="margin-bottom: 8px; color: #666;">💰 Total: $${order.total_price?.toFixed(2) || '0.00'}</p>
                               <p style="margin-bottom: 8px; color: #666;">📅 ${new Date(order.created_at).toLocaleString()}</p>
-                              ${order.notes ? `<p style="margin-bottom: 8px; color: #666;">📝 Notes: ${order.notes}</p>` : ''}
+                              ${safeNotes ? `<p style="margin-bottom: 8px; color: #666;">📝 Notes: ${safeNotes}</p>` : ''}
                           </div>
                           <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                               ${order.payment_status !== 'Paid' ? `
-                                  <button onclick="confirmPayment(${order.id})" style="background: #34C759; color: white; padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">
+                                  <button onclick="confirmPayment(${orderId})" style="background: #34C759; color: white; padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">
                                       ✅ Confirm Payment
                                   </button>
                               ` : ''}
-                              <button onclick="sendToRiders(${order.id})" style="background: #5856D6; color: white; padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">
+                              <button onclick="sendToRiders(${orderId})" style="background: #5856D6; color: white; padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">
                                   📤 Send to Riders
                               </button>
                           </div>
                       </div>
-                  `).join('');
+                  `;
+                  }).join('');
               }
               
               window.loadMenuItems = async function() {
