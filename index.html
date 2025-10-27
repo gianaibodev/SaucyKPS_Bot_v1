@@ -2109,7 +2109,7 @@
     <!-- Hero Section -->
     <div class="hero">
         <div class="hero-content">
-            <h1>🍽️ Saucy Kitchen</h1>
+            <h1 id="hero-title" style="cursor: pointer;">🍽️ Saucy Kitchen</h1>
             <p>Delicious meals delivered fresh</p>
             <div class="delivery-time">
                 ⚡ 25-35 min delivery
@@ -2346,34 +2346,6 @@
         </div>
     </div>
 
-    <!-- Admin Dashboard -->
-    <div id="admin-dashboard" class="admin-dashboard" style="display: none;">
-        <div class="admin-header">
-            <h1>🍽️ Admin Dashboard</h1>
-            <button id="admin-logout" class="admin-btn-logout">Logout</button>
-        </div>
-
-        <div id="admin-login-screen" class="admin-login">
-            <h2>Admin Login</h2>
-            <input type="text" id="admin-username" placeholder="Username" value="admin">
-            <input type="password" id="admin-password" placeholder="Password">
-            <button id="admin-login-btn" class="admin-btn-primary">Login</button>
-            <p id="admin-error" class="admin-error"></p>
-        </div>
-
-        <div id="admin-content" class="admin-content" style="display: none;">
-            <div class="admin-section">
-                <h2>📋 Orders</h2>
-                <div id="orders-list" class="orders-grid"></div>
-            </div>
-            <div class="admin-section">
-                <h2>🍽️ Menu Management</h2>
-                <input type="text" id="menu-search" placeholder="Search menu items...">
-                <div id="menu-items-list" class="menu-grid-admin"></div>
-            </div>
-        </div>
-    </div>
-
     <script>
         // FULL SUPABASE CONFIGURATION
         const SUPABASE_URL = 'https://ojuhzknpzxneilvxhlcm.supabase.co';
@@ -2473,7 +2445,7 @@
             
             if (!hasSeenTutorial) {
                 showTutorial();
-            } else {
+                } else {
                 hideTutorial();
             }
             
@@ -2484,7 +2456,7 @@
             console.log('Setting up tutorial event listeners...');
             
             // Skip button
-            const skipBtn = document.getElementById('tutorial-skip');
+                const skipBtn = document.getElementById('tutorial-skip');
             if (skipBtn) {
                 skipBtn.onclick = () => {
                     console.log('Skip clicked');
@@ -2493,7 +2465,7 @@
             }
             
             // Next button
-            const nextBtn = document.getElementById('tutorial-next');
+                const nextBtn = document.getElementById('tutorial-next');
             if (nextBtn) {
                 nextBtn.onclick = () => {
                     console.log('Next clicked');
@@ -2530,48 +2502,48 @@
         
         function showTutorial() {
             console.log('Showing tutorial');
-            const overlay = document.getElementById('tutorial-overlay');
+                const overlay = document.getElementById('tutorial-overlay');
             if (overlay) {
                 overlay.classList.add('active');
                 updateTutorialStep();
             }
         }
-        
+
         function hideTutorial() {
             console.log('Hiding tutorial');
-            const overlay = document.getElementById('tutorial-overlay');
+                const overlay = document.getElementById('tutorial-overlay');
             if (overlay) {
                 overlay.classList.remove('active');
             }
         }
-        
+
         function updateTutorialStep() {
             console.log('Updating tutorial step:', tutorialCurrentStep);
             
-            // Hide all steps
-            document.querySelectorAll('.tutorial-step').forEach(step => {
-                step.classList.remove('active');
-            });
-            
-            // Show current step
+                // Hide all steps
+                document.querySelectorAll('.tutorial-step').forEach(step => {
+                    step.classList.remove('active');
+                });
+
+                // Show current step
             const currentStepEl = document.getElementById(`step-${tutorialCurrentStep}`);
-            if (currentStepEl) {
-                currentStepEl.classList.add('active');
-            }
-            
-            // Update progress dots
-            document.querySelectorAll('.progress-dot').forEach((dot, index) => {
-                dot.classList.remove('active');
-                if (index + 1 === tutorialCurrentStep) {
-                    dot.classList.add('active');
+                if (currentStepEl) {
+                    currentStepEl.classList.add('active');
                 }
-            });
-            
+
+                // Update progress dots
+                document.querySelectorAll('.progress-dot').forEach((dot, index) => {
+                    dot.classList.remove('active');
+                if (index + 1 === tutorialCurrentStep) {
+                        dot.classList.add('active');
+                    }
+                });
+
             // Update buttons
-            const backBtn = document.getElementById('tutorial-back');
-            const nextBtn = document.getElementById('tutorial-next');
-            const startBtn = document.getElementById('tutorial-start');
-            
+                const backBtn = document.getElementById('tutorial-back');
+                const nextBtn = document.getElementById('tutorial-next');
+                const startBtn = document.getElementById('tutorial-start');
+
             if (backBtn) {
                 backBtn.style.display = tutorialCurrentStep === 1 ? 'none' : 'block';
             }
@@ -2611,7 +2583,7 @@
         
         function completeTutorial() {
             console.log('Completing tutorial');
-            localStorage.setItem('saucyKPS_tutorialSeen', 'true');
+                localStorage.setItem('saucyKPS_tutorialSeen', 'true');
             hideTutorial();
         }
         
@@ -3072,8 +3044,8 @@
                 
                 // Use GET request with proper headers (from Stack Overflow solution)
                 const response = await fetch(url, {
-                    method: 'GET',
-                    headers: {
+                        method: 'GET',
+                        headers: {
                         'Content-Type': 'text/plain;charset=utf-8'
                     },
                     redirect: 'follow'
@@ -3308,7 +3280,7 @@
                 
                 loadingText.textContent = 'Complete!';
                 loadingProgress.style.width = '100%';
-                
+
                 // Hide loader after a short delay
                 setTimeout(() => {
                     elements.loader.style.display = 'none';
@@ -3918,18 +3890,18 @@
         // FULL SUPABASE: Order placement using Supabase
         async function placeOrder() {
             console.log('Place order function called!');
-            
-            if (Object.keys(cart).length === 0) {
-                tg.showAlert("⚠️ Your cart is empty");
-                return;
-            }
-            
+
+                if (Object.keys(cart).length === 0) {
+                    tg.showAlert("⚠️ Your cart is empty");
+                    return;
+                }
+
             const deliveryAddress = elements.checkoutDeliveryAddress.value.trim();
-            if (!deliveryAddress) {
-                tg.showAlert("⚠️ Please enter your delivery address");
-                return;
-            }
-            
+                if (!deliveryAddress) {
+                    tg.showAlert("⚠️ Please enter your delivery address");
+                    return;
+                }
+
             // Get order data
             const orderData = {
                 customerName: userInfo ? `${userInfo.first_name} ${userInfo.last_name || ''}`.trim() : 'Customer',
@@ -3952,7 +3924,7 @@
             
             try {
                 // Show loading state
-                elements.placeOrderBtn.disabled = true;
+                    elements.placeOrderBtn.disabled = true;
                 elements.placeOrderBtn.textContent = 'Placing Order...';
                 
                 // Generate order number
@@ -3972,7 +3944,8 @@
                         total_price: orderData.totalPrice,
                         status: 'Pending',
                         payment_status: 'Unpaid',
-                        notes: orderData.notes
+                        notes: orderData.notes,
+                        customer_telegram_chat_id: userInfo ? userInfo.id?.toString() : null
                     }])
                     .select()
                     .single();
@@ -4004,9 +3977,9 @@
                 }
                 
                 // Clear cart
-                cart = {};
-                updateCartUI();
-                hideCheckout();
+                            cart = {};
+                            updateCartUI();
+                            hideCheckout();
                 
                 // Show success message
                 showToast('Order placed successfully! Order #' + orderNumber, 'success');
@@ -4055,9 +4028,9 @@
                     console.error('Supabase Edge Function error:', error);
                     // Fallback to direct Telegram API call
                     await sendTelegramNotificationDirect(order, orderData);
-                } else {
+                    } else {
                     console.log('Telegram notification sent via Edge Function:', data);
-                }
+                    }
                 
             } catch (error) {
                 console.error('Telegram notification error:', error);
@@ -4347,7 +4320,7 @@ Status: ${order.status} | Payment: ${order.payment_status}
         setTimeout(async () => {
             const connectionOk = await testSupabaseConnection();
             if (connectionOk) {
-                fetchMenu();
+            fetchMenu();
             } else {
                 console.log('Supabase connection failed, loading fallback menu');
                 allItems = getFallbackMenu();
@@ -4451,8 +4424,267 @@ Status: ${order.status} | Payment: ${order.payment_status}
           // ADMIN DASHBOARD FUNCTIONALITY
           // =====================================================
           
-          // Check URL for admin access
-          if (window.location.pathname.includes('/admin')) {
+          // Define admin functions BEFORE the HTML (so they're available in onclick)
+          window.ADMIN_USERNAME = 'admin';
+          window.ADMIN_PASSWORD = 'saucycat123';
+          window.RIDERS_CHAT_ID = '-1001003046741577';
+          window.BOT_TOKEN = '8318381464:AAH2YMr_oZP8f27UZ1q2l7I0_eOaIaIFVWI';
+          
+          // Global admin login handler
+          window.handleAdminLogin = function() {
+              console.log('Login button clicked!');
+              const username = document.getElementById('admin-username').value;
+              const password = document.getElementById('admin-password').value;
+              
+              console.log('Username:', username, 'Password:', password);
+              
+              if (username === window.ADMIN_USERNAME && password === window.ADMIN_PASSWORD) {
+                  localStorage.setItem('adminAuth', 'true');
+                  
+                  // Hide login screen and show admin content
+                  document.getElementById('admin-login-screen').style.display = 'none';
+                  document.getElementById('admin-content').style.display = 'block';
+                  
+                  // Load data
+                  if (typeof window.loadOrders === 'function') window.loadOrders();
+                  if (typeof window.loadMenuItems === 'function') window.loadMenuItems();
+              } else {
+                  document.getElementById('admin-error').textContent = 'Invalid credentials';
+              }
+          };
+          
+          // Simple showAdminContent function
+          window.showAdminContent = function() {
+              document.getElementById('admin-login-screen').style.display = 'none';
+              document.getElementById('admin-content').style.display = 'block';
+              if (typeof window.loadOrders === 'function') window.loadOrders();
+              if (typeof window.loadMenuItems === 'function') window.loadMenuItems();
+          };
+          
+          // Define confirmPayment function globally
+          window.confirmPayment = async function(orderId) {
+              if (!confirm('Confirm that this order has been paid?')) return;
+              
+              try {
+                  const { error } = await supabase
+                      .from('orders')
+                      .update({ payment_status: 'Paid' })
+                      .eq('id', orderId);
+                  
+                  if (error) throw error;
+                  alert('Payment confirmed! You can now send this order to riders.');
+                  
+                  // Reload orders to refresh display
+                  if (typeof window.loadOrders === 'function') {
+                      window.loadOrders();
+                  } else {
+                      window.location.reload();
+                  }
+              } catch (error) {
+                  console.error('Error confirming payment:', error);
+                  alert('Failed to confirm payment: ' + error.message);
+              }
+          };
+          
+          // Handle Telegram callback for rider acceptance
+          // This should be set up in your Telegram bot to handle the "accept_order" callback
+          // The bot will send a message to the customer when a rider clicks "Accept"
+          
+          // Define add/delete menu item functions globally
+          window.showAddItemModal = function() {
+              document.getElementById('add-item-modal').style.display = 'flex';
+          };
+          
+          window.hideAddItemModal = function() {
+              document.getElementById('add-item-modal').style.display = 'none';
+          };
+          
+          window.addMenuItem = async function() {
+              const name = document.getElementById('new-item-name').value;
+              const description = document.getElementById('new-item-description').value;
+              const price = parseFloat(document.getElementById('new-item-price').value);
+              const category = document.getElementById('new-item-category').value;
+              const imageurl = document.getElementById('new-item-image').value;
+              const popular = document.getElementById('new-item-popular').checked;
+              
+              if (!name || !price || !category) {
+                  alert('Please fill in all required fields');
+                  return;
+              }
+              
+              try {
+                  const { error } = await supabase
+                      .from('menuitems')
+                      .insert([{
+                          name: name,
+                          description: description || '',
+                          price: price,
+                          category: category,
+                          imageurl: imageurl || '🍽️',
+                          popular: popular
+                      }]);
+                  
+                  if (error) throw error;
+                  
+                  alert('Menu item added successfully!');
+                  window.hideAddItemModal();
+                  if (typeof window.loadMenuItems === 'function') window.loadMenuItems();
+              } catch (error) {
+                  console.error('Error adding item:', error);
+                  alert('Failed to add menu item: ' + error.message);
+              }
+          };
+          
+          window.deleteMenuItem = async function(itemName) {
+              if (!confirm(`Delete "${itemName}" from the menu?`)) return;
+              
+              try {
+                  const { error } = await supabase
+                      .from('menuitems')
+                      .delete()
+                      .eq('name', itemName);
+                  
+                  if (error) throw error;
+                  
+                  alert('Menu item deleted successfully!');
+                  if (typeof window.loadMenuItems === 'function') window.loadMenuItems();
+              } catch (error) {
+                  console.error('Error deleting item:', error);
+                  alert('Failed to delete menu item: ' + error.message);
+              }
+          };
+          
+          // Define sendToRiders function globally
+          window.sendToRiders = async function(orderId) {
+              try {
+                  const { data: order, error: orderError } = await supabase
+                      .from('orders')
+                      .select('*')
+                      .eq('id', orderId)
+                      .single();
+                  
+                  if (orderError) throw orderError;
+                  
+                  const { data: orderItems, error: itemsError } = await supabase
+                      .from('order_items')
+                      .select('*')
+                      .eq('order_id', orderId);
+                  
+                  if (itemsError) throw itemsError;
+                  
+                  let message = `🚴 NEW DELIVERY ORDER\n\n`;
+                  message += `📦 Order #${order.order_number}\n`;
+                  message += `👤 Customer: ${order.customer_name}\n`;
+                  message += `📞 Phone: ${order.customer_phone}\n`;
+                  message += `📍 Address: ${order.delivery_address}\n\n`;
+                  message += `🛒 Items:\n`;
+                  
+                  orderItems.forEach(item => {
+                      message += `• ${item.item_name} x${item.quantity} - $${item.total_price.toFixed(2)}\n`;
+                  });
+                  
+                  message += `\n💰 Total: $${order.total_price.toFixed(2)}\n`;
+                  message += `${order.payment_status === 'Paid' ? '✅ PAID' : '⏳ PENDING'}\n`;
+                  
+                  if (order.notes) {
+                      message += `\n📝 Notes: ${order.notes}\n`;
+                  }
+                  
+                  message += `\n🎯 Accept this delivery by clicking the button below!`;
+                  
+                  // Send message with inline button for riders to accept
+                  const response = await fetch(`https://api.telegram.org/bot${window.BOT_TOKEN || '8318381464:AAH2YMr_oZP8f27UZ1q2l7I0_eOaIaIFVWI'}/sendMessage`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                          chat_id: window.RIDERS_CHAT_ID || '-1001003046741577',
+                          text: message,
+                          parse_mode: 'HTML',
+                          reply_markup: {
+                              inline_keyboard: [[
+                                  {
+                                      text: '✅ Accept This Delivery',
+                                      callback_data: `accept_order_${orderId}_${order.customer_name}`
+                                  }
+                              ]]
+                          }
+                      })
+                  });
+                  
+                  if (response.ok) {
+                      alert('✅ Order sent to riders group!');
+                  } else {
+                      const errorData = await response.json();
+                      throw new Error('Failed to send to Telegram: ' + (errorData.description || response.statusText));
+                  }
+                  
+              } catch (error) {
+                  console.error('Error sending to riders:', error);
+                  alert('Failed to send order to riders: ' + error.message);
+              }
+          };
+          
+          // Define admin HTML globally
+          const adminHtml = `
+                  <div id="admin-dashboard" style="display: block; max-width: 1200px; margin: 0 auto; padding: 20px; background: #f5f5f7; min-height: 100vh;">
+                      <div style="background: linear-gradient(135deg, #FE6601 0%, #FE8533 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">
+                          <h1 style="font-size: 24px; font-weight: 700;">🍽️ Admin Dashboard</h1>
+                          <button id="back-to-menu-btn" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">← Back to Menu</button>
+                      </div>
+
+                  <div id="admin-login-screen" style="background: white; padding: 40px; border-radius: 12px; max-width: 400px; margin: 100px auto; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+                      <h2 style="margin-bottom: 30px; color: #FE6601;">Admin Login</h2>
+                      <input type="text" id="admin-username" placeholder="Username" style="width: 100%; padding: 12px; margin-bottom: 20px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
+                      <input type="password" id="admin-password" placeholder="Password" style="width: 100%; padding: 12px; margin-bottom: 20px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
+                      <button id="admin-login-btn" onclick="window.handleAdminLogin()" style="width: 100%; background: #FE6601; color: white; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;">Login</button>
+                      <p id="admin-error" style="color: #ff3b30; margin-top: 10px; text-align: center;"></p>
+                  </div>
+
+                  <div id="admin-content" style="display: none;">
+                      <div style="background: white; padding: 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                          <h2 style="margin-bottom: 20px; color: #1d1d1f;">📋 Recent Orders</h2>
+                          <div id="orders-list"></div>
+                      </div>
+
+                      <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                              <h2 style="margin: 0; color: #1d1d1f;">🍽️ Menu Management</h2>
+                              <button onclick="window.showAddItemModal()" style="background: #34C759; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">+ Add Item</button>
+                          </div>
+                          <input type="text" id="menu-search" placeholder="Search menu items..." style="width: 100%; padding: 12px; margin-bottom: 20px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
+                          <div id="menu-items-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px;"></div>
+                      </div>
+                      
+                      <!-- Add Item Modal -->
+                      <div id="add-item-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+                          <div style="background: white; padding: 30px; border-radius: 12px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;">
+                              <h2 style="margin-bottom: 20px; color: #FE6601;">Add Menu Item</h2>
+                              <input type="text" id="new-item-name" placeholder="Item Name" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box;">
+                              <textarea id="new-item-description" placeholder="Description" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box; min-height: 60px;"></textarea>
+                              <input type="number" id="new-item-price" placeholder="Price" step="0.01" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box;">
+                              <select id="new-item-category" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box;">
+                                  <option>FILIPINO SUNRICE</option>
+                                  <option>DISH OF THE DAY</option>
+                                  <option>VEGETABLE MEAL</option>
+                                  <option>SEAFOOD</option>
+                                  <option>SNACKS</option>
+                              </select>
+                              <input type="text" id="new-item-image" placeholder="Image URL or Emoji" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box;">
+                              <label style="display: block; margin-bottom: 10px;">
+                                  <input type="checkbox" id="new-item-popular"> Available
+                              </label>
+                              <div style="display: flex; gap: 10px;">
+                                  <button onclick="window.addMenuItem()" style="flex: 1; background: #FE6601; color: white; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Add Item</button>
+                                  <button onclick="window.hideAddItemModal()" style="flex: 1; background: #ddd; color: #333; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Cancel</button>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          `;
+          
+          // Check URL for admin access (both pathname and hash)
+          if (window.location.pathname.includes('/admin') || window.location.hash === '#/admin') {
               // Hide main content
               document.querySelector('.hero')?.remove();
               document.querySelector('.categories')?.remove();
@@ -4461,37 +4693,7 @@ Status: ${order.status} | Payment: ${order.payment_status}
               document.querySelector('.cart-sheet')?.remove();
               document.querySelector('.cart-overlay')?.remove();
               
-              // Show admin dashboard
-              const adminHtml = `
-                  <div id="admin-dashboard" style="display: block; max-width: 1200px; margin: 0 auto; padding: 20px; background: #f5f5f7; min-height: 100vh;">
-                      <div style="background: linear-gradient(135deg, #FE6601 0%, #FE8533 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">
-                          <h1 style="font-size: 24px; font-weight: 700;">🍽️ Admin Dashboard</h1>
-                          <button id="admin-logout-btn" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">Logout</button>
-                      </div>
-
-                      <div id="admin-login-screen" style="background: white; padding: 40px; border-radius: 12px; max-width: 400px; margin: 100px auto; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
-                          <h2 style="margin-bottom: 30px; color: #FE6601;">Admin Login</h2>
-                          <input type="text" id="admin-username" placeholder="Username" value="admin" style="width: 100%; padding: 12px; margin-bottom: 20px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
-                          <input type="password" id="admin-password" placeholder="Password" value="saucycat123" style="width: 100%; padding: 12px; margin-bottom: 20px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
-                          <button id="admin-login-btn" style="width: 100%; background: #FE6601; color: white; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;">Login</button>
-                          <p id="admin-error" style="color: #ff3b30; margin-top: 10px; text-align: center;"></p>
-                      </div>
-
-                      <div id="admin-content" style="display: none;">
-                          <div style="background: white; padding: 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-                              <h2 style="margin-bottom: 20px; color: #1d1d1f;">📋 Recent Orders</h2>
-                              <div id="orders-list"></div>
-                          </div>
-
-                          <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-                              <h2 style="margin-bottom: 20px; color: #1d1d1f;">🍽️ Menu Management</h2>
-                              <input type="text" id="menu-search" placeholder="Search menu items..." style="width: 100%; padding: 12px; margin-bottom: 20px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
-                              <div id="menu-items-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px;"></div>
-                          </div>
-                      </div>
-                  </div>
-              `;
-              
+              // Use the global adminHtml defined above
               document.body.innerHTML = adminHtml;
               
               // Admin functionality
@@ -4525,14 +4727,14 @@ Status: ${order.status} | Payment: ${order.payment_status}
                   window.location.pathname = '/';
               });
               
-              async function showAdminContent() {
+              window.showAdminContent = async function() {
                   document.getElementById('admin-login-screen').style.display = 'none';
                   document.getElementById('admin-content').style.display = 'block';
-                  loadOrders();
-                  loadMenuItems();
-              }
+                  if (typeof loadOrders === 'function') loadOrders();
+                  if (typeof loadMenuItems === 'function') loadMenuItems();
+              };
               
-              async function loadOrders() {
+              window.loadOrders = async function() {
                   try {
                       const { data, error } = await supabase
                           .from('orders')
@@ -4585,7 +4787,7 @@ Status: ${order.status} | Payment: ${order.payment_status}
                   `).join('');
               }
               
-              async function loadMenuItems() {
+              window.loadMenuItems = async function() {
                   try {
                       const { data, error } = await supabase
                           .from('menuitems')
@@ -4647,6 +4849,7 @@ Status: ${order.status} | Payment: ${order.payment_status}
                                   <div style="width: 22px; height: 22px; background: white; border-radius: 50%; position: absolute; top: 2px; left: ${item.popular ? '26px' : '2px'}; transition: left 0.3s;"></div>
                               </div>
                           </div>
+                          <button onclick="window.deleteMenuItem('${item.name}')" style="width: 100%; margin-top: 10px; background: #ff3b30; color: white; padding: 8px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">🗑️ Delete</button>
                       </div>
                   `).join('');
               }
@@ -4713,83 +4916,73 @@ Status: ${order.status} | Payment: ${order.payment_status}
                   }
               };
               
-              window.confirmPayment = async function(orderId) {
-                  if (!confirm('Confirm that this order has been paid?')) return;
-                  
-                  try {
-                      const { error } = await supabase
-                          .from('orders')
-                          .update({ payment_status: 'Paid' })
-                          .eq('id', orderId);
-                      
-                      if (error) throw error;
-                      alert('Payment confirmed! You can now send this order to riders.');
-                      loadOrders();
-                  } catch (error) {
-                      console.error('Error confirming payment:', error);
-                      alert('Failed to confirm payment');
-                  }
-              };
-              
-              window.sendToRiders = async function(orderId) {
-                  try {
-                      const { data: order, error: orderError } = await supabase
-                          .from('orders')
-                          .select('*')
-                          .eq('id', orderId)
-                          .single();
-                      
-                      if (orderError) throw orderError;
-                      
-                      const { data: orderItems, error: itemsError } = await supabase
-                          .from('order_items')
-                          .select('*')
-                          .eq('order_id', orderId);
-                      
-                      if (itemsError) throw itemsError;
-                      
-                      let message = `🚴 NEW DELIVERY ORDER\n\n`;
-                      message += `📦 Order #${order.order_number}\n`;
-                      message += `👤 Customer: ${order.customer_name}\n`;
-                      message += `📞 Phone: ${order.customer_phone}\n`;
-                      message += `📍 Address: ${order.delivery_address}\n\n`;
-                      message += `🛒 Items:\n`;
-                      
-                      orderItems.forEach(item => {
-                          message += `• ${item.item_name} x${item.quantity} - $${item.total_price.toFixed(2)}\n`;
-                      });
-                      
-                      message += `\n💰 Total: $${order.total_price.toFixed(2)}\n`;
-                      message += `${order.payment_status === 'Paid' ? '✅ PAID' : '⏳ PENDING'}\n`;
-                      
-                      if (order.notes) {
-                          message += `\n📝 Notes: ${order.notes}\n`;
-                      }
-                      
-                      message += `\n🎯 Accept this delivery by sending "ACCEPT" to @saucykitchen_bot`;
-                      
-                      const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({
-                              chat_id: RIDERS_CHAT_ID,
-                              text: message,
-                              parse_mode: 'HTML'
-                          })
-                      });
-                      
-                      if (response.ok) {
-                          alert('✅ Order sent to riders group!');
-                      } else {
-                          throw new Error('Failed to send to Telegram');
-                      }
-                      
-                  } catch (error) {
-                      console.error('Error sending to riders:', error);
-                      alert('Failed to send order to riders');
-                  }
-              };
+              // Duplicate functions removed - now defined globally above
           }
+          
+          // Check for admin on initial load
+          console.log('Current URL:', window.location.href);
+          
+          // Redirect to admin if hash or path matches
+          if (window.location.hash === '#/admin' || window.location.pathname.includes('/admin')) {
+              console.log('Redirecting to admin mode...');
+              // Replace entire page content with admin dashboard
+              document.body.innerHTML = adminHtml;
+              
+              // Re-initialize admin functions after body replacement
+              setTimeout(() => {
+                  initAdminFunctions();
+              }, 100);
+          }
+          
+          // Define ADMIN_USERNAME and ADMIN_PASSWORD globally FIRST
+          window.ADMIN_USERNAME = 'admin';
+          window.ADMIN_PASSWORD = 'saucycat123';
+          window.RIDERS_CHAT_ID = '-1001003046741577';
+          window.BOT_TOKEN = '8318381464:AAH2YMr_oZP8f27UZ1q2l7I0_eOaIaIFVWI';
+          
+          // Global admin initialization function
+          window.initAdminFunctions = function() {
+              console.log('🔧 Initializing admin functions...');
+              
+              // Back to menu handler
+              document.getElementById('back-to-menu-btn')?.addEventListener('click', () => {
+                  window.location.hash = '';
+                  window.location.reload();
+              });
+              
+              // Check if already logged in
+              if (localStorage.getItem('adminAuth') === 'true') {
+                  window.showAdminContent();
+              }
+          };
+          
+              // Re-run init if already on admin page
+              if (window.location.hash === '#/admin' || window.location.pathname.includes('/admin')) {
+                  setTimeout(() => {
+                      window.initAdminFunctions();
+                  }, 500);
+              }
+          
+          // =====================================================
+          // SECRET ADMIN ACCESS: Tap Saucy Kitchen title 10 times
+          // =====================================================
+          (function() {
+              let tapCount = 0;
+              const title = document.getElementById('hero-title');
+              if (title) {
+                  title.addEventListener('click', () => {
+                      tapCount++;
+                      console.log('Secret tap count:', tapCount);
+                      
+                      if (tapCount >= 10) {
+                          alert('🔐 Accessing Admin Dashboard...');
+                          window.location.hash = '#/admin';
+                          window.location.reload();
+                          tapCount = 0;
+                      }
+                  });
+              }
+          })();
           
           // =====================================================
           // INITIALIZATION
