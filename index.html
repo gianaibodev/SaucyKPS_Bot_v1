@@ -2346,18 +2346,58 @@
         </div>
     </div>
 
+    <!-- Admin Dashboard -->
+    <div id="admin-dashboard" class="admin-dashboard" style="display: none;">
+        <div class="admin-header">
+            <h1>🍽️ Admin Dashboard</h1>
+            <button id="admin-logout" class="admin-btn-logout">Logout</button>
+        </div>
+
+        <div id="admin-login-screen" class="admin-login">
+            <h2>Admin Login</h2>
+            <input type="text" id="admin-username" placeholder="Username" value="admin">
+            <input type="password" id="admin-password" placeholder="Password">
+            <button id="admin-login-btn" class="admin-btn-primary">Login</button>
+            <p id="admin-error" class="admin-error"></p>
+        </div>
+
+        <div id="admin-content" class="admin-content" style="display: none;">
+            <div class="admin-section">
+                <h2>📋 Orders</h2>
+                <div id="orders-list" class="orders-grid"></div>
+            </div>
+            <div class="admin-section">
+                <h2>🍽️ Menu Management</h2>
+                <input type="text" id="menu-search" placeholder="Search menu items...">
+                <div id="menu-items-list" class="menu-grid-admin"></div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // FULL SUPABASE CONFIGURATION
         const SUPABASE_URL = 'https://ojuhzknpzxneilvxhlcm.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qdWh6a25wenhuZWlsdnhobGNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEyOTU1NjUsImV4cCI6MjA3Njg3MTU2NX0.ngjHcMcDZarhe4wIDGU97MFWt5I7Rz-zsrboAaplyys';
         
+        // DIAGNOSTIC: Check what's available globally
+        console.log('🔍 Debugging Supabase library...');
+        console.log('window.supabase:', window.supabase);
+        console.log('window.supabase?.createClient:', window.supabase?.createClient);
+        console.log('typeof window.supabase:', typeof window.supabase);
+        
         // Initialize Supabase client for everything
         let supabase;
         try {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            console.log('Supabase client initialized successfully');
+            if (window.supabase && window.supabase.createClient) {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                console.log('✅ Supabase client initialized successfully');
+            } else {
+                console.error('❌ Supabase library not loaded properly. window.supabase is:', window.supabase);
+                throw new Error('Supabase library not loaded');
+            }
         } catch (error) {
-            console.error('Failed to initialize Supabase client:', error);
+            console.error('❌ Failed to initialize Supabase client:', error);
+            console.error('Error details:', error.message, error.stack);
         }
 
         const tg = window.Telegram.WebApp;
@@ -2827,273 +2867,6 @@
         window.prevTutorialStep = previousStep;
         
         // =====================================================
-        // DEBUGGING FUNCTIONS FOR MENU DISPLAY
-        // =====================================================
-        
-        // Debug menu display issue
-        async function debugMenuDisplay() {
-            console.log('🔍 Debugging menu display issue...');
-            
-            try {
-                // Check Supabase connection
-                console.log('1. Testing Supabase connection...');
-                const { data: menuItems, error } = await supabase
-                    .from('menuitems')
-                    .select('*')
-                    .order('category', { ascending: true })
-                    .order('name', { ascending: true });
-                
-                if (error) {
-                    console.error('❌ Supabase error:', error);
-                    return;
-                }
-                
-                console.log('✅ Supabase connection successful');
-                console.log('📊 Total records in database:', menuItems.length);
-                
-                // Check data structure
-                console.log('2. Checking data structure...');
-                console.log('📋 Sample record:', menuItems[0]);
-                
-                // Check for null/undefined values
-                const validItems = menuItems.filter(item => 
-                    item.name && 
-                    item.category && 
-                    item.price !== null && 
-                    item.price !== undefined
-                );
-                
-                console.log('📊 Valid items (after filtering):', validItems.length);
-                console.log('📊 Invalid items:', menuItems.length - validItems.length);
-                
-                // Check categories
-                const categories = [...new Set(menuItems.map(item => item.category))];
-                console.log('📂 Categories found:', categories);
-                
-                // Check if items are being filtered somewhere
-                console.log('3. Checking current allItems array...');
-                console.log('📊 Current allItems length:', allItems.length);
-                console.log('📋 Current allItems sample:', allItems.slice(0, 3));
-                
-                // Check if there's a limit in the query
-                console.log('4. Testing with limit...');
-                const { data: limitedItems } = await supabase
-                    .from('menuitems')
-                    .select('*')
-                    .limit(100);
-                console.log('📊 Items with limit 100:', limitedItems.length);
-                
-                // Check RLS policies
-                console.log('5. Checking RLS policies...');
-                const { data: policyCheck } = await supabase
-                    .from('menuitems')
-                    .select('name')
-                    .limit(1);
-                console.log('📊 RLS policy test:', policyCheck ? 'Working' : 'Failed');
-                
-                return {
-                    totalInDB: menuItems.length,
-                    validItems: validItems.length,
-                    currentDisplayed: allItems.length,
-                    categories: categories
-                };
-                
-            } catch (error) {
-                console.error('❌ Debug error:', error);
-            }
-        }
-        
-        // Test menu rendering
-        function testMenuRendering() {
-            console.log('🧪 Testing menu rendering...');
-            
-            console.log('📊 allItems length:', allItems.length);
-            console.log('📋 allItems sample:', allItems.slice(0, 5));
-            
-            // Check if items are being filtered by category
-            const categories = [...new Set(allItems.map(item => item.category))];
-            console.log('📂 Categories in allItems:', categories);
-            
-            // Check if there's a limit in renderMenu function
-            console.log('🔍 Checking renderMenu function...');
-            
-            // Force re-render
-            renderMenu();
-            updateCategoryCounts();
-            
-            console.log('✅ Menu rendering test complete');
-        }
-        
-        // Check specific category
-        function checkCategory(categoryName) {
-            console.log(`🔍 Checking category: ${categoryName}`);
-            
-            const categoryItems = allItems.filter(item => item.category === categoryName);
-            console.log(`📊 Items in ${categoryName}:`, categoryItems.length);
-            console.log(`📋 Items:`, categoryItems.map(item => item.name));
-            
-            return categoryItems;
-        }
-        
-        // Force reload menu from Supabase
-        async function forceReloadMenu() {
-            console.log('🔄 Force reloading menu from Supabase...');
-            
-            // Clear cache
-            menuCache = null;
-            cacheTimestamp = 0;
-            
-            // Reload
-            await fetchMenu();
-            
-            console.log('✅ Menu reloaded');
-        }
-        
-        // =====================================================
-        // COMPREHENSIVE TESTING FUNCTIONS
-        // =====================================================
-        
-        // Test complete order placement system
-        async function testCompleteOrderSystem() {
-            console.log('🧪 Testing complete order placement system...');
-            
-            try {
-                // Test 1: Supabase Connection
-                console.log('1️⃣ Testing Supabase connection...');
-                const { data: menuItems, error: menuError } = await supabase
-                    .from('menuitems')
-                    .select('Name, Price, Category')
-                    .limit(5);
-                
-                if (menuError) {
-                    console.error('❌ Supabase connection failed:', menuError);
-                    return false;
-                }
-                console.log('✅ Supabase connection successful');
-                
-                // Test 2: Create Test Order
-                console.log('2️⃣ Creating test order...');
-                const testOrder = {
-                    order_number: 'TEST-' + Date.now(),
-                    customer_name: 'Test Customer',
-                    customer_phone: 'testuser123',
-                    delivery_address: '123 Test Street, Test City',
-                    items: [
-                        {
-                            id: 'CHICK SILOG',
-                            name: 'CHICK SILOG',
-                            price: 8.99,
-                            quantity: 1
-                        }
-                    ],
-                    subtotal: 8.99,
-                    delivery_fee: 0,
-                    total_price: 8.99,
-                    status: 'Pending',
-                    payment_status: 'Unpaid',
-                    notes: 'Test order from browser console'
-                };
-                
-                const { data: order, error: orderError } = await supabase
-                    .from('orders')
-                    .insert([testOrder])
-                    .select()
-                    .single();
-                
-                if (orderError) {
-                    console.error('❌ Order creation failed:', orderError);
-                    return false;
-                }
-                console.log('✅ Order created successfully:', order.id);
-                
-                // Test 3: Create Order Items
-                console.log('3️⃣ Creating order items...');
-                const testOrderItems = [
-                    {
-                        order_id: order.id,
-                        menu_item_name: 'CHICK SILOG',
-                        item_name: 'CHICK SILOG',
-                        item_price: 8.99,
-                        quantity: 1,
-                        total_price: 8.99
-                    }
-                ];
-                
-                const { error: itemsError } = await supabase
-                    .from('order_items')
-                    .insert(testOrderItems);
-                
-                if (itemsError) {
-                    console.error('❌ Order items creation failed:', itemsError);
-                    return false;
-                }
-                console.log('✅ Order items created successfully');
-                
-                // Test 4: Send Telegram Notification
-                console.log('4️⃣ Testing Telegram notification...');
-                try {
-                    await sendTelegramNotificationDirect(order, {
-                        customerName: testOrder.customer_name,
-                        phone: testOrder.customer_phone,
-                        address: testOrder.delivery_address,
-                        items: testOrder.items,
-                        subtotal: testOrder.subtotal,
-                        deliveryFee: testOrder.delivery_fee,
-                        totalPrice: testOrder.total_price,
-                        notes: testOrder.notes
-                    });
-                    console.log('✅ Telegram notification sent');
-                } catch (telegramError) {
-                    console.log('⚠️ Telegram notification failed (non-critical):', telegramError.message);
-                }
-                
-                console.log('🎉 ALL TESTS PASSED! Your order system is working perfectly!');
-                return true;
-                
-            } catch (error) {
-                console.error('❌ Test failed:', error);
-                return false;
-            }
-        }
-        
-        // Quick menu count check
-        async function checkMenuCount() {
-            console.log('🔍 Checking menu count...');
-            
-            try {
-                const { data: menuItems, error } = await supabase
-                    .from('menuitems')
-                    .select('Name, Category');
-                
-                if (error) {
-                    console.error('❌ Error:', error);
-                    return;
-                }
-                
-                console.log('📊 Total menu items:', menuItems.length);
-                
-                const categories = [...new Set(menuItems.map(item => item.Category))];
-                console.log('📂 Categories:', categories);
-                
-                categories.forEach(cat => {
-                    const count = menuItems.filter(item => item.Category === cat).length;
-                    console.log(`  ${cat}: ${count} items`);
-                });
-                
-            } catch (error) {
-                console.error('❌ Check failed:', error);
-            }
-        }
-        
-        // Make debugging functions available globally
-        window.debugMenuDisplay = debugMenuDisplay;
-        window.testMenuRendering = testMenuRendering;
-        window.checkCategory = checkCategory;
-        window.forceReloadMenu = forceReloadMenu;
-        window.testCompleteOrderSystem = testCompleteOrderSystem;
-        window.checkMenuCount = checkMenuCount;
-        
-        // =====================================================
         // MENU FETCHING FROM SUPABASE
         // =====================================================
         async function fetchMenu() {
@@ -3451,15 +3224,17 @@
             }
 
             try {
-                // Check if we have valid cached data
+                // Check if we have valid cached data (FORCE REFRESH TO DEBUG)
                 const now = Date.now();
-                if (menuCache && (now - cacheTimestamp) < CACHE_DURATION) {
-                    console.log('Using cached menu data');
-                    allItems = menuCache;
-                    renderMenu();
-                    updateCategoryCounts();
-                    return;
-                }
+                // TEMPORARILY DISABLED CACHE TO FORCE REFRESH
+                console.log('⚠️ CACHE DISABLED - Fetching fresh data from Supabase');
+                // if (menuCache && (now - cacheTimestamp) < CACHE_DURATION) {
+                //     console.log('Using cached menu data');
+                //     allItems = menuCache;
+                //     renderMenu();
+                //     updateCategoryCounts();
+                //     return;
+                // }
 
                 isLoading = true;
                 elements.loader.style.display = 'block';
@@ -3477,13 +3252,12 @@
                     throw new Error('Supabase client not initialized. Please check your credentials.');
                 }
                 
-                // Fetch menu items from Supabase (no limit to get all items)
+                // Fetch menu items from Supabase
                 const { data: menuItems, error } = await supabase
                     .from('menuitems')
                     .select('*');
                 
-                console.log('🔍 DEBUG: Raw menu items from Supabase:', menuItems);
-                console.log('🔍 DEBUG: Total items fetched:', menuItems ? menuItems.length : 0);
+                console.log('🔍 DEBUG: Fetched from Supabase:', menuItems?.length || 0, 'items');
                 
                 loadingText.textContent = 'Processing menu data...';
                 loadingProgress.style.width = '60%';
@@ -3499,20 +3273,8 @@
                 
                 console.log('Menu items fetched:', menuItems.length);
                 
-                // Sort items by category first, then by name alphabetically
-                const sortedMenuItems = menuItems.sort((a, b) => {
-                    // First sort by category
-                    const categoryA = a.category.toLowerCase();
-                    const categoryB = b.category.toLowerCase();
-                    if (categoryA !== categoryB) {
-                        return categoryA.localeCompare(categoryB);
-                    }
-                    // Then sort by name within each category
-                    return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
-                });
-                
-                // Transform data to match expected format
-                allItems = sortedMenuItems.map(item => ({
+                // Transform data to match expected format (using lowercase column names)
+                allItems = menuItems.map(item => ({
                     id: item.name, // Use name as ID since it's the primary key
                     name: item.name,
                     description: item.description || '',
@@ -3523,16 +3285,15 @@
                     imageURL: item.imageurl || '🍽️'
                 }));
                 
-                console.log('🔍 DEBUG: Transformed allItems length:', allItems.length);
-                console.log('🔍 DEBUG: Sample transformed items:', allItems.slice(0, 3));
+                // Sort items by category then name alphabetically
+                allItems.sort((a, b) => {
+                    const catA = a.category.toLowerCase();
+                    const catB = b.category.toLowerCase();
+                    if (catA !== catB) return catA.localeCompare(catB);
+                    return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+                });
                 
-                // Check for any filtering issues
-                const categories = [...new Set(allItems.map(item => item.category))];
-                console.log('🔍 DEBUG: Categories found:', categories);
-                console.log('🔍 DEBUG: Category counts:', categories.map(cat => ({
-                    category: cat,
-                    count: allItems.filter(item => item.category === cat).length
-                })));
+                console.log('🔍 DEBUG: Transformed allItems:', allItems.length);
                 
                 // Cache the data
                 menuCache = allItems;
@@ -3671,11 +3432,7 @@
         }
 
         function filterItems() {
-            console.log('🔍 DEBUG: filterItems called');
-            console.log('🔍 DEBUG: allItems length:', allItems.length);
-            console.log('🔍 DEBUG: currentCategory:', currentCategory);
-            console.log('🔍 DEBUG: searchQuery:', searchQuery);
-            
+            console.log('Filtering items - currentCategory:', currentCategory, 'searchQuery:', searchQuery);
             const filtered = allItems.filter(item => {
                 let matchesCategory;
                 
@@ -3705,13 +3462,7 @@
         }
 
         function renderMenu() {
-            console.log('🔍 DEBUG: renderMenu called');
-            console.log('🔍 DEBUG: allItems length:', allItems.length);
-            console.log('🔍 DEBUG: currentCategory:', currentCategory);
-            
             const filteredItems = filterItems();
-            console.log('🔍 DEBUG: filteredItems length:', filteredItems.length);
-            
             elements.menuContainer.innerHTML = '';
             elements.menuContainer.style.display = 'block';
 
@@ -4605,6 +4356,443 @@ Status: ${order.status} | Payment: ${order.payment_status}
                 elements.loader.style.display = 'none';
             }
         }, 100);
+
+        // Make debugging functions available globally
+        if (typeof testCompleteOrderSystem !== 'undefined') {
+            window.testCompleteOrderSystem = testCompleteOrderSystem;
+        }
+        if (typeof checkMenuCount !== 'undefined') {
+            window.checkMenuCount = checkMenuCount;
+        }
+          
+         // =====================================================
+         // NEW ADVANCED DEBUGGER
+         // =====================================================
+         async function runAdvancedDebugger() {
+            console.log("🚀 Kicking off advanced debugger...");
+            let report = {
+                supabaseConnection: 'pending',
+                rlsCheck: 'pending',
+                totalRowsInDB: 0,
+                fetchedRows: 0,
+                fallbackStatus: 'not used'
+            };
+
+            // 1. Test basic connection and count
+            try {
+                const { count, error } = await supabase
+                    .from('menuitems')
+                    .select('*', { count: 'exact', head: true });
+
+                if (error) throw error;
+
+                report.supabaseConnection = '✅ Successful';
+                report.totalRowsInDB = count;
+            } catch (error) {
+                report.supabaseConnection = `❌ FAILED: ${error.message}`;
+                console.error("Debugger Error (Connection):", error);
+                console.table(report);
+                return report;
+            }
+
+            // 2. Fetch all data to check RLS
+            try {
+                const { data, error } = await supabase
+                    .from('menuitems')
+                    .select('*');
+
+                if (error) throw error;
+                
+                report.fetchedRows = data.length;
+                if (report.fetchedRows < report.totalRowsInDB) {
+                     report.rlsCheck = `⚠️ WARNING: RLS policies might be blocking data. DB has ${report.totalRowsInDB} rows, but we could only fetch ${report.fetchedRows}.`;
+                } else {
+                     report.rlsCheck = '✅ Seems OK';
+                }
+
+            } catch (error) {
+                report.rlsCheck = `❌ FAILED: ${error.message}`;
+                console.error("Debugger Error (RLS Check):", error);
+            }
+
+            // 3. Check if fallback data was used
+            if (allItems.length < report.fetchedRows) {
+                report.fallbackStatus = `⚠️ WARNING: Fallback data might have been used. The app is displaying ${allItems.length} items, but we fetched ${report.fetchedRows} from the DB.`
+            }
+
+            console.log("--- 🏁 Advanced Debugger Report ---");
+            console.table(report);
+            console.log("------------------------------------");
+            
+            if (report.rlsCheck.includes("WARNING")) {
+                console.log("💡 To fix the RLS issue, please go to your Supabase SQL Editor and run the following command to allow public read access on your menu:");
+                console.log(`
+                    -- First, ensure RLS is enabled on the table
+                    ALTER TABLE public.menuitems ENABLE ROW LEVEL SECURITY;
+
+                    -- Drop any existing select policy to avoid conflicts
+                    DROP POLICY IF EXISTS "Allow public read access to menu" ON public.menuitems;
+
+                    -- Create a new policy that allows anyone to read all menu items
+                    CREATE POLICY "Allow public read access to menu"
+                    ON public.menuitems
+                    FOR SELECT
+                    TO anon, authenticated
+                    USING (true);
+                `);
+            }
+            
+            return report;
+         }
+         window.runAdvancedDebugger = runAdvancedDebugger;
+
+
+          // =====================================================
+          // ADMIN DASHBOARD FUNCTIONALITY
+          // =====================================================
+          
+          // Check URL for admin access
+          if (window.location.pathname.includes('/admin')) {
+              // Hide main content
+              document.querySelector('.hero')?.remove();
+              document.querySelector('.categories')?.remove();
+              document.querySelector('.search-bar')?.remove();
+              document.querySelector('.menu-container')?.remove();
+              document.querySelector('.cart-sheet')?.remove();
+              document.querySelector('.cart-overlay')?.remove();
+              
+              // Show admin dashboard
+              const adminHtml = `
+                  <div id="admin-dashboard" style="display: block; max-width: 1200px; margin: 0 auto; padding: 20px; background: #f5f5f7; min-height: 100vh;">
+                      <div style="background: linear-gradient(135deg, #FE6601 0%, #FE8533 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">
+                          <h1 style="font-size: 24px; font-weight: 700;">🍽️ Admin Dashboard</h1>
+                          <button id="admin-logout-btn" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">Logout</button>
+                      </div>
+
+                      <div id="admin-login-screen" style="background: white; padding: 40px; border-radius: 12px; max-width: 400px; margin: 100px auto; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+                          <h2 style="margin-bottom: 30px; color: #FE6601;">Admin Login</h2>
+                          <input type="text" id="admin-username" placeholder="Username" value="admin" style="width: 100%; padding: 12px; margin-bottom: 20px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
+                          <input type="password" id="admin-password" placeholder="Password" value="saucycat123" style="width: 100%; padding: 12px; margin-bottom: 20px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
+                          <button id="admin-login-btn" style="width: 100%; background: #FE6601; color: white; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;">Login</button>
+                          <p id="admin-error" style="color: #ff3b30; margin-top: 10px; text-align: center;"></p>
+                      </div>
+
+                      <div id="admin-content" style="display: none;">
+                          <div style="background: white; padding: 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                              <h2 style="margin-bottom: 20px; color: #1d1d1f;">📋 Recent Orders</h2>
+                              <div id="orders-list"></div>
+                          </div>
+
+                          <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                              <h2 style="margin-bottom: 20px; color: #1d1d1f;">🍽️ Menu Management</h2>
+                              <input type="text" id="menu-search" placeholder="Search menu items..." style="width: 100%; padding: 12px; margin-bottom: 20px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
+                              <div id="menu-items-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px;"></div>
+                          </div>
+                      </div>
+                  </div>
+              `;
+              
+              document.body.innerHTML = adminHtml;
+              
+              // Admin functionality
+              const ADMIN_USERNAME = 'admin';
+              const ADMIN_PASSWORD = 'saucycat123';
+              const RIDERS_CHAT_ID = '-1001003046741577';
+              const BOT_TOKEN = '8318381464:AAH2YMr_oZP8f27UZ1q2l7I0_eOaIaIFVWI';
+              
+              let isAdminAuthenticated = localStorage.getItem('adminAuth') === 'true';
+              
+              if (isAdminAuthenticated) {
+                  showAdminContent();
+              }
+              
+              document.getElementById('admin-login-btn')?.addEventListener('click', () => {
+                  const username = document.getElementById('admin-username').value;
+                  const password = document.getElementById('admin-password').value;
+                  
+                  if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+                      isAdminAuthenticated = true;
+                      localStorage.setItem('adminAuth', 'true');
+                      showAdminContent();
+                  } else {
+                      document.getElementById('admin-error').textContent = 'Invalid credentials';
+                  }
+              });
+              
+              document.getElementById('admin-logout-btn')?.addEventListener('click', () => {
+                  isAdminAuthenticated = false;
+                  localStorage.removeItem('adminAuth');
+                  window.location.pathname = '/';
+              });
+              
+              async function showAdminContent() {
+                  document.getElementById('admin-login-screen').style.display = 'none';
+                  document.getElementById('admin-content').style.display = 'block';
+                  loadOrders();
+                  loadMenuItems();
+              }
+              
+              async function loadOrders() {
+                  try {
+                      const { data, error } = await supabase
+                          .from('orders')
+                          .select('*')
+                          .order('created_at', { ascending: false })
+                          .limit(50);
+                      
+                      if (error) throw error;
+                      displayOrders(data || []);
+                  } catch (error) {
+                      console.error('Error loading orders:', error);
+                      document.getElementById('orders-list').innerHTML = '<p>Error loading orders</p>';
+                  }
+              }
+              
+              function displayOrders(orders) {
+                  const container = document.getElementById('orders-list');
+                  if (orders.length === 0) {
+                      container.innerHTML = '<p>No orders yet</p>';
+                      return;
+                  }
+                  
+                  container.innerHTML = orders.map(order => `
+                      <div style="background: #f9f9f9; border: 2px solid #e5e5e5; padding: 20px; border-radius: 12px; margin-bottom: 15px;">
+                          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                              <span style="font-weight: 700; font-size: 18px; color: #FE6601;">#${order.order_number}</span>
+                              <span style="padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; background: ${order.payment_status === 'Paid' ? '#d4edda' : '#fff3cd'}; color: ${order.payment_status === 'Paid' ? '#155724' : '#856404'};">
+                                  ${order.payment_status}
+                              </span>
+                          </div>
+                          <div style="margin-bottom: 15px;">
+                              <p style="margin-bottom: 8px; color: #666;">👤 ${order.customer_name}</p>
+                              <p style="margin-bottom: 8px; color: #666;">📞 ${order.customer_phone}</p>
+                              <p style="margin-bottom: 8px; color: #666;">📍 ${order.delivery_address}</p>
+                              <p style="margin-bottom: 8px; color: #666;">💰 Total: $${order.total_price.toFixed(2)}</p>
+                              <p style="margin-bottom: 8px; color: #666;">📅 ${new Date(order.created_at).toLocaleString()}</p>
+                              ${order.notes ? `<p style="margin-bottom: 8px; color: #666;">📝 Notes: ${order.notes}</p>` : ''}
+                          </div>
+                          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                              ${order.payment_status !== 'Paid' ? `
+                                  <button onclick="confirmPayment(${order.id})" style="background: #34C759; color: white; padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">
+                                      ✅ Confirm Payment
+                                  </button>
+                              ` : ''}
+                              <button onclick="sendToRiders(${order.id})" style="background: #5856D6; color: white; padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">
+                                  📤 Send to Riders
+                              </button>
+                          </div>
+                      </div>
+                  `).join('');
+              }
+              
+              async function loadMenuItems() {
+                  try {
+                      const { data, error } = await supabase
+                          .from('menuitems')
+                          .select('*')
+                          .order('category', { ascending: true })
+                          .order('name', { ascending: true });
+                      
+                      if (error) throw error;
+                      
+                      displayMenuItems(data);
+                      
+                      document.getElementById('menu-search')?.addEventListener('input', (e) => {
+                          const query = e.target.value.toLowerCase();
+                          const filtered = data.filter(item => 
+                              item.name.toLowerCase().includes(query) ||
+                              item.category.toLowerCase().includes(query)
+                          );
+                          displayMenuItems(filtered);
+                      });
+                      
+                  } catch (error) {
+                      console.error('Error loading menu:', error);
+                  }
+              }
+              
+              function displayMenuItems(items) {
+                  const container = document.getElementById('menu-items-list');
+                  
+                  container.innerHTML = items.map(item => `
+                      <div style="background: #f9f9f9; border: 2px solid #e5e5e5; padding: 20px; border-radius: 12px;">
+                          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                              <div>
+                                  <div style="font-weight: 700; font-size: 16px; color: #1d1d1f;">${item.name}</div>
+                                  <div style="color: #666; font-size: 14px;">${item.category}</div>
+                              </div>
+                              <div style="color: #FE6601; font-weight: 700;">$${parseFloat(item.price).toFixed(2)}</div>
+                          </div>
+                          <div style="margin-bottom: 10px;">
+                              <label style="font-weight: 600; display: block; margin-bottom: 5px;">Image URL/Emoji:</label>
+                              <input type="text" id="img-${item.name}" value="${item.imageurl || '🍽️'}" 
+                                     onchange="updateImage('${item.name}', this.value)"
+                                     style="width: 70%; padding: 8px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px; display: inline-block;">
+                              <input type="file" accept="image/*" id="upload-${item.name}" 
+                                     onchange="uploadImage('${item.name}', this)" 
+                                     style="display: inline-block; margin-left: 5px; padding: 8px;">
+                          </div>
+                          <div id="preview-${item.name}" style="margin-top: 5px; text-align: center;">
+                              ${item.imageurl && (item.imageurl.startsWith('http') || item.imageurl.startsWith('data:')) ? 
+                                  `<img src="${item.imageurl}" style="max-width: 100px; max-height: 100px; border-radius: 8px;" alt="${item.name}">` :
+                                  `<span style="font-size: 48px;">${item.imageurl || '🍽️'}</span>`
+                              }
+                          </div>
+                          <div style="display: flex; align-items: center; gap: 10px;">
+                              <span style="color: ${item.popular ? '#34C759' : '#999'};">
+                                  ${item.popular ? '✅ Available' : '❌ Unavailable'}
+                              </span>
+                              <div onclick="toggleAvailability('${item.name}', ${!item.popular})" 
+                                   style="width: 50px; height: 26px; background: ${item.popular ? '#34C759' : '#ddd'}; border-radius: 13px; position: relative; cursor: pointer;">
+                                  <div style="width: 22px; height: 22px; background: white; border-radius: 50%; position: absolute; top: 2px; left: ${item.popular ? '26px' : '2px'}; transition: left 0.3s;"></div>
+                              </div>
+                          </div>
+                      </div>
+                  `).join('');
+              }
+              
+              window.updateImage = async function(itemName, imageUrl) {
+                  try {
+                      const { error } = await supabase
+                          .from('menuitems')
+                          .update({ imageurl: imageUrl })
+                          .eq('name', itemName);
+                      
+                      if (error) throw error;
+                      console.log('Image updated successfully');
+                      // Update preview
+                      const preview = document.getElementById(`preview-${itemName}`);
+                      if (preview) {
+                          if (imageUrl.startsWith('http') || imageUrl.startsWith('data:')) {
+                              preview.innerHTML = `<img src="${imageUrl}" style="max-width: 100px; max-height: 100px; border-radius: 8px;" alt="${itemName}">`;
+                          } else {
+                              preview.innerHTML = `<span style="font-size: 48px;">${imageUrl}</span>`;
+                          }
+                      }
+                  } catch (error) {
+                      console.error('Error updating image:', error);
+                      alert('Failed to update image');
+                  }
+              };
+              
+              window.uploadImage = async function(itemName, input) {
+                  if (!input.files || !input.files[0]) return;
+                  
+                  const file = input.files[0];
+                  const reader = new FileReader();
+                  
+                  reader.onload = function(e) {
+                      const dataUrl = e.target.result;
+                      
+                      // Update the image URL in database
+                      updateImage(itemName, dataUrl).then(() => {
+                          // Also update the text input
+                          const textInput = document.getElementById(`img-${itemName}`);
+                          if (textInput) {
+                              textInput.value = dataUrl;
+                          }
+                          alert('Image uploaded successfully!');
+                      });
+                  };
+                  
+                  reader.readAsDataURL(file);
+              };
+              
+              window.toggleAvailability = async function(itemName, isAvailable) {
+                  try {
+                      const { error } = await supabase
+                          .from('menuitems')
+                          .update({ popular: isAvailable })
+                          .eq('name', itemName);
+                      
+                      if (error) throw error;
+                      loadMenuItems();
+                  } catch (error) {
+                      console.error('Error toggling availability:', error);
+                      alert('Failed to update availability');
+                  }
+              };
+              
+              window.confirmPayment = async function(orderId) {
+                  if (!confirm('Confirm that this order has been paid?')) return;
+                  
+                  try {
+                      const { error } = await supabase
+                          .from('orders')
+                          .update({ payment_status: 'Paid' })
+                          .eq('id', orderId);
+                      
+                      if (error) throw error;
+                      alert('Payment confirmed! You can now send this order to riders.');
+                      loadOrders();
+                  } catch (error) {
+                      console.error('Error confirming payment:', error);
+                      alert('Failed to confirm payment');
+                  }
+              };
+              
+              window.sendToRiders = async function(orderId) {
+                  try {
+                      const { data: order, error: orderError } = await supabase
+                          .from('orders')
+                          .select('*')
+                          .eq('id', orderId)
+                          .single();
+                      
+                      if (orderError) throw orderError;
+                      
+                      const { data: orderItems, error: itemsError } = await supabase
+                          .from('order_items')
+                          .select('*')
+                          .eq('order_id', orderId);
+                      
+                      if (itemsError) throw itemsError;
+                      
+                      let message = `🚴 NEW DELIVERY ORDER\n\n`;
+                      message += `📦 Order #${order.order_number}\n`;
+                      message += `👤 Customer: ${order.customer_name}\n`;
+                      message += `📞 Phone: ${order.customer_phone}\n`;
+                      message += `📍 Address: ${order.delivery_address}\n\n`;
+                      message += `🛒 Items:\n`;
+                      
+                      orderItems.forEach(item => {
+                          message += `• ${item.item_name} x${item.quantity} - $${item.total_price.toFixed(2)}\n`;
+                      });
+                      
+                      message += `\n💰 Total: $${order.total_price.toFixed(2)}\n`;
+                      message += `${order.payment_status === 'Paid' ? '✅ PAID' : '⏳ PENDING'}\n`;
+                      
+                      if (order.notes) {
+                          message += `\n📝 Notes: ${order.notes}\n`;
+                      }
+                      
+                      message += `\n🎯 Accept this delivery by sending "ACCEPT" to @saucykitchen_bot`;
+                      
+                      const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                              chat_id: RIDERS_CHAT_ID,
+                              text: message,
+                              parse_mode: 'HTML'
+                          })
+                      });
+                      
+                      if (response.ok) {
+                          alert('✅ Order sent to riders group!');
+                      } else {
+                          throw new Error('Failed to send to Telegram');
+                      }
+                      
+                  } catch (error) {
+                      console.error('Error sending to riders:', error);
+                      alert('Failed to send order to riders');
+                  }
+              };
+          }
+          
+          // =====================================================
+          // INITIALIZATION
     </script>
 </body>
 </html>
