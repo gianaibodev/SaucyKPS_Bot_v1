@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import 'tailwindcss';
+
+@theme {
+    --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+    --color-primary: #FE6601;
+    --color-primary-light: #FF8533;
+    --color-primary-dark: #cc5200;
+
+    --color-surface-50: #ffffff;
+    --color-surface-100: #fafafa;
+    --color-surface-200: #f4f4f5;
+
+    --shadow-premium: 0 10px 40px -10px rgba(254, 102, 1, 0.15);
+    --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+}
+
+@layer base {
+    body {
+        @apply bg-surface-100 text-gray-900 antialiased font-sans selection:bg-primary/20;
+        /* Prevent overscroll bounce on mobile for native feel */
+        overscroll-behavior-y: none;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        @apply tracking-tight;
+    }
+}
+
+@layer utilities {
+    .glass {
+        @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-glass;
+    }
+
+    .glass-dark {
+        @apply bg-gray-900/80 backdrop-blur-xl border border-white/10 shadow-glass;
+    }
+
+    .text-gradient {
+        @apply bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-700;
+    }
+
+    .text-gradient-primary {
+        @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-dark;
+    }
+}
